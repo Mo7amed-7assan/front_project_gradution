@@ -14,9 +14,14 @@ export async function getApplicationDetails(projectId, applicationId)
     return getData(res)
 }
 
-export async function submitApplication(projectId, { project_role_id, cover_message, availability, skills })
+export async function submitApplication(projectId, { role_id, project_role_id, proposed_role, cover_message, availability, skills })
 {
-    const payload = { project_role_id, cover_message, availability, skills }
+    const selectedRoleId = role_id || project_role_id
+    const payload = { cover_message, availability, skills }
+
+    if (selectedRoleId) payload.role_id = selectedRoleId
+    else if (proposed_role) payload.proposed_role = proposed_role
+
     const res = await api.post(`/projects/${projectId}/applications`, payload)
     return getData(res)
 }

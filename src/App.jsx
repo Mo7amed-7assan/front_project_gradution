@@ -20,7 +20,6 @@ import MyApplications from './pages/MyApplications'
 import ProjectApplications from './pages/ProjectApplications'
 import Connections from './pages/Connections'
 import Invitations from './pages/Invitations'
-import Matches from './pages/Matches'
 import IdentityVerification from './pages/IdentityVerification'
 import Notifications from './pages/Notifications'
 import Messaging from './pages/Messaging'
@@ -62,7 +61,6 @@ export default function App(){
       <Route path="/users/:id" element={<ProtectedRoute><Layout><PublicProfile/></Layout></ProtectedRoute>} />
       <Route path="/connections" element={<ProtectedRoute><Layout><Connections/></Layout></ProtectedRoute>} />
       <Route path="/invitations" element={<ProtectedRoute><Layout><Invitations/></Layout></ProtectedRoute>} />
-      <Route path="/matches" element={<ProtectedRoute><Layout><Matches/></Layout></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Layout><Messaging/></Layout></ProtectedRoute>} />
       <Route path="/messages/:id" element={<ProtectedRoute><Layout><Conversation/></Layout></ProtectedRoute>} />
       <Route path="/verification" element={<ProtectedRoute><Layout><IdentityVerification/></Layout></ProtectedRoute>} />

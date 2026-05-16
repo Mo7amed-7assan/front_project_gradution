@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getNotifications, markNotificationAsRead } from '../services/notifications'
+import {
+  getNotificationPreferences,
+  getNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+  updateNotificationPreferences
+} from '../services/notifications'
 import { respondToConnection } from '../services/connections'
 
 const CONNECTION_REFRESH_EVENT = 'connections:refresh'
@@ -23,6 +29,17 @@ const TYPE_COLORS = {
   team_invite: 'bg-purple-100 text-purple-800',
   message: 'bg-gray-100 text-gray-800',
   connection_request: 'bg-teal-100 text-teal-800',
+}
+
+const DEFAULT_PREFERENCES = {
+  platform_notifications: true,
+  email_notifications: false,
+  push_notifications: true,
+  notification_digest: 'immediate',
+  quiet_hours_start: '',
+  quiet_hours_end: '',
+  quiet_hours_timezone: '',
+  preferences: {},
 }
 
 // Extract project id from notification — handles multiple field shapes
@@ -50,8 +67,12 @@ function extractNotifications(res) {
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([])
+  const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES)
   const [loading, setLoading] = useState(true)
+  const [loadingPreferences, setLoadingPreferences] = useState(true)
+  const [savingPreferences, setSavingPreferences] = useState(false)
   const [error, setError] = useState(null)
+  const [preferenceMessage, setPreferenceMessage] = useState(null)
   const [respondingTo, setRespondingTo] = useState(null)
 
   const fetchNotifications = async () => {
@@ -69,7 +90,23 @@ export default function Notifications() {
     }
   }
 
-  useEffect(() => { fetchNotifications() }, [])
+  const fetchPreferences = async () => {
+    setLoadingPreferences(true)
+    setPreferenceMessage(null)
+    try {
+      const data = await getNotificationPreferences()
+      setPreferences({ ...DEFAULT_PREFERENCES, ...(data || {}) })
+    } catch (err) {
+      setPreferenceMessage(err?.response?.data?.message || 'Failed to load notification preferences.')
+    } finally {
+      setLoadingPreferences(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchNotifications()
+    fetchPreferences()
+  }, [])
 
   const handleMarkAsRead = async (id) => {
     try {
@@ -96,14 +133,42 @@ export default function Notifications() {
   }
 
   const markAllRead = async () => {
-    const unread = notifications.filter(n => !isRead(n))
-    await Promise.allSettled(unread.map(n => markNotificationAsRead(n.id)))
-    setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString(), read: true, is_read: true })))
+    try {
+      await markAllNotificationsAsRead()
+      setNotifications(prev => prev.map(n => ({ ...n, read_at: new Date().toISOString(), read: true, is_read: true })))
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to mark all notifications as read.')
+    }
   }
 
   const isRead = (n) => !!(n.read_at || n.read || n.is_read)
 
   const unreadCount = notifications.filter(n => !isRead(n)).length
+
+  const updatePreferenceField = (field, value) => {
+    setPreferences(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSavePreferences = async () => {
+    setSavingPreferences(true)
+    setPreferenceMessage(null)
+    try {
+      const payload = {
+        ...preferences,
+        quiet_hours_start: preferences.quiet_hours_start || '',
+        quiet_hours_end: preferences.quiet_hours_end || '',
+        quiet_hours_timezone: preferences.quiet_hours_timezone || '',
+        preferences: preferences.preferences || {},
+      }
+      const updated = await updateNotificationPreferences(payload)
+      setPreferences({ ...DEFAULT_PREFERENCES, ...(updated || payload) })
+      setPreferenceMessage('Notification preferences saved.')
+    } catch (err) {
+      setPreferenceMessage(err?.response?.data?.message || 'Failed to save notification preferences.')
+    } finally {
+      setSavingPreferences(false)
+    }
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -134,6 +199,113 @@ export default function Notifications() {
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
       )}
+
+      <div className="mb-6 bg-white border border-gray-200 rounded-xl p-4">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Notification Preferences</h3>
+            <p className="text-sm text-gray-500">Control how and when you receive notifications.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={fetchPreferences}
+              disabled={loadingPreferences || savingPreferences}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50"
+            >
+              {loadingPreferences ? 'Loading...' : 'Load Preferences'}
+            </button>
+            <button
+              onClick={handleSavePreferences}
+              disabled={savingPreferences || loadingPreferences}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50"
+            >
+              {savingPreferences ? 'Saving...' : 'Save Preferences'}
+            </button>
+          </div>
+        </div>
+
+        {preferenceMessage && (
+          <div className={`mb-4 text-sm ${preferenceMessage.includes('Failed') ? 'text-red-600' : 'text-green-600'}`}>
+            {preferenceMessage}
+          </div>
+        )}
+
+        {loadingPreferences ? (
+          <p className="text-sm text-gray-500">Loading preferences...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="flex items-center justify-between gap-3 rounded-lg border p-3">
+              <span className="text-sm font-medium text-gray-700">Platform notifications</span>
+              <input
+                type="checkbox"
+                checked={!!preferences.platform_notifications}
+                onChange={(e) => updatePreferenceField('platform_notifications', e.target.checked)}
+                className="h-4 w-4"
+              />
+            </label>
+            <label className="flex items-center justify-between gap-3 rounded-lg border p-3">
+              <span className="text-sm font-medium text-gray-700">Email notifications</span>
+              <input
+                type="checkbox"
+                checked={!!preferences.email_notifications}
+                onChange={(e) => updatePreferenceField('email_notifications', e.target.checked)}
+                className="h-4 w-4"
+              />
+            </label>
+            <label className="flex items-center justify-between gap-3 rounded-lg border p-3">
+              <span className="text-sm font-medium text-gray-700">Push notifications</span>
+              <input
+                type="checkbox"
+                checked={!!preferences.push_notifications}
+                onChange={(e) => updatePreferenceField('push_notifications', e.target.checked)}
+                className="h-4 w-4"
+              />
+            </label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Digest</label>
+              <select
+                value={preferences.notification_digest || 'immediate'}
+                onChange={(e) => updatePreferenceField('notification_digest', e.target.value)}
+                className="w-full border rounded px-3 py-2"
+              >
+                <option value="immediate">Immediate</option>
+                <option value="hourly">Hourly</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Quiet hours start</label>
+              <input
+                type="time"
+                value={preferences.quiet_hours_start || ''}
+                onChange={(e) => updatePreferenceField('quiet_hours_start', e.target.value)}
+                className="w-full border rounded px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Quiet hours end</label>
+              <input
+                type="time"
+                value={preferences.quiet_hours_end || ''}
+                onChange={(e) => updatePreferenceField('quiet_hours_end', e.target.value)}
+                className="w-full border rounded px-3 py-2"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Quiet hours timezone</label>
+              <input
+                type="text"
+                value={preferences.quiet_hours_timezone || ''}
+                onChange={(e) => updatePreferenceField('quiet_hours_timezone', e.target.value)}
+                placeholder="Africa/Cairo"
+                className="w-full border rounded px-3 py-2"
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {notifications.length === 0 ? (
         <div className="text-center py-16 text-gray-400">

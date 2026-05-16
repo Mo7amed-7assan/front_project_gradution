@@ -9,7 +9,11 @@ export const INVITATION_TYPES = {
 
 const getData = (res) => {
     if (Array.isArray(res?.data?.data?.data)) return res.data.data.data
+    if (Array.isArray(res?.data?.data?.invitations)) return res.data.data.invitations
+    if (Array.isArray(res?.data?.data?.items)) return res.data.data.items
     if (Array.isArray(res?.data?.data)) return res.data.data
+    if (Array.isArray(res?.data?.invitations)) return res.data.invitations
+    if (Array.isArray(res?.data?.items)) return res.data.items
     return res?.data?.data ?? res?.data ?? res
 }
 
@@ -26,7 +30,7 @@ export async function sendInvitation(recipient_id, invitation_type, project_id =
 export const sendInvite = sendInvitation
 
 export async function respondToInvitation(id, response) {
-    const res = await api.patch(`/invitations/${id}/respond`, { response })
+    const res = await api.patch(`/invitations/${id}/respond`, { action: response, status: response })
     return res.data
 }
 

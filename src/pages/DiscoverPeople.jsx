@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { searchUsers } from '../services/profile'
 import Spinner from '../components/Spinner'
+import SuggestedMatches from '../components/SuggestedMatches'
 
 export default function DiscoverPeople() {
+  const [activeTab, setActiveTab] = useState('search')
   const [query, setQuery] = useState('')
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
@@ -32,6 +34,26 @@ export default function DiscoverPeople() {
           <p className="text-gray-600">Search the community and view public profiles.</p>
         </div>
       </div>
+      <div className="flex gap-2 mb-4">
+        <button
+          type="button"
+          onClick={() => setActiveTab('search')}
+          className={`px-4 py-2 rounded text-sm font-semibold ${activeTab === 'search' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        >
+          Search People
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('suggestions')}
+          className={`px-4 py-2 rounded text-sm font-semibold ${activeTab === 'suggestions' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        >
+          Suggested Users
+        </button>
+      </div>
+      {activeTab === 'suggestions' ? (
+        <SuggestedMatches kind="user" />
+      ) : (
+      <>
       <form onSubmit={handleSearch} className="flex gap-3 mb-4">
         <input
           value={query}
@@ -69,6 +91,8 @@ export default function DiscoverPeople() {
             </Link>
           ))}
         </div>
+      )}
+      </>
       )}
     </div>
   )

@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getProjects } from '../services/project'
 import { getCurrentUserId, getProjectOwnerId, getProjectRelation } from '../utils/projectAccess'
+import SuggestedMatches from '../components/SuggestedMatches'
 
 export default function Projects(){
   const { user } = useAuth()
+  const [activeTab, setActiveTab] = useState('projects')
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -65,6 +67,22 @@ export default function Projects(){
             </select>
           </div>
         </div>
+        <div className="flex gap-2 mb-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab('projects')}
+            className={`px-4 py-2 rounded text-sm font-semibold ${activeTab === 'projects' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          >
+            All Projects
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('suggestions')}
+            className={`px-4 py-2 rounded text-sm font-semibold ${activeTab === 'suggestions' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+          >
+            Suggested Projects
+          </button>
+        </div>
         {showFilters && (
           <div className="bg-white p-4 rounded shadow mb-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -115,6 +133,11 @@ export default function Projects(){
         )}
       </header>
 
+      {activeTab === 'suggestions' ? (
+        <SuggestedMatches kind="project" />
+      ) : (
+      <>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? Array.from({length: perPage}).map((_,i)=>(<SkeletonCard key={i}/>)) : projects.length === 0 ? (
           <div className="col-span-full text-center py-16 text-gray-400">
@@ -150,6 +173,8 @@ export default function Projects(){
         <div className="text-sm text-gray-600">Page {page} / {totalPages}</div>
         <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} className="px-3 py-1 bg-gray-200 rounded">Next</button>
       </div>
+      </>
+      )}
     </div>
   )
 }

@@ -18,9 +18,18 @@ import {
   getProjectRoles
 } from '../services/project'
 import { getCurrentUserId, getProjectOwnerId, getProjectRelation, normalizeId } from '../utils/projectAccess'
+import { RATING_FIELDS, createRating } from '../services/rating'
 
 const tabs = ['Overview', 'Roadmap', 'Team', 'Applications']
 const APPLICATION_REFRESH_EVENT = 'applications:refresh'
+const DEFAULT_RATING_FORM = {
+  overall_rating: 5,
+  communication_rating: 5,
+  reliability_rating: 5,
+  skill_rating: 5,
+  problem_solving_rating: 5,
+  teamwork_rating: 5,
+}
 
 const isTruthyBoolean = (value) =>
   value === true || value === 1 || value === '1' || value === 'true'
@@ -76,8 +85,9 @@ export default function ProjectDetails() {
   // Rating state
   const [rateModalOpen, setRateModalOpen] = useState(false)
   const [rateMember, setRateMember] = useState(null)
-  const [ratingVal, setRatingVal] = useState(5)
+  const [ratingForm, setRatingForm] = useState(DEFAULT_RATING_FORM)
   const [ratingComment, setRatingComment] = useState('')
+  const [ratingVisibility, setRatingVisibility] = useState('public')
   const [submittingRating, setSubmittingRating] = useState(false)
 
   const fetchProject = async () => {
@@ -276,15 +286,16 @@ export default function ProjectDetails() {
   }
 
   const handleSubmitApplication = async () => {
-    if (!projectRoleId) {
-      alert('Please select a role from the dropdown.')
+    if (!projectRoleId && !proposedRole.trim()) {
+      alert('Please select a role or enter a proposed role title.')
       return
     }
     
     setApplying(true)
     try {
       const payload = {
-        project_role_id: projectRoleId,
+        role_id: projectRoleId || undefined,
+        proposed_role: projectRoleId ? undefined : proposedRole.trim(),
         cover_message: applicationMessage,
         availability: availability,
         skills: selectedSkills
@@ -465,8 +476,9 @@ export default function ProjectDetails() {
       return
     }
     setRateMember(member)
-    setRatingVal(5)
+    setRatingForm(DEFAULT_RATING_FORM)
     setRatingComment('')
+    setRatingVisibility('public')
     setRateModalOpen(true)
   }
 
@@ -478,12 +490,13 @@ export default function ProjectDetails() {
         alert('Unable to rate this team member because the API did not include member.user.id.')
         return
       }
-      const { createRating } = await import('../services/rating')
       await createRating({
         rated_user_id: ratedUserId,
         project_id: id,
-        rating: Number(ratingVal),
-        comment: ratingComment
+        ...ratingForm,
+        written_feedback: ratingComment,
+        review_text: ratingComment,
+        visibility: ratingVisibility
       })
       alert('Rating submitted successfully')
       setRateModalOpen(false)
@@ -710,13 +723,9 @@ export default function ProjectDetails() {
                 <div className="flex justify-center p-4">
                   <div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              ) : projectRoles.length === 0 ? (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700">
-                  No open roles for this project.
-                </div>
-              ) : (
+              ) : projectRoles.length > 0 ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Select Role *</label>
+                  <label className="block text-sm font-medium text-gray-700">Select Role</label>
                   <select 
                     value={projectRoleId || ''} 
                     onChange={(e) => {
@@ -738,6 +747,22 @@ export default function ProjectDetails() {
                       <option key={r.id} value={r.id}>{resolveRoleValue(r)}</option>
                     ))}
                   </select>
+                </div>
+              ) : (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700">
+                  No open roles for this project. Enter a proposed role title below.
+                </div>
+              )}
+
+              {!projectRoleId && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Proposed Role *</label>
+                  <input
+                    value={proposedRole}
+                    onChange={(e) => setProposedRole(e.target.value)}
+                    className="mt-1 block w-full border rounded px-3 py-2"
+                    placeholder="e.g. Backend Developer, UI Designer"
+                  />
                 </div>
               )}
 
@@ -812,7 +837,7 @@ export default function ProjectDetails() {
 
               <div className="flex items-center justify-end gap-2 mt-4">
                 <button onClick={() => setShowApplyModal(false)} className="px-3 py-2 rounded border">Cancel</button>
-                <button onClick={handleSubmitApplication} disabled={applying || projectRoles.length === 0 || !projectRoleId} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">{applying ? 'Submitting...' : 'Submit application'}</button>
+                <button onClick={handleSubmitApplication} disabled={applying || (!projectRoleId && !proposedRole.trim())} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">{applying ? 'Submitting...' : 'Submit application'}</button>
               </div>
             </div>
           </div>
@@ -941,25 +966,29 @@ export default function ProjectDetails() {
 
       {rateModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded shadow max-w-md w-full p-6">
+          <div className="bg-white rounded shadow max-w-lg w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Rate {resolveUserName(rateMember)}</h3>
               <button onClick={() => setRateModalOpen(false)} className="text-gray-500 hover:text-gray-700">Close</button>
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rating (1-5)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={ratingVal}
-                  onChange={(e) => setRatingVal(e.target.value)}
-                  className="mt-1 block w-full border rounded px-3 py-2"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {RATING_FIELDS.map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label} (1-5)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={ratingForm[field.key]}
+                      onChange={(e) => setRatingForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                      className="mt-1 block w-full border rounded px-3 py-2"
+                    />
+                  </div>
+                ))}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
                 <textarea
                   value={ratingComment}
                   onChange={(e) => setRatingComment(e.target.value)}
@@ -967,6 +996,18 @@ export default function ProjectDetails() {
                   rows={3}
                   placeholder="Share your experience working with this member..."
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+                <select
+                  value={ratingVisibility}
+                  onChange={(e) => setRatingVisibility(e.target.value)}
+                  className="mt-1 block w-full border rounded px-3 py-2"
+                >
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                  <option value="anonymous">Anonymous</option>
+                </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button onClick={() => setRateModalOpen(false)} className="px-3 py-2 rounded border text-gray-600">Cancel</button>

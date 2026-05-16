@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Co-Found Platform API",
-    "description": "Complete REST API for the Co-Found collaboration platform.\n\n## Authentication\nAll protected endpoints require a Bearer token obtained from `/api/auth/login`.\nInclude it in the `Authorization` header: `Authorization: Bearer {token}`\n\n## Modules\n- **Authentication** — Register, login, email verification, password reset, identity verification\n- **Profile** — User profile, skills, endorsements, portfolio\n- **Projects** — CRUD, roles, skills, milestones, team members\n- **Applications** — Apply, review, manage project applications\n- **Collaboration** — Connections, invitations, matches, ratings\n- **Communication** — Conversations, messages, files, video calls, notifications\n- **Administration** — Reports, moderation, restrictions, system settings (admin/moderator only)\n",
+    "description": "Complete REST API for the Co-Found collaboration platform.\n\n## Authentication\nAll protected endpoints require a Bearer token obtained from `/auth/login`.\nInclude it in the `Authorization` header: `Authorization: Bearer {token}`\n\n## Modules\n- **Authentication** — Register, login, email verification, password reset, identity verification\n- **Profile** — User profile, skills, endorsements, portfolio\n- **Projects** — CRUD, roles, skills, milestones, team members\n- **Applications** — Apply, review, manage project applications\n- **Collaboration** — Connections, invitations, matches, ratings\n- **Communication** — Conversations, messages, files, video calls, notifications\n- **Administration** — Reports, moderation, restrictions, system settings (admin/moderator only)\n",
     "version": "1.0.0",
     "contact": {
       "name": "Co-Found Dev Team"
@@ -1895,7 +1895,7 @@
             "in": "query",
             "description": "this field true if you want ",
             "required": false,
-            "example": "",
+            "example": "1",
             "schema": {
               "type": "boolean"
             }
@@ -1905,7 +1905,7 @@
             "in": "query",
             "description": "role may be (all , owner , member, admin) default if is_user_participant must be all or any thing",
             "required": false,
-            "example": "",
+            "example": "owner",
             "schema": {
               "type": "string"
             }
@@ -2227,7 +2227,7 @@
             "in": "path",
             "description": "",
             "required": true,
-            "example": "a19700a4-d3c4-424e-acb4-5745497f5ee2",
+            "example": "fc84fb0e-4fc8-11f1-b07c-42010a9c0002",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -10657,8 +10657,8 @@
                 }
               },
               "example": {
-                "email": "alice@cofound.io",
-                "password": "Alice@12345"
+                "email": "dave@cofound.io",
+                "password": "Dave@12345"
               }
             }
           },

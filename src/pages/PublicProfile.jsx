@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { getUserById, getUserPortfolio, endorseSkill } from '../services/profile'
 import { sendConnectionRequest, getConnections } from '../services/connections'
 import { INVITATION_TYPES, sendInvitation } from '../services/invitations'
-import { getUserRatings, updateRating, deleteRating } from '../services/rating'
+import { RATING_FIELDS, extractRatings, getRatingFeedback, getRatingScore, getUserRatings, updateRating, deleteRating } from '../services/rating'
 import Spinner from '../components/Spinner'
 import { getProjectRelation } from '../utils/projectAccess'
 import { getMyProjects } from '../services/project'
@@ -50,6 +50,22 @@ const getConnectionStatusForUi = (connection) => {
   return connection ? status : 'not_connected'
 }
 
+const DEFAULT_RATING_FORM = {
+  overall_rating: 5,
+  communication_rating: 5,
+  reliability_rating: 5,
+  skill_rating: 5,
+  problem_solving_rating: 5,
+  teamwork_rating: 5,
+}
+
+const getRatingAverages = (ratingRes, items) => {
+  const source = ratingRes?.average_scores || ratingRes?.data?.average_scores || ratingRes?.data?.data?.average_scores
+  if (source?.overall !== undefined) return source
+  const average = items.length ? items.reduce((sum, rating) => sum + getRatingScore(rating), 0) / items.length : 0
+  return { overall: average }
+}
+
 export default function PublicProfile() {
   const { id } = useParams()
   const { user: currentUser } = useAuth()
@@ -72,8 +88,9 @@ export default function PublicProfile() {
   // Ratings state
   const [ratingsData, setRatingsData] = useState({ average: 0, count: 0, items: [] })
   const [editingRating, setEditingRating] = useState(null)
-  const [editRatingVal, setEditRatingVal] = useState(5)
+  const [editRatingForm, setEditRatingForm] = useState(DEFAULT_RATING_FORM)
   const [editRatingComment, setEditRatingComment] = useState('')
+  const [editRatingVisibility, setEditRatingVisibility] = useState('public')
 
   const fetchProfile = async () => {
     setLoading(true)
@@ -102,23 +119,11 @@ export default function PublicProfile() {
       // Fetch ratings
       try {
         const ratingRes = await getUserRatings(id)
-        let items = []
-        let avg = 0
-        let count = 0
-        if (Array.isArray(ratingRes)) {
-           items = ratingRes
-           avg = items.length ? items.reduce((a,b)=>a+b.rating, 0)/items.length : 0
-           count = items.length
-        } else if (ratingRes?.ratings) {
-           items = ratingRes.ratings
-           avg = ratingRes.average_rating || (items.length ? items.reduce((a,b)=>a+b.rating, 0)/items.length : 0)
-           count = ratingRes.total_ratings || items.length
-        } else if (ratingRes?.data) {
-           items = Array.isArray(ratingRes.data) ? ratingRes.data : (ratingRes.data.ratings || [])
-           avg = ratingRes.data.average_rating || (items.length ? items.reduce((a,b)=>a+b.rating, 0)/items.length : 0)
-           count = ratingRes.data.total_ratings || items.length
-        }
-        setRatingsData({ average: avg, count, items })
+        const items = extractRatings(ratingRes)
+        const averages = getRatingAverages(ratingRes, items)
+        const avg = Number(averages.overall || ratingRes?.average_rating || ratingRes?.data?.average_rating || 0)
+        const count = ratingRes?.total_ratings || ratingRes?.data?.total_ratings || ratingRes?.meta?.total || ratingRes?.data?.meta?.total || items.length
+        setRatingsData({ average: avg, count, items, averages })
       } catch(e) {
         console.error('Failed to load ratings', e)
       }
@@ -222,7 +227,12 @@ export default function PublicProfile() {
   const handleUpdateRating = async () => {
     if (!editingRating) return
     try {
-      await updateRating(editingRating, { rating: Number(editRatingVal), comment: editRatingComment })
+      await updateRating(editingRating, {
+        ...editRatingForm,
+        written_feedback: editRatingComment,
+        review_text: editRatingComment,
+        visibility: editRatingVisibility
+      })
       setActionMessageType('success')
       setActionMessage('Rating updated successfully')
       setEditingRating(null)
@@ -380,7 +390,10 @@ export default function PublicProfile() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900">{r.rater?.full_name || r.rater?.name || 'User'}</span>
-                      <span className="text-yellow-400 text-sm">{'★'.repeat(r.rating || 0)}{'☆'.repeat(5-(r.rating || 0))}</span>
+                      <span className="text-yellow-400 text-sm">
+                        {'★'.repeat(Math.round(getRatingScore(r)))}{'☆'.repeat(5 - Math.round(getRatingScore(r)))}
+                      </span>
+                      <span className="text-xs text-gray-500">{Number(getRatingScore(r)).toFixed(1)}</span>
                     </div>
                     {r.project && <p className="text-xs text-gray-500 mt-0.5">Project: {r.project.title || r.project.name}</p>}
                   </div>
@@ -388,14 +401,29 @@ export default function PublicProfile() {
                     <div className="flex gap-2">
                       <button onClick={() => {
                         setEditingRating(r.id)
-                        setEditRatingVal(r.rating)
-                        setEditRatingComment(r.comment || '')
+                        setEditRatingForm({
+                          overall_rating: Math.round(getRatingScore(r)) || 5,
+                          communication_rating: r.communication_rating || 5,
+                          reliability_rating: r.reliability_rating || 5,
+                          skill_rating: r.skill_rating || 5,
+                          problem_solving_rating: r.problem_solving_rating || 5,
+                          teamwork_rating: r.teamwork_rating || 5,
+                        })
+                        setEditRatingComment(getRatingFeedback(r))
+                        setEditRatingVisibility(r.visibility || 'public')
                       }} className="text-xs text-blue-600 hover:underline">Edit</button>
                       <button onClick={() => handleDeleteRating(r.id)} className="text-xs text-red-600 hover:underline">Delete</button>
                     </div>
                   )}
                 </div>
-                {r.comment && <p className="text-gray-700 text-sm mt-2">{r.comment}</p>}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3 text-xs text-gray-600">
+                  {RATING_FIELDS.filter((field) => field.key !== 'overall_rating').map((field) => (
+                    <span key={field.key} className="bg-white border rounded px-2 py-1">
+                      {field.label}: {r[field.key] || '-'}
+                    </span>
+                  ))}
+                </div>
+                {getRatingFeedback(r) && <p className="text-gray-700 text-sm mt-2">{getRatingFeedback(r)}</p>}
               </div>
             ))}
           </div>
@@ -465,28 +493,44 @@ export default function PublicProfile() {
 
       {editingRating && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6">
             <h3 className="text-xl font-semibold mb-4">Edit Rating</h3>
             <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rating (1-5)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={editRatingVal}
-                  onChange={(e) => setEditRatingVal(e.target.value)}
-                  className="mt-1 block w-full border rounded px-3 py-2"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {RATING_FIELDS.map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label} (1-5)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={editRatingForm[field.key]}
+                      onChange={(e) => setEditRatingForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                      className="mt-1 block w-full border rounded px-3 py-2"
+                    />
+                  </div>
+                ))}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
                 <textarea
                   value={editRatingComment}
                   onChange={(e) => setEditRatingComment(e.target.value)}
                   className="mt-1 block w-full border rounded px-3 py-2"
                   rows={3}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+                <select
+                  value={editRatingVisibility}
+                  onChange={(e) => setEditRatingVisibility(e.target.value)}
+                  className="mt-1 block w-full border rounded px-3 py-2"
+                >
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                  <option value="anonymous">Anonymous</option>
+                </select>
               </div>
             </div>
             <div className="flex justify-end gap-3">
