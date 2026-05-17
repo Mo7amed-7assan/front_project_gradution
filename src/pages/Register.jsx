@@ -30,13 +30,8 @@ export default function Register(){
         password,
         password_confirmation: passwordConfirmation
       }
-      const res = await auth.register(payload)
-      navigate('/login', {
-        replace: true,
-        state: {
-          message: res?.message || 'Registration successful. Please check your email to verify your account before signing in.'
-        }
-      })
+      await auth.register(payload)
+      navigate('/dashboard')
     } catch (err) {
       console.error(err)
       setError(err?.response?.data?.message || err.message || 'Registration failed')

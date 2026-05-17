@@ -12,12 +12,6 @@ const normalizeUser = (value) => {
   return { ...user, id }
 }
 
-const isPendingEmailVerification = (user) => user && (
-  user.email_verified === false
-  || user.email_verified_at === null
-  || user.account_status === 'pending'
-)
-
 export function AuthProvider({ children }){
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -52,11 +46,6 @@ export function AuthProvider({ children }){
     const token = getAccessToken(res)
     const userObj = getAuthUser(res)
     if (!token) throw new Error('No token returned from API')
-    if (isPendingEmailVerification(userObj)) {
-      Cookies.remove('cf_token')
-      setUser(null)
-      throw new Error('Please verify your email address before signing in.')
-    }
     Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
     setUser(normalizeUser(userObj))
     return res
@@ -64,8 +53,10 @@ export function AuthProvider({ children }){
 
   const register = async (payload) => {
     const res = await authRegister(payload)
-    Cookies.remove('cf_token')
-    setUser(null)
+    const token = getAccessToken(res)
+    const userObj = getAuthUser(res)
+    if (token) Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
+    setUser(normalizeUser(userObj))
     return res
   }
 
