@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Register from './pages/Register'
+import EmailVerify from './pages/EmailVerify'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import DiscoverPeople from './pages/DiscoverPeople'
@@ -45,8 +46,10 @@ export default function App(){
     <Routes>
       <Route path="/login" element={<Login/>} />
       <Route path="/register" element={<Register/>} />
+      <Route path="/auth/email/verify/:token" element={<EmailVerify/>} />
       <Route path="/forgot-password" element={<ForgotPassword/>} />
       <Route path="/reset-password" element={<ResetPassword/>} />
+      <Route path="/reset-password/:token" element={<ResetPassword/>} />
       <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><Layout><Projects/></Layout></ProtectedRoute>} />
       <Route path="/projects/create" element={<ProtectedRoute><Layout><CreateProject/></Layout></ProtectedRoute>} />

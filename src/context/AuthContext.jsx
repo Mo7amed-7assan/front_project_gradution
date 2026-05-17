@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import api from '../services/api'
-import { authLogin, authRegister, authGuest, authPasswordForgot, authPasswordReset, getAccessToken, getAuthUser } from '../services/auth'
+import { authLogin, authRegister, authGuest, authEmailVerify, authPasswordForgot, authPasswordReset, getAccessToken, getAuthUser } from '../services/auth'
 
 const AuthContext = createContext(null)
 
@@ -11,6 +11,12 @@ const normalizeUser = (value) => {
   const id = user.id || user.user_id || user.data?.id
   return { ...user, id }
 }
+
+const isPendingEmailVerification = (user) => user && (
+  user.email_verified === false
+  || user.email_verified_at === null
+  || user.account_status === 'pending'
+)
 
 export function AuthProvider({ children }){
   const [user, setUser] = useState(null)
@@ -46,6 +52,11 @@ export function AuthProvider({ children }){
     const token = getAccessToken(res)
     const userObj = getAuthUser(res)
     if (!token) throw new Error('No token returned from API')
+    if (isPendingEmailVerification(userObj)) {
+      Cookies.remove('cf_token')
+      setUser(null)
+      throw new Error('Please verify your email address before signing in.')
+    }
     Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
     setUser(normalizeUser(userObj))
     return res
@@ -53,10 +64,8 @@ export function AuthProvider({ children }){
 
   const register = async (payload) => {
     const res = await authRegister(payload)
-    const token = getAccessToken(res)
-    const userObj = getAuthUser(res)
-    if (token) Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
-    setUser(normalizeUser(userObj))
+    Cookies.remove('cf_token')
+    setUser(null)
     return res
   }
 
@@ -75,6 +84,11 @@ export function AuthProvider({ children }){
     return res
   }
 
+  const emailVerify = async (token) => {
+    const res = await authEmailVerify(token)
+    return res
+  }
+
   const passwordReset = async (token, password, password_confirmation) => {
     const res = await authPasswordReset(token, password, password_confirmation)
     return res
@@ -87,7 +101,7 @@ export function AuthProvider({ children }){
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, fetchMe, guest, passwordForgot, passwordReset }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, fetchMe, guest, emailVerify, passwordForgot, passwordReset }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
 
@@ -12,6 +12,8 @@ export default function Login(){
   const auth = useAuth()
 
   const navigate = useNavigate()
+  const location = useLocation()
+  const notice = location.state?.message
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -53,6 +55,7 @@ export default function Login(){
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md bg-white p-8 rounded shadow">
         <h1 className="text-2xl font-semibold mb-6">Sign in to Co-Found</h1>
+        {notice && <div className="mb-4 text-sm text-green-600">{notice}</div>}
         {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -99,6 +102,12 @@ export default function Login(){
             Forgot Password?
           </Link>
         </div>
+        <p className="mt-5 text-center text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Create one
+          </Link>
+        </p>
       </div>
     </div>
   )

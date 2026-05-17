@@ -12,9 +12,9 @@ export default function IdentityVerification(){
     submission_method: 'webcam',
     liveness_check_data: ''
   })
-  const [images, setImages] = useState({ front: null, back: null, selfie: null })
+  const [images, setImages] = useState({ front: null, back: null })
   const [cameraActive, setCameraActive] = useState(false)
-  const [currentCapture, setCurrentCapture] = useState(null) // 'front', 'back', 'selfie'
+  const [currentCapture, setCurrentCapture] = useState(null) // 'front' or 'back'
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const [submitting, setSubmitting] = useState(false)
@@ -23,7 +23,7 @@ export default function IdentityVerification(){
   const fetchStatus = async () => {
     try {
       const res = await getVerificationStatus()
-      setStatus(res?.data?.data)
+      setStatus(res)
     } catch (err) {
       // No existing verification
     }
@@ -76,24 +76,26 @@ export default function IdentityVerification(){
       }
 
       const formData = new FormData()
-      formData.append('id_card_number', form.id_card_number)
-      formData.append('full_name_on_card', form.full_name_on_card)
+      if (form.id_card_number.trim()) {
+        formData.append('id_card_number', form.id_card_number.trim())
+      }
+      formData.append('full_name_on_card', form.full_name_on_card.trim())
       formData.append('date_of_birth', form.date_of_birth)
-      formData.append('nationality', form.nationality)
-      formData.append('expiry_date', form.expiry_date)
+      if (form.nationality.trim()) {
+        formData.append('nationality', form.nationality.trim())
+      }
+      if (form.expiry_date) {
+        formData.append('expiry_date', form.expiry_date)
+      }
       formData.append('submission_method', form.submission_method)
-      if (form.liveness_check_data) {
-        formData.append('liveness_check_data', form.liveness_check_data)
+      if (form.liveness_check_data.trim()) {
+        formData.append('liveness_check_data', form.liveness_check_data.trim())
       }
 
       const frontFile = createFileFromDataURL(images.front, 'id_card_front.png')
       formData.append('id_card_image_front', frontFile)
       const backFile = createFileFromDataURL(images.back, 'id_card_back.png')
       formData.append('id_card_image_back', backFile)
-      if (images.selfie) {
-        const selfieFile = createFileFromDataURL(images.selfie, 'selfie.png')
-        formData.append('selfie_image', selfieFile)
-      }
 
       await submitVerification(formData)
       alert('Verification submitted')
@@ -120,8 +122,8 @@ export default function IdentityVerification(){
       <h2 className="text-2xl font-semibold mb-4">Identity Verification</h2>
       {status && (
         <div className="mb-4 p-4 bg-gray-100 rounded">
-          <p><strong>Status:</strong> {status.status}</p>
-          {status.review_notes && <p><strong>Notes:</strong> {status.review_notes}</p>}
+          <p><strong>Status:</strong> {status.status_label || status.verification_status}</p>
+          {status.rejection_reason && <p><strong>Reason:</strong> {status.rejection_reason}</p>}
         </div>
       )}
       {error && <div className="text-red-600 mb-3">{error}</div>}
@@ -129,7 +131,7 @@ export default function IdentityVerification(){
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">ID Card Number</label>
-            <input value={form.id_card_number} onChange={handleChange('id_card_number')} required className="mt-1 block w-full border rounded px-3 py-2" />
+            <input value={form.id_card_number} onChange={handleChange('id_card_number')} className="mt-1 block w-full border rounded px-3 py-2" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Full Name on Card</label>
@@ -173,12 +175,11 @@ export default function IdentityVerification(){
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Selfie</label>
-            {images.selfie ? (
-              <img src={images.selfie} alt="Selfie" className="w-full h-32 object-cover border rounded" />
-            ) : (
-              <button type="button" onClick={()=>startCamera('selfie')} className="mt-1 block w-full bg-blue-600 text-white px-4 py-2 rounded">Capture Selfie</button>
-            )}
+            <label className="block text-sm font-medium text-gray-700">Submission Method</label>
+            <select value={form.submission_method} onChange={handleChange('submission_method')} required className="mt-1 block w-full border rounded px-3 py-2">
+              <option value="webcam">Webcam</option>
+              <option value="mobile_capture">Mobile Capture</option>
+            </select>
           </div>
         </div>
 
@@ -188,8 +189,8 @@ export default function IdentityVerification(){
               <video ref={videoRef} autoPlay className="w-64 h-48 border"></video>
               <canvas ref={canvasRef} className="hidden"></canvas>
               <div className="mt-2 space-x-2">
-                <button onClick={captureImage} className="bg-green-600 text-white px-4 py-2 rounded">Capture</button>
-                <button onClick={stopCamera} className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
+                <button type="button" onClick={captureImage} className="bg-green-600 text-white px-4 py-2 rounded">Capture</button>
+                <button type="button" onClick={stopCamera} className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
               </div>
             </div>
           </div>

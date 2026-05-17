@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate, Link } from 'react-router-dom'
+import { useSearchParams, useNavigate, Link, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
 
 export default function ResetPassword() {
   const auth = useAuth()
   const navigate = useNavigate()
+  const { token: tokenParamFromPath } = useParams()
   const [searchParams] = useSearchParams()
   const [token, setToken] = useState('')
   const [password, setPassword] = useState('')
@@ -15,9 +16,9 @@ export default function ResetPassword() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const tokenParam = searchParams.get('token') || ''
+    const tokenParam = tokenParamFromPath || searchParams.get('token') || ''
     setToken(tokenParam)
-  }, [searchParams])
+  }, [searchParams, tokenParamFromPath])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,6 +26,14 @@ export default function ResetPassword() {
     setMessage(null)
     if (!token) {
       setError('Reset token is required.')
+      return
+    }
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      setError('Password must be at least 8 characters and include uppercase, lowercase, and a number.')
+      return
+    }
+    if (password !== passwordConfirmation) {
+      setError('Password confirmation does not match.')
       return
     }
     setLoading(true)
