@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
 
 export default function Register(){
   const auth = useAuth()
+  const navigate = useNavigate()
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -29,10 +31,24 @@ export default function Register(){
         password_confirmation: passwordConfirmation
       }
       await auth.register(payload)
-      window.location.href = '/dashboard'
+      navigate('/dashboard')
     } catch (err) {
       console.error(err)
       setError(err?.response?.data?.message || err.message || 'Registration failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGuest = async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      await auth.guest()
+      navigate('/dashboard')
+    } catch (err) {
+      console.error(err)
+      setError(err?.response?.data?.message || err?.message || 'Guest login failed')
     } finally {
       setLoading(false)
     }
@@ -70,6 +86,19 @@ export default function Register(){
             </button>
           </div>
         </form>
+        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+          <button
+            type="button"
+            onClick={handleGuest}
+            disabled={loading}
+            className="text-left text-blue-600 hover:underline disabled:opacity-60"
+          >
+            Continue as Guest
+          </button>
+          <Link to="/login" className="text-blue-600 hover:underline">
+            Sign in
+          </Link>
+        </div>
       </div>
     </div>
   )

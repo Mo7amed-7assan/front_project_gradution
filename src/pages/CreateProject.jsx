@@ -4,6 +4,19 @@ import { createProject } from '../services/project'
 
 const steps = ['Basic info', 'Roles & Skills', 'Timeline']
 const PROJECT_REFRESH_EVENT = 'projects:refresh'
+const PROJECT_STATUSES = ['planning', 'active']
+const PROJECT_VISIBILITIES = ['public', 'private', 'unlisted']
+
+const toNullableInteger = (value) => {
+  if (value === '' || value === null || value === undefined) return null
+  const parsed = parseInt(value, 10)
+  return Number.isNaN(parsed) ? null : parsed
+}
+
+const toPositiveInteger = (value, fallback = 1) => {
+  const parsed = parseInt(value, 10)
+  return Number.isNaN(parsed) || parsed < 1 ? fallback : parsed
+}
 
 export default function CreateProject() {
   const navigate = useNavigate()
@@ -29,7 +42,10 @@ export default function CreateProject() {
   const [error, setError] = useState(null)
 
   const updateField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }))
-  const handleChange = (key) => (e) => updateField(key, e.target.value)
+  const handleChange = (key) => (e) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
+    updateField(key, value)
+  }
 
   const handleRoleChange = (idx, key) => (e) => {
     const roles = [...form.roles]
@@ -50,7 +66,13 @@ export default function CreateProject() {
   const removeSkill = (idx) => updateField('skills', form.skills.filter((_, i) => i !== idx))
 
   const canContinue = () => {
-    if (step === 0) return form.title.trim() && form.category.trim() && form.short_description.trim()
+    if (step === 0) {
+      return form.title.trim()
+        && form.category.trim()
+        && form.short_description.trim()
+        && form.full_description.trim()
+        && form.short_description.trim().length <= 500
+    }
     return true
   }
 
@@ -60,28 +82,28 @@ export default function CreateProject() {
     setSaving(true)
     try {
       const payload = {
-        title: form.title,
-        category: form.category,
-        short_description: form.short_description,
-        full_description: form.full_description,
+        title: form.title.trim(),
+        category: form.category.trim(),
+        short_description: form.short_description.trim(),
+        full_description: form.full_description.trim(),
         status: form.status,
         visibility: form.visibility,
-        team_size_min: form.team_size_min || null,
-        team_size_max: form.team_size_max || null,
+        team_size_min: toNullableInteger(form.team_size_min),
+        team_size_max: toNullableInteger(form.team_size_max),
         start_date: form.start_date || null,
         target_completion_date: form.target_completion_date || null,
         application_deadline: form.application_deadline || null,
         is_accepting_applications: form.is_accepting_applications,
         roles: form.roles.filter((r) => r.role_name.trim()).map((r) => ({
-          role_name: r.role_name,
-          description: r.description || null,
-          positions_needed: parseInt(r.positions_needed, 10) || 1
+          role_name: r.role_name.trim(),
+          description: r.description.trim() || null,
+          positions_needed: toPositiveInteger(r.positions_needed)
         })),
         skills: form.skills.filter((s) => s.skill_name.trim()).map((s) => ({
-          skill_name: s.skill_name,
-          proficiency_required: parseInt(s.proficiency_required, 10) || 1,
-          positions_needed: parseInt(s.positions_needed, 10) || 1,
-          is_required: s.is_required
+          skill_name: s.skill_name.trim(),
+          proficiency_required: Math.min(5, toPositiveInteger(s.proficiency_required)),
+          positions_needed: toPositiveInteger(s.positions_needed),
+          is_required: Boolean(s.is_required)
         }))
       }
 
@@ -128,9 +150,27 @@ export default function CreateProject() {
                 <input value={form.category} onChange={handleChange('category')} required className="mt-1 block w-full border rounded px-3 py-2" />
               </div>
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Project Status</label>
+                <select value={form.status} onChange={handleChange('status')} className="mt-1 block w-full border rounded px-3 py-2">
+                  {PROJECT_STATUSES.map((status) => (
+                    <option key={status} value={status}>{status.replace('_', ' ')}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Visibility</label>
+                <select value={form.visibility} onChange={handleChange('visibility')} className="mt-1 block w-full border rounded px-3 py-2">
+                  {PROJECT_VISIBILITIES.map((visibility) => (
+                    <option key={visibility} value={visibility}>{visibility}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Short Description</label>
-              <input value={form.short_description} onChange={handleChange('short_description')} required className="mt-1 block w-full border rounded px-3 py-2" />
+              <input value={form.short_description} onChange={handleChange('short_description')} required maxLength={500} className="mt-1 block w-full border rounded px-3 py-2" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Full Description</label>
@@ -152,7 +192,7 @@ export default function CreateProject() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Role Title</label>
-                      <input value={role.role_name} onChange={handleRoleChange(idx, 'role_name')} required className="mt-1 block w-full border rounded px-3 py-2" />
+                      <input value={role.role_name} onChange={handleRoleChange(idx, 'role_name')} className="mt-1 block w-full border rounded px-3 py-2" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Positions Needed</label>
@@ -177,7 +217,7 @@ export default function CreateProject() {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Skill Name</label>
-                      <input value={skill.skill_name} onChange={handleSkillChange(idx, 'skill_name')} required className="mt-1 block w-full border rounded px-3 py-2" />
+                      <input value={skill.skill_name} onChange={handleSkillChange(idx, 'skill_name')} className="mt-1 block w-full border rounded px-3 py-2" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Proficiency</label>
@@ -210,6 +250,20 @@ export default function CreateProject() {
 
         {step === 2 && (
           <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Min Team Size</label>
+                <input type="number" min="1" value={form.team_size_min} onChange={handleChange('team_size_min')} className="mt-1 block w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Max Team Size</label>
+                <input type="number" min="1" value={form.team_size_max} onChange={handleChange('team_size_max')} className="mt-1 block w-full border rounded px-3 py-2" />
+              </div>
+              <label className="flex items-end gap-2 text-sm text-gray-700">
+                <input type="checkbox" checked={form.is_accepting_applications} onChange={handleChange('is_accepting_applications')} className="mb-3" />
+                <span className="mb-2">Accepting applications</span>
+              </label>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Start Date</label>

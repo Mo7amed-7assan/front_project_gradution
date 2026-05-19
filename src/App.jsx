@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Register from './pages/Register'
+import EmailVerify from './pages/EmailVerify'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import DiscoverPeople from './pages/DiscoverPeople'
@@ -20,7 +21,6 @@ import MyApplications from './pages/MyApplications'
 import ProjectApplications from './pages/ProjectApplications'
 import Connections from './pages/Connections'
 import Invitations from './pages/Invitations'
-import Matches from './pages/Matches'
 import IdentityVerification from './pages/IdentityVerification'
 import Notifications from './pages/Notifications'
 import Messaging from './pages/Messaging'
@@ -46,8 +46,10 @@ export default function App(){
     <Routes>
       <Route path="/login" element={<Login/>} />
       <Route path="/register" element={<Register/>} />
+      <Route path="/auth/email/verify/:token" element={<EmailVerify/>} />
       <Route path="/forgot-password" element={<ForgotPassword/>} />
       <Route path="/reset-password" element={<ResetPassword/>} />
+      <Route path="/reset-password/:token" element={<ResetPassword/>} />
       <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><Layout><Projects/></Layout></ProtectedRoute>} />
       <Route path="/projects/create" element={<ProtectedRoute><Layout><CreateProject/></Layout></ProtectedRoute>} />
@@ -62,7 +64,6 @@ export default function App(){
       <Route path="/users/:id" element={<ProtectedRoute><Layout><PublicProfile/></Layout></ProtectedRoute>} />
       <Route path="/connections" element={<ProtectedRoute><Layout><Connections/></Layout></ProtectedRoute>} />
       <Route path="/invitations" element={<ProtectedRoute><Layout><Invitations/></Layout></ProtectedRoute>} />
-      <Route path="/matches" element={<ProtectedRoute><Layout><Matches/></Layout></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Layout><Messaging/></Layout></ProtectedRoute>} />
       <Route path="/messages/:id" element={<ProtectedRoute><Layout><Conversation/></Layout></ProtectedRoute>} />
       <Route path="/verification" element={<ProtectedRoute><Layout><IdentityVerification/></Layout></ProtectedRoute>} />

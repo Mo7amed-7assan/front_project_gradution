@@ -26,6 +26,12 @@ export async function authGuest()
     return getResponseData(res)
 }
 
+export async function authEmailVerify(token)
+{
+    const res = await api.get(`/auth/email/verify/${token}`)
+    return getResponseData(res)
+}
+
 export async function authPasswordForgot(email)
 {
     const res = await api.post('/auth/password/forgot', { email })
@@ -56,6 +62,7 @@ export default {
     authLogin,
     authRegister,
     authGuest,
+    authEmailVerify,
     authPasswordForgot,
     authPasswordReset,
     getAccessToken,

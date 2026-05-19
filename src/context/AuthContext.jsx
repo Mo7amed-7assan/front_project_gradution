@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import api from '../services/api'
-import { authLogin, authRegister, authGuest, authPasswordForgot, authPasswordReset, getAccessToken, getAuthUser } from '../services/auth'
+import { authLogin, authRegister, authGuest, authEmailVerify, authPasswordForgot, authPasswordReset, getAccessToken, getAuthUser } from '../services/auth'
 
 const AuthContext = createContext(null)
 
@@ -75,6 +75,11 @@ export function AuthProvider({ children }){
     return res
   }
 
+  const emailVerify = async (token) => {
+    const res = await authEmailVerify(token)
+    return res
+  }
+
   const passwordReset = async (token, password, password_confirmation) => {
     const res = await authPasswordReset(token, password, password_confirmation)
     return res
@@ -87,7 +92,7 @@ export function AuthProvider({ children }){
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, fetchMe, guest, passwordForgot, passwordReset }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, fetchMe, guest, emailVerify, passwordForgot, passwordReset }}>
       {children}
     </AuthContext.Provider>
   )
