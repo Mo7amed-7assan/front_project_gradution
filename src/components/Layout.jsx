@@ -17,10 +17,22 @@ const NAV_ITEMS = [
   { to: '/verification', label: 'Verification', icon: 'Check' },
 ]
 
+const ADMIN_NAV_ITEMS = [
+  { to: '/admin/verifications', label: 'Admin Verifications', icon: 'Shield' },
+  { to: '/admin/reports', label: 'Admin Reports', icon: 'Report' },
+  { to: '/admin/moderation', label: 'Admin Moderation', icon: 'Gavel' },
+  { to: '/admin/restrictions', label: 'Admin Restrictions', icon: 'Ban' },
+  { to: '/admin/users', label: 'Admin Users', icon: 'Users' },
+  { to: '/admin/settings', label: 'Admin Settings', icon: 'Settings' },
+  { to: '/admin/action-logs', label: 'Admin Action Logs', icon: 'FileText' },
+  { to: '/admin/system-logs', label: 'Admin System Logs', icon: 'Activity' },
+]
+
 function Sidebar() {
   const { logout, user } = useAuth()
   const location = useLocation()
   const [unreadCount, setUnread] = useState(0)
+  const [isAdminOpen, setIsAdminOpen] = useState(false)
 
   useEffect(() => {
     const fetchUnread = async () => {
@@ -43,6 +55,13 @@ function Sidebar() {
     const interval = setInterval(fetchUnread, 60000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    // Auto-expand admin menu if on admin route
+    if (location.pathname.startsWith('/admin')) {
+      setIsAdminOpen(true)
+    }
+  }, [location.pathname])
 
   const isActive = (path) => {
     if (path === '/projects' && location.pathname === '/projects') return true
@@ -96,6 +115,51 @@ function Sidebar() {
             </Link>
           )
         })}
+
+        {user && ['administrator', 'admin', 'moderator'].includes(user.role) && (
+          <div>
+            <button
+              onClick={() => setIsAdminOpen(!isAdminOpen)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                isAdminOpen
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <span className="text-[10px] leading-none w-10 shrink-0 text-gray-400 uppercase">Admin</span>
+              <span className="flex-1">Administration</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${isAdminOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+
+            {isAdminOpen && (
+              <div className="mt-1 ml-2 space-y-0.5 border-l-2 border-indigo-200 pl-2">
+                {ADMIN_NAV_ITEMS.map(({ to, label }) => {
+                  const active = isActive(to)
+                  return (
+                    <Link
+                      key={to}
+                      to={to}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                        active
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <span className="flex-1">{label.replace('Admin ', '')}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       <div className="px-4 py-4 border-t border-gray-100">

@@ -25,6 +25,23 @@ import IdentityVerification from './pages/IdentityVerification'
 import Notifications from './pages/Notifications'
 import Messaging from './pages/Messaging'
 import Conversation from './pages/Conversation'
+import AdminVerifications from './pages/AdminVerifications'
+import AdminVerificationDetail from './pages/AdminVerificationDetail'
+import AdminReports from './pages/AdminReports'
+import AdminReportDetail from './pages/AdminReportDetail'
+import AdminModeration from './pages/AdminModeration'
+import AdminModerationLog from './pages/AdminModerationLog'
+import AdminRestrictions from './pages/AdminRestrictions'
+import AdminRestrictionDetail from './pages/AdminRestrictionDetail'
+import AdminRestrictUser from './pages/AdminRestrictUser'
+import AdminUsers from './pages/AdminUsers'
+import AdminUserDetail from './pages/AdminUserDetail'
+import AdminSettings from './pages/AdminSettings'
+import AdminSettingDetail from './pages/AdminSettingDetail'
+import AdminActionLogs from './pages/AdminActionLogs'
+import AdminActionLogDetail from './pages/AdminActionLogDetail'
+import AdminSystemLogs from './pages/AdminSystemLogs'
+import AdminSystemLogDetail from './pages/AdminSystemLogDetail'
 
 function ProjectDetailsRoute() {
   const { id } = useParams()
@@ -68,6 +85,23 @@ export default function App(){
       <Route path="/messages/:id" element={<ProtectedRoute><Layout><Conversation/></Layout></ProtectedRoute>} />
       <Route path="/verification" element={<ProtectedRoute><Layout><IdentityVerification/></Layout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><Layout><Notifications/></Layout></ProtectedRoute>} />
+      <Route path="/admin/verifications" element={<ProtectedRoute><Layout><AdminVerifications/></Layout></ProtectedRoute>} />
+      <Route path="/admin/verifications/:id" element={<ProtectedRoute><Layout><AdminVerificationDetail/></Layout></ProtectedRoute>} />
+      <Route path="/admin/reports" element={<ProtectedRoute><Layout><AdminReports/></Layout></ProtectedRoute>} />
+      <Route path="/admin/reports/:id" element={<ProtectedRoute><Layout><AdminReportDetail/></Layout></ProtectedRoute>} />
+      <Route path="/admin/moderation" element={<ProtectedRoute><Layout><AdminModeration/></Layout></ProtectedRoute>} />
+      <Route path="/admin/moderation/log" element={<ProtectedRoute><Layout><AdminModerationLog/></Layout></ProtectedRoute>} />
+      <Route path="/admin/restrictions" element={<ProtectedRoute><Layout><AdminRestrictions/></Layout></ProtectedRoute>} />
+      <Route path="/admin/restrictions/:id" element={<ProtectedRoute><Layout><AdminRestrictionDetail/></Layout></ProtectedRoute>} />
+      <Route path="/admin/restrict-user" element={<ProtectedRoute><Layout><AdminRestrictUser/></Layout></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute><Layout><AdminUsers/></Layout></ProtectedRoute>} />
+      <Route path="/admin/users/:id" element={<ProtectedRoute><Layout><AdminUserDetail/></Layout></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute><Layout><AdminSettings/></Layout></ProtectedRoute>} />
+      <Route path="/admin/settings/:key" element={<ProtectedRoute><Layout><AdminSettingDetail/></Layout></ProtectedRoute>} />
+      <Route path="/admin/action-logs" element={<ProtectedRoute><Layout><AdminActionLogs/></Layout></ProtectedRoute>} />
+      <Route path="/admin/action-logs/:id" element={<ProtectedRoute><Layout><AdminActionLogDetail/></Layout></ProtectedRoute>} />
+      <Route path="/admin/system-logs" element={<ProtectedRoute><Layout><AdminSystemLogs/></Layout></ProtectedRoute>} />
+      <Route path="/admin/system-logs/:id" element={<ProtectedRoute><Layout><AdminSystemLogDetail/></Layout></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   )
