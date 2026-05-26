@@ -1,14 +1,33 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import Spinner from '../components/Spinner'
 import { getActionLogById } from '../services/adminActionLogs'
 import { useAuth } from '../context/AuthContext'
 
+const getActionBadge = (action) => {
+  const a = `${action || ''}`.toLowerCase()
+  if (a.includes('create')) return { cls: 'badge-green',  icon: '✨' }
+  if (a.includes('update') || a.includes('edit')) return { cls: 'badge-blue', icon: '✏️' }
+  if (a.includes('delete')) return { cls: 'badge-red',   icon: '🗑️' }
+  if (a.includes('restrict') || a.includes('ban')) return { cls: 'bg-orange-50 text-orange-700 border border-orange-200 badge', icon: '🚫' }
+  if (a.includes('approve') || a.includes('reject')) return { cls: 'bg-purple-50 text-purple-700 border border-purple-200 badge', icon: '✅' }
+  return { cls: 'badge-slate', icon: '📋' }
+}
+
+function InfoRow({ label, children, copyable = false }) {
+  return (
+    <div>
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+      <div className={`text-sm font-semibold text-slate-800 ${copyable ? 'font-mono bg-slate-50 px-2 py-1 rounded inline-block border border-slate-100' : ''}`}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 export default function AdminActionLogDetail() {
   const { id } = useParams()
-  const navigate = useNavigate()
   const { user } = useAuth()
-
   const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -27,101 +46,92 @@ export default function AdminActionLogDetail() {
     load()
   }, [id, user?.id])
 
-  if (loading) return <div className="min-h-[12rem] flex items-center justify-center"><Spinner /></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
+  if (!item) return <div className="p-8 text-rose-600 font-bold">Action log not found.</div>
 
-  if (!item) return <div className="p-6 text-red-600">Action log not found</div>
-
-  const getActionBadgeColor = (action) => {
-    const a = (action || '').toLowerCase()
-    if (a.includes('create')) return 'bg-green-100 text-green-700'
-    if (a.includes('update') || a.includes('edit')) return 'bg-blue-100 text-blue-700'
-    if (a.includes('delete')) return 'bg-red-100 text-red-700'
-    if (a.includes('restrict') || a.includes('ban')) return 'bg-orange-100 text-orange-700'
-    if (a.includes('approve') || a.includes('reject')) return 'bg-purple-100 text-purple-700'
-    return 'bg-gray-100 text-gray-700'
-  }
+  const badge = getActionBadge(item.action_type || item.action)
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Action Log Detail</h1>
-        <button
-          onClick={() => navigate('/admin/action-logs')}
-          className="px-3 py-2 bg-gray-600 text-white rounded text-sm"
-        >
-          Back to Logs
-        </button>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <Link to="/admin/action-logs" className="text-sm text-brand-primary font-bold flex items-center gap-1 mb-2 hover:underline">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            Back to Action Logs
+          </Link>
+          <h1 className="page-title text-brand-secondary">Action Log Detail</h1>
+        </div>
       </div>
 
-      <div className="space-y-4 mb-8">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Action Type</label>
-          <div className="mt-1">
-            <span className={`inline-block px-3 py-1 rounded text-sm font-medium ${getActionBadgeColor(item.action_type || item.action)}`}>
-              {item.action_type || item.action || 'unknown'}
-            </span>
+      <div className="card p-6">
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+          <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl shrink-0">
+            {badge.icon}
+          </div>
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-slate-900 capitalize">
+                {item.action_type || item.action || 'Unknown Action'}
+              </h2>
+              <span className={`${badge.cls} text-xs uppercase tracking-wider`}>Logged Action</span>
+            </div>
+            <p className="text-sm text-slate-500 mt-1">
+              Performed by:{' '}
+              <span className="font-semibold text-brand-primary">
+                {item.admin_user?.full_name || item.admin_user?.name || item.performed_by_id || 'Unknown'}
+              </span>
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Performed By</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
-              {item.admin_user?.full_name || item.admin_user?.name || item.performed_by_id || 'Unknown'}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Timestamp</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="space-y-6">
+            <InfoRow label="Timestamp">
               {item.created_at ? new Date(item.created_at).toLocaleString() : 'Unknown'}
+            </InfoRow>
+            
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Reason</p>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 whitespace-pre-wrap">
+                {item.description || item.reason || 'No description provided.'}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Target Type</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
-              {item.target_type || 'N/A'}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Target ID</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm font-mono">
+          <div className="space-y-6">
+            <InfoRow label="Target Type">
+              <span className="capitalize">{item.target_type || 'N/A'}</span>
+            </InfoRow>
+            
+            <InfoRow label="Target ID" copyable>
               {item.target_id || 'N/A'}
-            </div>
-          </div>
-        </div>
+            </InfoRow>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Description / Reason</label>
-          <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
-            {item.description || item.reason || 'No description'}
+            {item.ip_address && (
+              <InfoRow label="IP Address" copyable>
+                {item.ip_address}
+              </InfoRow>
+            )}
           </div>
         </div>
 
         {item.changes && (
           <div>
-            <label className="block text-sm font-medium text-gray-700">Changes</label>
-            <pre className="mt-1 p-3 bg-gray-50 rounded text-xs overflow-auto">
-              {typeof item.changes === 'string' ? item.changes : JSON.stringify(item.changes, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        {item.ip_address && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700">IP Address</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm font-mono">
-              {item.ip_address}
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Changes payload</p>
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 overflow-x-auto">
+              <pre className="text-xs text-slate-600 font-mono">
+                {typeof item.changes === 'string' ? item.changes : JSON.stringify(item.changes, null, 2)}
+              </pre>
             </div>
           </div>
         )}
       </div>
 
-      <details className="border-t pt-4">
-        <summary className="cursor-pointer font-medium text-gray-700">Raw Data</summary>
-        <pre className="mt-3 p-3 bg-gray-50 rounded text-xs overflow-auto">
+      <details className="mt-6">
+        <summary className="cursor-pointer text-xs font-bold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors inline-block ml-1">
+          Raw JSON Data
+        </summary>
+        <pre className="mt-3 p-4 bg-slate-50 rounded-xl text-xs overflow-auto border border-slate-100 text-slate-600 font-mono">
           {JSON.stringify(item, null, 2)}
         </pre>
       </details>

@@ -1,21 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
-  buildCallFrameUrl,
-  cancelCall,
-  endCall,
-  extractCalls,
-  getCall,
-  initiateCall,
-  joinCall,
-  leaveCall,
-  listCalls,
+  buildCallFrameUrl, cancelCall, endCall, extractCalls,
+  getCall, initiateCall, joinCall, leaveCall, listCalls,
 } from '../services/calls'
 import { getConversations, startConversation } from '../services/messaging'
 import { getConnections } from '../services/connections'
-import RealtimeChatPanel from '../components/RealtimeChatPanel'
 import { getCurrentUserId } from '../utils/projectAccess'
 import { useAuth } from '../context/AuthContext'
+import MessagingUI from '../ui/pages/MessagingUI'
 
 const extractConversations = (value) => {
   if (Array.isArray(value)) return value
@@ -70,7 +63,7 @@ const getPersonName = (person) =>
   person?.full_name || person?.name || person?.username || person?.email || `User ${getPersonId(person) || ''}`
 
 const getPersonAvatar = (person) =>
-  person?.profile_picture_url || person?.avatar_url || person?.avatar || '/default-avatar.png'
+  person?.profile_picture_url || person?.avatar_url || person?.avatar || null
 
 const getConversationId = (conversation) =>
   conversation?.id || conversation?.uuid || conversation?.conversation_id
@@ -146,14 +139,7 @@ const createDirectConversation = async (personId) => {
   throw lastError || new Error('Failed to create conversation.')
 }
 
-const getCallLabel = (call) => {
-  const context = call.conversation_id ? `Conversation ${call.conversation_id}` : `Project ${call.project_id || ''}`
-  return call.room_name || call.title || context
-}
-
-const canJoin = (call) => ['scheduled', 'active'].includes(`${call.status || ''}`.toLowerCase())
-
-export default function Messaging(){
+export default function Messaging() {
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const autoOpenedUserRef = useRef('')
@@ -230,7 +216,7 @@ export default function Messaging(){
     }
   }
 
-  useEffect(()=>{ loadPage() }, [])
+  useEffect(() => { loadPage() }, [])
 
   const ensureConversationForPerson = async (person) => {
     const personId = getPersonId(person?.person || person?.id)
@@ -394,255 +380,42 @@ export default function Messaging(){
     setWideFrame(false)
   }
 
+  const handleToggleWide = () => {
+    setWideFrame((prev) => !prev)
+  }
+
   return (
-    <div className={`${wideFrame ? 'max-w-none' : 'max-w-6xl'} mx-auto bg-white p-6 rounded shadow`}>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-2xl font-semibold">Messaging</h2>
-          <p className="text-sm text-gray-500 mt-1">Choose a connection, then chat or start a video call.</p>
-        </div>
-        <button onClick={loadPage} className="px-3 py-2 rounded border text-gray-700 hover:bg-gray-50">Refresh</button>
-      </div>
-
-      {error && <div className="mb-4 p-3 rounded border border-red-200 bg-red-50 text-red-700">{error}</div>}
-
-      <div className={`grid grid-cols-1 ${wideFrame ? 'xl:grid-cols-4' : 'lg:grid-cols-3'} gap-6`}>
-        <div className={`${wideFrame ? 'xl:col-span-1' : 'lg:col-span-1'} space-y-6`}>
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3">Connected People</h3>
-            {loading ? (
-              <p className="text-gray-500">Loading connections...</p>
-            ) : connectedPeople.length === 0 ? (
-              <p className="text-gray-500">No accepted connections yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {connectedPeople.map((item) => {
-                  const active = normalizeKey(item.id) === normalizeKey(selectedPersonId)
-                  return (
-                    <button
-                      key={item.connection?.id || item.id}
-                      type="button"
-                      onClick={() => handleSelectPerson(item)}
-                      disabled={preparingConversation}
-                      className={`w-full flex items-center gap-3 rounded-lg border p-3 text-left transition disabled:opacity-60 ${
-                        active ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
-                      }`}
-                    >
-                      <img src={item.avatar} alt={item.name} className="w-10 h-10 rounded-full object-cover bg-gray-100" />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{item.username || item.id}</p>
-                      </div>
-                      {active && <span className="text-xs text-blue-700 font-medium">Open</span>}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-            {preparingConversation && <p className="text-xs text-gray-500 mt-3">Opening conversation...</p>}
-          </div>
-
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3">Start a Call</h3>
-            <div className="mb-3 rounded border bg-gray-50 p-3">
-              <p className="text-xs text-gray-500">Selected person</p>
-              <p className="font-medium text-gray-900 truncate">
-                {selectedPerson ? selectedPerson.name : 'Choose someone from your connections'}
-              </p>
-            </div>
-            <button
-              onClick={handleStartCall}
-              disabled={starting || preparingConversation || !selectedConversationId}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-            >
-              {starting ? 'Starting...' : 'Start Video Call'}
-            </button>
-          </div>
-
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3">My Calls</h3>
-            {loading ? (
-              <p className="text-gray-500">Loading calls...</p>
-            ) : calls.length === 0 ? (
-              <p className="text-gray-500">No calls yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {calls.map((call) => {
-                  const status = `${call.status || 'scheduled'}`.toLowerCase()
-                  return (
-                    <div key={call.id} className="border rounded p-3">
-                      <button type="button" onClick={() => handleShowCallDetail(call.id)} className="w-full text-left">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{getCallLabel(call)}</p>
-                            <p className="text-xs text-gray-500 capitalize">{call.call_type || 'call'} - {status}</p>
-                          </div>
-                          <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${
-                            status === 'active' ? 'bg-green-100 text-green-800' :
-                            status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                            status === 'cancelled' ? 'bg-gray-100 text-gray-700' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {status}
-                          </span>
-                        </div>
-                      </button>
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        <button onClick={() => handleShowCallDetail(call.id)} disabled={loadingCallDetail} className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs disabled:opacity-50">
-                          Details
-                        </button>
-                        {canJoin(call) && (
-                          <button onClick={() => handleJoinCall(call.id)} disabled={processingCallId === call.id} className="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs disabled:opacity-50">
-                            {processingCallId === call.id ? 'Joining...' : 'Join'}
-                          </button>
-                        )}
-                        {status === 'active' && (
-                          <button onClick={() => handleEndCall(call)} disabled={processingCallId === call.id} className="px-3 py-1.5 bg-red-600 text-white rounded text-xs disabled:opacity-50">
-                            End
-                          </button>
-                        )}
-                        {status === 'scheduled' && (
-                          <button onClick={() => handleCancelCall(call)} disabled={processingCallId === call.id} className="px-3 py-1.5 bg-gray-600 text-white rounded text-xs disabled:opacity-50">
-                            Cancel
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3">Call Details</h3>
-            {loadingCallDetail ? (
-              <p className="text-gray-500">Loading call details...</p>
-            ) : !selectedCallDetail ? (
-              <p className="text-gray-500">Click any call to view its full details.</p>
-            ) : (
-              <div className="space-y-3 text-sm">
-                <div>
-                  <span className="text-gray-500">ID:</span>
-                  <p className="font-mono text-xs break-all">{selectedCallDetail.id}</p>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Status</span>
-                  <span className="font-medium capitalize">{selectedCallDetail.status || '-'}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Type</span>
-                  <span className="font-medium capitalize">{selectedCallDetail.call_type || '-'}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Room</span>
-                  <span className="font-medium text-right break-all">{selectedCallDetail.room_name || '-'}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Participants</span>
-                  <span className="font-medium">{selectedCallDetail.active_participants_count ?? selectedCallDetail.participants?.length ?? 0}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">Start time</span>
-                  <span className="font-medium text-right">{selectedCallDetail.start_time ? new Date(selectedCallDetail.start_time).toLocaleString() : '-'}</span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-gray-500">End time</span>
-                  <span className="font-medium text-right">{selectedCallDetail.end_time ? new Date(selectedCallDetail.end_time).toLocaleString() : '-'}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Room URL:</span>
-                  <p className="font-mono text-xs break-all">{selectedCallDetail.room_url || 'Not available until you join this call.'}</p>
-                </div>
-
-                {selectedCallDetail.initiator && (
-                  <div className="pt-2 border-t">
-                    <span className="text-gray-500">Initiator:</span>
-                    <p className="font-medium">
-                      {selectedCallDetail.initiator.full_name || selectedCallDetail.initiator.name || selectedCallDetail.initiator.username || selectedCallDetail.initiator.id}
-                    </p>
-                  </div>
-                )}
-
-                {Array.isArray(selectedCallDetail.participants) && selectedCallDetail.participants.length > 0 && (
-                  <div className="pt-2 border-t">
-                    <p className="text-gray-500 mb-2">Participants</p>
-                    <div className="space-y-2">
-                      {selectedCallDetail.participants.map((participant) => (
-                        <div key={participant.id || participant.user?.id || participant.user_id} className="bg-gray-50 rounded p-2">
-                          <p className="font-medium">
-                            {participant.user?.full_name || participant.user?.name || participant.user?.username || participant.user_id || 'Participant'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {participant.role || 'participant'} - {participant.left_at ? 'left' : 'active'}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {canJoin(selectedCallDetail) && (
-                  <button onClick={() => handleJoinCall(selectedCallDetail.id)} disabled={processingCallId === selectedCallDetail.id} className="w-full px-3 py-2 bg-indigo-600 text-white rounded disabled:opacity-50">
-                    {processingCallId === selectedCallDetail.id ? 'Joining...' : 'Join This Call'}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className={wideFrame ? 'xl:col-span-3' : 'lg:col-span-2'}>
-          <div className={`grid grid-cols-1 ${wideFrame ? '2xl:grid-cols-2' : 'xl:grid-cols-2'} gap-6 items-start`}>
-            <div>
-              {callFrameUrl ? (
-                <div className="border rounded-lg overflow-hidden bg-gray-900">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3 bg-gray-950 text-white">
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{activeCall ? getCallLabel(activeCall) : 'Video call'}</p>
-                      <p className="text-xs text-gray-300">Joined in this page - frame height {frameHeight}vh</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button type="button" onClick={shrinkFrame} className="px-4 py-2 rounded text-sm font-bold shadow-sm" style={{ backgroundColor: '#facc15', color: '#111827' }}>Make Smaller</button>
-                      <button type="button" onClick={growFrame} className="px-4 py-2 rounded text-sm font-bold shadow-sm" style={{ backgroundColor: '#22c55e', color: '#052e16' }}>Make Bigger</button>
-                      <button type="button" onClick={() => setWideFrame((value) => !value)} className="px-4 py-2 rounded text-sm font-bold shadow-sm" style={{ backgroundColor: '#38bdf8', color: '#082f49' }}>
-                        {wideFrame ? 'Normal Width' : 'Wide View'}
-                      </button>
-                      <button type="button" onClick={resetFrame} className="px-4 py-2 rounded text-sm font-bold shadow-sm" style={{ backgroundColor: '#c084fc', color: '#2e1065' }}>Reset Size</button>
-                      <button onClick={handleLeaveCall} disabled={processingCallId === activeCall?.id} className="px-4 py-2 rounded text-sm font-bold shadow-sm disabled:opacity-50" style={{ backgroundColor: '#ef4444', color: '#ffffff' }}>
-                        {processingCallId === activeCall?.id ? 'Leaving...' : 'Leave Call'}
-                      </button>
-                    </div>
-                  </div>
-                  <iframe
-                    title="Video call"
-                    src={callFrameUrl}
-                    className="w-full bg-black"
-                    style={{ height: `${frameHeight}vh` }}
-                    allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              ) : (
-                <div className="border rounded-lg min-h-[32rem] flex items-center justify-center text-center p-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No active call in page</h3>
-                    <p className="text-gray-500">Choose a connection, then start or join a call.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <RealtimeChatPanel
-              conversations={conversations}
-              selectedConversationId={selectedConversationId}
-              onSelectConversation={setSelectedConversationId}
-              compact={wideFrame}
-              showConversationSelector={false}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <MessagingUI
+      loading={loading}
+      connectedPeople={connectedPeople}
+      preparingConversation={preparingConversation}
+      selectedPersonId={selectedPersonId}
+      selectedPerson={selectedPerson}
+      selectedConversationId={selectedConversationId}
+      calls={calls}
+      loadingCallDetail={loadingCallDetail}
+      selectedCallDetail={selectedCallDetail}
+      activeCall={activeCall}
+      callFrameUrl={callFrameUrl}
+      frameHeight={frameHeight}
+      wideFrame={wideFrame}
+      processingCallId={processingCallId}
+      starting={starting}
+      error={error}
+      conversations={conversations}
+      onRefresh={loadPage}
+      onSelectPerson={handleSelectPerson}
+      onStartCall={handleStartCall}
+      onJoinCall={handleJoinCall}
+      onShowCallDetail={handleShowCallDetail}
+      onLeaveCall={handleLeaveCall}
+      onEndCall={handleEndCall}
+      onCancelCall={handleCancelCall}
+      onGrowFrame={growFrame}
+      onShrinkFrame={shrinkFrame}
+      onResetFrame={resetFrame}
+      onToggleWide={handleToggleWide}
+      setSelectedConversationId={setSelectedConversationId}
+    />
   )
 }

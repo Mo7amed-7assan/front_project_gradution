@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { getProjectApplications, getMyApplications, reviewApplication } from '../services/applications'
 import { getProjectTeam } from '../services/project'
 import Spinner from '../components/Spinner'
+import ProjectApplicationsUI from '../ui/pages/ProjectApplicationsUI'
 
 // Robust extractor — handles multiple response shapes
 function extractApplications(res) {
@@ -107,113 +108,18 @@ export default function ProjectApplications() {
   const pendingCount = applications.filter(a => (a.status || '').toLowerCase() === 'pending').length
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Project Applications</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {pendingCount > 0
-              ? `${pendingCount} pending application${pendingCount !== 1 ? 's' : ''} awaiting review`
-              : 'All applications have been reviewed'}
-          </p>
-        </div>
-        <Link to={`/projects/${id}`} className="text-sm text-indigo-600 hover:underline font-medium">
-          ← Back to Project
-        </Link>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
-      )}
-
-      {loading ? (
-        <div className="flex justify-center py-16"><Spinner /></div>
-      ) : applications.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <div className="text-5xl mb-4">📭</div>
-          <p className="text-lg font-medium">No applications yet</p>
-          <p className="text-sm mt-1">Applications will appear here when people apply for roles.</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {applications.map(a => {
-            const statusKey   = (a.status || 'pending').toLowerCase()
-            const statusClass = STATUS_STYLES[statusKey] || 'bg-gray-100 text-gray-600'
-            const roleName    = getRoleName(a)
-            const applicant   = getApplicantName(a)
-            const isPending   = statusKey === 'pending'
-
-            return (
-              <div key={a.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-                <div className="flex items-start justify-between gap-4">
-                  {/* Left — applicant info */}
-                  <div className="flex-1 min-w-0">
-                    {/* Avatar + name */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0">
-                        {applicant.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">{applicant}</div>
-                        {a.applicant?.email && (
-                          <div className="text-xs text-gray-400">{a.applicant.email}</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Role applied for */}
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">Role:</span>{' '}
-                      <span className="text-gray-800">{roleName}</span>
-                    </div>
-
-                    {/* Applied date */}
-                    <div className="mt-0.5 text-xs text-gray-400">
-                      Applied: {a.applied_at
-                        ? new Date(a.applied_at).toLocaleString()
-                        : (a.created_at ? new Date(a.created_at).toLocaleString() : '—')}
-                    </div>
-
-                    {/* Cover message */}
-                    {a.cover_message && (
-                      <p className="mt-3 text-sm text-gray-600 bg-gray-50 rounded-lg p-3 border border-gray-100 italic">
-                        "{a.cover_message}"
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Right — status + actions */}
-                  <div className="flex flex-col items-end gap-3 shrink-0">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusClass}`}>
-                      {a.status ? a.status.charAt(0).toUpperCase() + a.status.slice(1) : 'Pending'}
-                    </span>
-
-                    {isPending && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleReview(a.id, 'accepted')}
-                          disabled={!!reviewing}
-                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold disabled:opacity-50 transition-colors"
-                        >
-                          {isReviewing(a.id, 'accepted') ? '...' : '✓ Accept'}
-                        </button>
-                        <button
-                          onClick={() => handleReview(a.id, 'rejected')}
-                          disabled={!!reviewing}
-                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold disabled:opacity-50 transition-colors"
-                        >
-                          {isReviewing(a.id, 'rejected') ? '...' : '✕ Reject'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
+    <ProjectApplicationsUI
+      id={id}
+      applications={applications}
+      loading={loading}
+      error={error}
+      reviewing={reviewing}
+      handleReview={handleReview}
+      getRoleName={getRoleName}
+      getApplicantName={getApplicantName}
+      isReviewing={isReviewing}
+      pendingCount={pendingCount}
+      STATUS_STYLES={STATUS_STYLES}
+    />
   )
 }

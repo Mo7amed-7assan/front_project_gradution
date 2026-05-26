@@ -8,6 +8,7 @@ import { RATING_FIELDS, extractRatings, getRatingFeedback, getRatingScore, getUs
 import Spinner from '../components/Spinner'
 import { getProjectRelation } from '../utils/projectAccess'
 import { getMyProjects } from '../services/project'
+import PublicProfileUI from '../ui/pages/PublicProfileUI'
 
 const CONNECTION_REFRESH_EVENT = 'connections:refresh'
 const CONNECTABLE_STATUSES = new Set(['not_connected', 'rejected', 'deleted'])
@@ -262,294 +263,46 @@ export default function PublicProfile() {
   const canSendConnectionRequest = CONNECTABLE_STATUSES.has(connectionStatus)
 
   return (
-    <div className="max-w-5xl mx-auto bg-white p-6 rounded shadow">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold">{profile.full_name || profile.username}</h1>
-          <p className="text-gray-600">{profile.location || 'Location not provided'}</p>
-        </div>
-        <div className="flex items-center gap-4">
-          {!isOwnProfile && (
-            <div className="flex items-center gap-2">
-              {connectionStatus && (
-                <button
-                  onClick={handleConnect}
-                  disabled={connecting || !canSendConnectionRequest}
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    connectionStatus === 'connected'
-                      ? 'bg-green-100 text-green-800 cursor-default'
-                      : connectionStatus === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800 cursor-default'
-                      : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-                  }`}
-                >
-                  {connecting ? 'Connecting...' :
-                   connectionStatus === 'connected' ? '✓ Connected' :
-                   connectionStatus === 'pending' ? 'Request Sent' :
-                   'Connect'}
-                </button>
-              )}
-              <button
-                onClick={handleOpenInvite}
-                className="px-4 py-2 rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {!currentUser || currentUser?.role === 'guest' ? 'Register to Invite' : 'Invite to Project'}
-              </button>
-            </div>
-          )}
-          <div className="text-sm text-gray-500">
-            <Link to="/discover" className="text-blue-600 hover:underline">Back to discover</Link>
-          </div>
-        </div>
-      </div>
-      {actionMessage && (
-        <div className={`mb-4 text-sm ${actionMessageType === 'error' ? 'text-red-600' : 'text-green-600'}`}>
-          {actionMessage}
-        </div>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div>
-          <h2 className="text-lg font-semibold">About</h2>
-          <p className="mt-2 text-gray-700">{profile.bio || 'No bio provided.'}</p>
-          <div className="mt-4 space-y-2 text-sm text-gray-600">
-            <div><strong>Email:</strong> {profile.email || '—'}</div>
-            <div><strong>Website:</strong> {profile.website_url ? <a className="text-blue-600" href={profile.website_url}>{profile.website_url}</a> : '—'}</div>
-            <div><strong>GitHub:</strong> {profile.github_url ? <a className="text-blue-600" href={profile.github_url}>{profile.github_url}</a> : '—'}</div>
-            <div><strong>LinkedIn:</strong> {profile.linkedin_url ? <a className="text-blue-600" href={profile.linkedin_url}>{profile.linkedin_url}</a> : '—'}</div>
-          </div>
-        </div>
-        <div className="md:col-span-2">
-          <h2 className="text-lg font-semibold">Skills</h2>
-          {profile.skills?.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {profile.skills.map((skill) => (
-                <div key={skill.id} className="bg-gray-100 rounded-full px-3 py-1 flex items-center gap-2">
-                  <span>{skill.skill_name}</span>
-                  <span className="text-xs text-gray-500">{skill.endorsements_count ?? 0} endorsements</span>
-                  {!isOwnProfile && (
-                    <button
-                      onClick={() => handleEndorse(skill.id)}
-                      className="text-xs text-blue-600 hover:underline"
-                    >
-                      Endorse
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-3 text-gray-500">No skills listed.</p>
-          )}
-        </div>
-      </div>
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Portfolio</h2>
-        {portfolio.length > 0 ? (
-          <div className="space-y-4">
-            {portfolio.map((item) => (
-              <div key={item.id} className="border rounded p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold">{item.title}</h3>
-                    <p className="text-sm text-gray-500">{item.item_type || 'Item'}</p>
-                  </div>
-                  {item.external_url && (
-                    <a href={item.external_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm">View</a>
-                  )}
-                </div>
-                <p className="mt-2 text-gray-700">{item.description || 'No description provided.'}</p>
-                {item.skills?.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2 text-sm text-gray-600">
-                    {item.skills.map((skill) => (
-                      <span key={skill} className="bg-gray-100 px-2 py-1 rounded-full">{skill}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No public portfolio items available.</p>
-        )}
-      </div>
-
-      {/* Ratings Section */}
-      <div className="mt-8 border-t pt-6">
-        <h2 className="text-lg font-semibold mb-4">Reviews & Ratings</h2>
-        <div className="flex items-center gap-2 mb-6">
-          <span className="text-2xl font-bold text-gray-900">{Number(ratingsData.average).toFixed(1)}</span>
-          <span className="text-yellow-400 text-2xl">★</span>
-          <span className="text-gray-500 text-sm">({ratingsData.count} reviews)</span>
-        </div>
-        
-        {ratingsData.items.length > 0 ? (
-          <div className="space-y-4">
-            {ratingsData.items.map(r => (
-              <div key={r.id} className="border rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900">{r.rater?.full_name || r.rater?.name || 'User'}</span>
-                      <span className="text-yellow-400 text-sm">
-                        {'★'.repeat(Math.round(getRatingScore(r)))}{'☆'.repeat(5 - Math.round(getRatingScore(r)))}
-                      </span>
-                      <span className="text-xs text-gray-500">{Number(getRatingScore(r)).toFixed(1)}</span>
-                    </div>
-                    {r.project && <p className="text-xs text-gray-500 mt-0.5">Project: {r.project.title || r.project.name}</p>}
-                  </div>
-                  {currentUser && (r.rater?.id === currentUser.id || r.rater_id === currentUser.id) && (
-                    <div className="flex gap-2">
-                      <button onClick={() => {
-                        setEditingRating(r.id)
-                        setEditRatingForm({
-                          overall_rating: Math.round(getRatingScore(r)) || 5,
-                          communication_rating: r.communication_rating || 5,
-                          reliability_rating: r.reliability_rating || 5,
-                          skill_rating: r.skill_rating || 5,
-                          problem_solving_rating: r.problem_solving_rating || 5,
-                          teamwork_rating: r.teamwork_rating || 5,
-                        })
-                        setEditRatingComment(getRatingFeedback(r))
-                        setEditRatingVisibility(r.visibility || 'public')
-                      }} className="text-xs text-blue-600 hover:underline">Edit</button>
-                      <button onClick={() => handleDeleteRating(r.id)} className="text-xs text-red-600 hover:underline">Delete</button>
-                    </div>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3 text-xs text-gray-600">
-                  {RATING_FIELDS.filter((field) => field.key !== 'overall_rating').map((field) => (
-                    <span key={field.key} className="bg-white border rounded px-2 py-1">
-                      {field.label}: {r[field.key] || '-'}
-                    </span>
-                  ))}
-                </div>
-                {getRatingFeedback(r) && <p className="text-gray-700 text-sm mt-2">{getRatingFeedback(r)}</p>}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No reviews yet.</p>
-        )}
-      </div>
-
-      {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold mb-4">Invite to Project</h3>
-            {myProjects.length === 0 ? (
-              <p className="text-gray-600 mb-6">You don't have any active projects to invite to.</p>
-            ) : (
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Project</label>
-                  <select
-                    value={selectedProject}
-                    onChange={e => setSelectedProject(e.target.value)}
-                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    {myProjects.map(p => {
-                      const projectId = getProjectId(p)
-                      return (
-                        <option key={projectId || p.title || p.name} value={projectId || ''}>{p.title || p.name}</option>
-                      )
-                    })}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Invitation Type</label>
-                  <select
-                    value={invitationType}
-                    onChange={e => setInvitationType(e.target.value)}
-                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value={INVITATION_TYPES.TEAM_INVITE}>Team Invite</option>
-                    <option value={INVITATION_TYPES.COLLABORATION_REQUEST}>Collaboration Request</option>
-                    <option value={INVITATION_TYPES.PROJECT_JOIN}>Project Join</option>
-                    <option value={INVITATION_TYPES.MENTORSHIP}>Mentorship</option>
-                  </select>
-                </div>
-              </div>
-            )}
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              {myProjects.length > 0 && (
-                <button
-                  onClick={handleSendInvite}
-                  disabled={inviting || !selectedProject}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {inviting ? 'Sending...' : 'Send Invitation'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {editingRating && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full p-6">
-            <h3 className="text-xl font-semibold mb-4">Edit Rating</h3>
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {RATING_FIELDS.map((field) => (
-                  <div key={field.key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label} (1-5)</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="5"
-                      value={editRatingForm[field.key]}
-                      onChange={(e) => setEditRatingForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
-                      className="mt-1 block w-full border rounded px-3 py-2"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
-                <textarea
-                  value={editRatingComment}
-                  onChange={(e) => setEditRatingComment(e.target.value)}
-                  className="mt-1 block w-full border rounded px-3 py-2"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
-                <select
-                  value={editRatingVisibility}
-                  onChange={(e) => setEditRatingVisibility(e.target.value)}
-                  className="mt-1 block w-full border rounded px-3 py-2"
-                >
-                  <option value="public">Public</option>
-                  <option value="private">Private</option>
-                  <option value="anonymous">Anonymous</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setEditingRating(null)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateRating}
-                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <PublicProfileUI
+      profile={profile}
+      portfolio={portfolio}
+      loading={loading}
+      error={error}
+      actionMessage={actionMessage}
+      actionMessageType={actionMessageType}
+      connectionStatus={connectionStatus}
+      connecting={connecting}
+      isOwnProfile={isOwnProfile}
+      canSendConnectionRequest={canSendConnectionRequest}
+      showInviteModal={showInviteModal}
+      setShowInviteModal={setShowInviteModal}
+      myProjects={myProjects}
+      selectedProject={selectedProject}
+      setSelectedProject={setSelectedProject}
+      invitationType={invitationType}
+      setInvitationType={setInvitationType}
+      inviting={inviting}
+      ratingsData={ratingsData}
+      editingRating={editingRating}
+      setEditingRating={setEditingRating}
+      editRatingForm={editRatingForm}
+      setEditRatingForm={setEditRatingForm}
+      editRatingComment={editRatingComment}
+      setEditRatingComment={setEditRatingComment}
+      editRatingVisibility={editRatingVisibility}
+      setEditRatingVisibility={setEditRatingVisibility}
+      handleConnect={handleConnect}
+      handleOpenInvite={handleOpenInvite}
+      handleSendInvite={handleSendInvite}
+      handleEndorse={handleEndorse}
+      handleUpdateRating={handleUpdateRating}
+      handleDeleteRating={handleDeleteRating}
+      INVITATION_TYPES={INVITATION_TYPES}
+      RATING_FIELDS={RATING_FIELDS}
+      getProjectId={getProjectId}
+      getRatingScore={getRatingScore}
+      getRatingFeedback={getRatingFeedback}
+      currentUser={currentUser}
+    />
   )
 }

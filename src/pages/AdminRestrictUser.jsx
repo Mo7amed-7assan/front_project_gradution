@@ -1,29 +1,28 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { restrictUser } from '../services/adminRestrictions'
-import { useAuth } from '../context/AuthContext'
+import Spinner from '../components/Spinner'
+
+const RESTRICTION_TYPES = [
+  { value: 'messaging',    label: 'Messaging',    icon: '💬', desc: 'Cannot send or receive messages' },
+  { value: 'posting',      label: 'Posting',      icon: '📝', desc: 'Cannot create or edit posts' },
+  { value: 'applications', label: 'Applications', icon: '📋', desc: 'Cannot apply to projects' },
+  { value: 'matching',     label: 'Matching',     icon: '🔀', desc: 'Excluded from match suggestions' },
+  { value: 'comments',     label: 'Comments',     icon: '💭', desc: 'Cannot leave comments' },
+]
 
 export default function AdminRestrictUser() {
   const navigate = useNavigate()
-  const { user } = useAuth()
-
   const [targetUserId, setTargetUserId] = useState('')
   const [restrictionType, setRestrictionType] = useState('messaging')
   const [reason, setReason] = useState('')
   const [duration, setDuration] = useState('')
   const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!targetUserId.trim()) {
-      alert('Please enter the target user ID')
-      return
-    }
-    if (!reason.trim()) {
-      alert('Please enter a reason')
-      return
-    }
-
+    setError(null)
     setProcessing(true)
     try {
       const payload = {
@@ -35,87 +34,105 @@ export default function AdminRestrictUser() {
         payload.expires_at = new Date(Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000).toISOString()
       }
       await restrictUser(payload)
-      alert('User restricted successfully')
       navigate('/admin/restrictions')
     } catch (err) {
-      console.error(err)
-      alert(err?.response?.data?.message || 'Failed to restrict user')
+      setError(err?.response?.data?.message || 'Failed to restrict user')
     } finally {
       setProcessing(false)
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h1 className="text-2xl font-semibold mb-6">Restrict a User</h1>
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div>
+        <h1 className="page-title text-brand-secondary">Restrict a User</h1>
+        <p className="page-subtitle">Apply a feature restriction to a specific user account.</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Target User ID *</label>
-          <input
-            type="text"
-            value={targetUserId}
-            onChange={(e) => setTargetUserId(e.target.value)}
-            className="mt-1 block w-full border rounded px-3 py-2"
-            placeholder="UUID of the user to restrict"
-            required
-          />
+      {error && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-sm font-bold flex items-center gap-2">
+          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {error}
         </div>
+      )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Restriction Type *</label>
-          <select value={restrictionType} onChange={(e) => setRestrictionType(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2">
-            <option value="messaging">Messaging</option>
-            <option value="posting">Posting</option>
-            <option value="applications">Applications</option>
-            <option value="matching">Matching</option>
-            <option value="comments">Comments</option>
-          </select>
-          <p className="text-xs text-gray-500 mt-1">Select which feature this user cannot access</p>
-        </div>
+      <div className="card p-6 md:p-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="form-label">Target User ID <span className="text-rose-500">*</span></label>
+            <input
+              type="text"
+              value={targetUserId}
+              onChange={(e) => setTargetUserId(e.target.value)}
+              className="form-input font-mono"
+              placeholder="UUID of the user to restrict"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Reason *</label>
-          <input
-            type="text"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            className="mt-1 block w-full border rounded px-3 py-2"
-            placeholder="e.g. Spam, Harassment, TOS Violation"
-            required
-          />
-        </div>
+          <div>
+            <label className="form-label">Restriction Type <span className="text-rose-500">*</span></label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+              {RESTRICTION_TYPES.map(rt => (
+                <button
+                  key={rt.value}
+                  type="button"
+                  onClick={() => setRestrictionType(rt.value)}
+                  className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                    restrictionType === rt.value
+                      ? 'border-rose-400 bg-rose-50 shadow-sm shadow-rose-400/10'
+                      : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
+                  }`}
+                >
+                  <span className="text-2xl">{rt.icon}</span>
+                  <div>
+                    <p className={`text-sm font-bold ${restrictionType === rt.value ? 'text-rose-600' : 'text-slate-800'}`}>
+                      {rt.label}
+                    </p>
+                    <p className="text-xs text-slate-500">{rt.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Duration (days)</label>
-          <input
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            className="mt-1 block w-full border rounded px-3 py-2"
-            placeholder="Leave empty for permanent restriction"
-            min="1"
-          />
-          <p className="text-xs text-gray-500 mt-1">Restriction will auto-lift after this many days</p>
-        </div>
+          <div>
+            <label className="form-label">Reason <span className="text-rose-500">*</span></label>
+            <input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="form-input"
+              placeholder="e.g. Spam, Harassment, TOS Violation"
+              required
+            />
+          </div>
 
-        <div className="flex gap-2 pt-4">
-          <button
-            type="submit"
-            disabled={processing}
-            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
-          >
-            {processing ? 'Restricting...' : 'Restrict User'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/admin/restrictions')}
-            className="px-4 py-2 bg-gray-600 text-white rounded"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+          <div>
+            <label className="form-label">Duration (days)</label>
+            <input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="form-input"
+              placeholder="Leave empty for permanent restriction"
+              min="1"
+            />
+            <p className="text-xs text-slate-400 mt-1.5 font-medium">
+              Restriction will auto-lift after this many days. Leave empty for permanent.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
+            <button type="button" onClick={() => navigate('/admin/restrictions')} className="btn-secondary flex-1">
+              Cancel
+            </button>
+            <button type="submit" disabled={processing} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors shadow-sm shadow-rose-500/20 disabled:opacity-50">
+              {processing ? <Spinner /> : '🔒 Apply Restriction'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

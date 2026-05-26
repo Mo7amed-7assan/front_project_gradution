@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Spinner from '../components/Spinner'
 import { listSettings } from '../services/adminSettings'
 import { useAuth } from '../context/AuthContext'
+import AdminSettingsUI from '../ui/pages/AdminSettingsUI'
 
 export default function AdminSettings() {
   const [items, setItems] = useState([])
@@ -40,46 +41,12 @@ export default function AdminSettings() {
   if (loading) return <div className="min-h-[12rem] flex items-center justify-center"><Spinner /></div>
 
   return (
-    <div className="max-w-6xl mx-auto bg-white p-6 rounded shadow">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">System Settings</h1>
-        <input
-          type="text"
-          placeholder="Search by key or description..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-3 py-2 border rounded w-64"
-        />
-      </div>
-      {items.length === 0 ? (
-        <div className="p-6 text-gray-600">No settings found.</div>
-      ) : (
-        <div className="space-y-3">
-          {items.map((it) => (
-            <Link key={it.key} to={`/admin/settings/${it.key}`}>
-              <div className="p-4 border rounded hover:bg-gray-50 cursor-pointer transition">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="font-medium font-mono text-sm">{it.key}</div>
-                    <div className="text-sm text-gray-600 mt-1">{it.description || 'No description'}</div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      Value: <span className="font-mono">{String(it.value).substring(0, 50)}{String(it.value).length > 50 ? '...' : ''}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getTypeBadgeColor(it.type)}`}>
-                      {it.type || 'unknown'}
-                    </span>
-                    {it.is_public && (
-                      <div className="text-xs text-green-600 mt-2">Public</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+    <AdminSettingsUI
+      items={items}
+      loading={loading}
+      search={search}
+      setSearch={setSearch}
+      getTypeBadgeColor={getTypeBadgeColor}
+    />
   )
 }

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import SkeletonCard from '../components/SkeletonCard'
 import { deleteProject, getMyProjects } from '../services/projects'
 import { getCurrentUserId, getProjectOwnerId, getProjectRelation } from '../utils/projectAccess'
+import MyProjectsUI from '../ui/pages/MyProjectsUI'
 
 const PROJECT_REFRESH_EVENT = 'projects:refresh'
 
@@ -83,122 +84,15 @@ export default function MyProjects() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">My Projects</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {loading ? 'Loading...' : `${projects.length} project${projects.length !== 1 ? 's' : ''}`}
-          </p>
-        </div>
-        <Link
-          to="/projects/create"
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors"
-        >
-          + Create Project
-        </Link>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-          : projects.length === 0
-          ? (
-            <div className="col-span-3 text-center py-16 text-gray-400">
-              <div className="text-5xl mb-4">🚀</div>
-              <p className="text-lg font-medium">No projects yet</p>
-              <p className="text-sm mt-1">Create your first project and start building your team.</p>
-              <Link
-                to="/projects/create"
-                className="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
-              >
-                Create a Project
-              </Link>
-            </div>
-          )
-          : projects.map(p => {
-            const statusKey   = (p.status || '').toLowerCase()
-            const statusClass = STATUS_STYLES[statusKey] || 'bg-gray-100 text-gray-600'
-            const roles       = p.project_roles || p.roles || []
-            const relation    = getProjectRelation(p, user)
-
-            return (
-              <div key={p.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col">
-                {/* Title */}
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <Link
-                    to={`/projects/${p.id}`}
-                    className="font-semibold text-gray-900 hover:text-indigo-600 truncate text-base"
-                  >
-                    {p.title || p.name}
-                  </Link>
-                  {p.status && (
-                    <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${statusClass}`}>
-                      {p.status.replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
-
-                {/* Description */}
-                <p className="text-gray-500 text-sm flex-1 mb-3">
-                  {p.description
-                    ? (p.description.length > 120 ? p.description.slice(0, 120) + '…' : p.description)
-                    : 'No description provided.'}
-                </p>
-
-                {/* Roles */}
-                {roles.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {roles.slice(0, 4).map(r => (
-                      <span
-                        key={r.id}
-                        className="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full"
-                      >
-                        {r.role_name || r.name || r.title}
-                      </span>
-                    ))}
-                    {roles.length > 4 && (
-                      <span className="text-xs text-gray-400">+{roles.length - 4} more</span>
-                    )}
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 mt-auto pt-3 border-t border-gray-50">
-                  <Link
-                    to={`/projects/${p.id}`}
-                    className="flex-1 text-center text-xs px-2 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 font-medium transition-colors"
-                  >
-                    Open
-                  </Link>
-                  {relation.isOwner && (
-                    <Link
-                      to={`/projects/${p.id}/edit`}
-                      className="flex-1 text-center text-xs px-2 py-1.5 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
-                    >
-                      Edit
-                    </Link>
-                  )}
-                  {relation.isOwner && (
-                    <button
-                    onClick={(e) => handleDelete(p.id, e)}
-                    disabled={deleting === p.id}
-                    className="flex-1 text-xs px-2 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-medium transition-colors disabled:opacity-50"
-                  >
-                    {deleting === p.id ? '…' : 'Delete'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )
-          })
-        }
-      </div>
-    </div>
+    <MyProjectsUI
+      projects={projects}
+      loading={loading}
+      error={error}
+      deleting={deleting}
+      handleDelete={handleDelete}
+      user={user}
+      STATUS_STYLES={STATUS_STYLES}
+      getProjectRelation={getProjectRelation}
+    />
   )
 }
