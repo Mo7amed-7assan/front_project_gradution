@@ -1,0 +1,78 @@
+GET /admin/users/userId/verification
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false}]
+  Body: no body
+GET /admin/verifications
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"status","in":"query","required":false}]
+  Body: no body
+PATCH /admin/verifications/{id}/claim
+  Params: [{"name":"id","in":"path","required":true}]
+  Body: no body
+PATCH /admin/verifications/{id}/escalate
+  Params: [{"name":"id","in":"path","required":true}]
+  Body: Properties: notes
+GET /admin/verifications/{id}
+  Params: [{"name":"id","in":"path","required":true}]
+  Body: no body
+POST /admin/verifications/{id}/review
+  Params: [{"name":"id","in":"path","required":true}]
+  Body: Properties: review_action, review_notes, rejection_reason_category, automated_checks_passed, automated_checks_data
+GET /admin/reports
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"status","in":"query","required":false},{"name":"priority","in":"query","required":false},{"name":"report_type","in":"query","required":false},{"name":"assigned_to","in":"query","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Accept","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+GET /admin/reports/reportId
+  Params: [{"name":"Content-Type","in":"header","required":false},{"name":"Accept","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+PATCH /admin/reports/reportId
+  Params: [{"name":"Content-Type","in":"header","required":false},{"name":"Accept","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: Properties: status, priority, assigned_to, resolution_action, resolution_notes
+GET /admin/moderation
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"content_type","in":"query","required":false},{"name":"action_taken","in":"query","required":false},{"name":"moderation_type","in":"query","required":false},{"name":"moderator_id","in":"query","required":false},{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false}]
+  Body: no body
+POST /admin/moderation
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"content-type","in":"header","required":false}]
+  Body: Properties: content_type, content_id, moderation_type, original_content, moderated_content, action_taken, reason, guideline_referenced
+GET /admin/restrictions
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"is_active","in":"query","required":false},{"name":"restriction_type","in":"query","required":false}]
+  Body: no body
+POST /admin/restrictions
+  Params: []
+  Body: Properties: user_id, restriction_type, reason, duration_hours
+GET /admin/restrictions/{id}
+  Params: [{"name":"id","in":"path","required":true}]
+  Body: no body
+GET /admin/users/{userId}/restrictions
+  Params: [{"name":"userId","in":"path","required":true},{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"is_active","in":"query","required":false}]
+  Body: no body
+PATCH /admin/restrictions/{id}/lift
+  Params: [{"name":"id","in":"path","required":true}]
+  Body: no body
+GET /admin/users
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"role","in":"query","required":false},{"name":"account_status","in":"query","required":false},{"name":"identity_verified","in":"query","required":false},{"name":"search","in":"query","required":false},{"name":"email_verified","in":"query","required":false},{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false}]
+  Body: no body
+GET /admin/users/targetUserId
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+PATCH /admin/users/targetUserId
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: Properties: role, account_status
+DELETE /admin/users/targetUserId
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+GET /admin/settings
+  Params: [{"name":"search","in":"query","required":false},{"name":"setting_type","in":"query","required":false},{"name":"is_public","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+GET /admin/settings/settingKey
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+PATCH /admin/settings/settingKey
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: Properties: setting_value, change_reason
+GET /admin/settings/settingKey/history
+  Params: [{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body
+GET /admin/action-logs
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"admin_id","in":"query","required":false},{"name":"target_type","in":"query","required":false},{"name":"action_type","in":"query","required":false},{"name":"target_id","in":"query","required":false},{"name":"from","in":"query","required":false},{"name":"to","in":"query","required":false},{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false}]
+  Body: no body
+GET /admin/system-logs
+  Params: [{"name":"page","in":"query","required":false},{"name":"per_page","in":"query","required":false},{"name":"log_level","in":"query","required":false},{"name":"component","in":"query","required":false},{"name":"event_type","in":"query","required":false},{"name":"user_id","in":"query","required":false},{"name":"from","in":"query","required":false},{"name":"to","in":"query","required":false},{"name":"search","in":"query","required":false},{"name":"Accept","in":"header","required":false},{"name":"Content-Type","in":"header","required":false},{"name":"Authorization","in":"header","required":false}]
+  Body: no body

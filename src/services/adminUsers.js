@@ -20,6 +20,6 @@ export async function updateUser(id, payload) {
 }
 
 export async function deleteUser(id) {
-  const res = await api.delete(`/admin/users/${id}/delete`)
+  const res = await api.delete(`/admin/users/${id}`)
   return getData(res)
 }
