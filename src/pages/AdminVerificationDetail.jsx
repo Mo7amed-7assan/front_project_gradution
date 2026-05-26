@@ -65,7 +65,15 @@ export default function AdminVerificationDetail() {
     if (!decision) return alert('Select a decision')
     setProcessing(true)
     try {
-      const payload = { decision, notes }
+      let review_action = ''
+      if (decision === 'approve') review_action = 'approved'
+      else if (decision === 'reject') review_action = 'rejected'
+      else if (decision === 'request_more_info') review_action = 'request_resubmission'
+
+      const payload = {
+        review_action,
+        review_notes: notes || null
+      }
       await reviewVerification(id, payload)
       alert('Review submitted')
       navigate('/admin/verifications')

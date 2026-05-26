@@ -22,8 +22,8 @@ export async function claimVerification(id) {
   return getData(res)
 }
 
-export async function escalateVerification(id) {
-  const res = await api.patch(`/admin/verifications/${id}/escalate`)
+export async function escalateVerification(id, payload = {}) {
+  const res = await api.patch(`/admin/verifications/${id}/escalate`, payload)
   return getData(res)
 }
 
