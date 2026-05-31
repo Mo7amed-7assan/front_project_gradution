@@ -1,4 +1,26 @@
-test5.html
+# dependencies
+node_modules/
+
+# build output
+/dist
+
+# local env files
+.env
+.env.*
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+
+# test files
 *.test
+
+# temporary
+*.tmp
+*~
 
 

@@ -4,8 +4,10 @@ import {
   buildCallFrameUrl, cancelCall, endCall, extractCalls,
   getCall, initiateCall, joinCall, leaveCall, listCalls,
 } from '../services/calls'
-import { getConversations, startConversation } from '../services/messaging'
+import { getConversations } from '../services/messaging'
 import { getConnections } from '../services/connections'
+import { getMyProjects } from '../services/projects'
+import { sendRealtimeMessage } from '../services/realtimeChat'
 import { getCurrentUserId } from '../utils/projectAccess'
 import { useAuth } from '../context/AuthContext'
 import MessagingUI from '../ui/pages/MessagingUI'
@@ -28,6 +30,19 @@ const extractConnectionList = (value) => {
   if (Array.isArray(value?.data)) return value.data
   if (Array.isArray(value?.connections)) return value.connections
   if (Array.isArray(value?.items)) return value.items
+  return []
+}
+
+const extractProjectList = (value) => {
+  const data = value?.data ?? value
+  if (Array.isArray(data?.data?.data?.data)) return data.data.data.data
+  if (Array.isArray(data?.data?.data)) return data.data.data
+  if (Array.isArray(data?.data?.items)) return data.data.items
+  if (Array.isArray(data?.data?.projects)) return data.data.projects
+  if (Array.isArray(data?.data)) return data.data
+  if (Array.isArray(data?.items)) return data.items
+  if (Array.isArray(data?.projects)) return data.projects
+  if (Array.isArray(data)) return data
   return []
 }
 
@@ -68,6 +83,12 @@ const getPersonAvatar = (person) =>
 const getConversationId = (conversation) =>
   conversation?.id || conversation?.uuid || conversation?.conversation_id
 
+const getProjectId = (project) =>
+  project?.id || project?.uuid || project?.project_id || project?.project_uuid
+
+const getProjectName = (project) =>
+  project?.title || project?.name || `Project ${getProjectId(project) || ''}`.trim()
+
 const getConversationData = (value) =>
   value?.data?.data?.conversation ||
   value?.data?.data ||
@@ -75,6 +96,44 @@ const getConversationData = (value) =>
   value?.data ||
   value?.conversation ||
   value
+
+const safeFirebaseKey = (value) =>
+  normalizeId(value)
+    .trim()
+    .replace(/[.#$[\]/]/g, '_')
+
+const buildDirectCallRoom = (conversationId) =>
+  `cofound-${safeFirebaseKey(conversationId)}-${Date.now()}`
+
+const buildDirectCallUrl = (roomName) =>
+  `https://meet.jit.si/${encodeURIComponent(roomName)}`
+
+const createFirebaseDirectConversation = (myId, person) => {
+  const otherUser = person?.person || person
+  const personId = getPersonId(otherUser || person?.id)
+  const participants = [normalizeId(myId), normalizeId(personId)].filter(Boolean).sort()
+
+  if (participants.length < 2) {
+    throw new Error('Cannot create a chat without both user IDs.')
+  }
+
+  return {
+    id: `direct_${participants.map(safeFirebaseKey).join('_')}`,
+    conversation_type: 'direct',
+    title: getPersonName(otherUser),
+    participant_ids: participants,
+    users: [
+      { id: normalizeId(myId) },
+      {
+        id: normalizeId(personId),
+        full_name: getPersonName(otherUser),
+        username: otherUser?.username || otherUser?.email || '',
+        profile_picture_url: getPersonAvatar(otherUser),
+      },
+    ],
+    is_firebase_only: true,
+  }
+}
 
 const getConversationParticipantIds = (conversation) => {
   const fields = [
@@ -110,41 +169,13 @@ const conversationIncludesPerson = (conversation, personId) => {
   return getConversationParticipantIds(conversation).includes(id)
 }
 
-const createDirectConversation = async (personId) => {
-  const payloads = [
-    { conversation_type: 'direct', participant_ids: [personId] },
-    { conversation_type: 'private', participant_ids: [personId] },
-    { conversation_type: 'one_to_one', participant_ids: [personId] },
-    { recipient_id: personId },
-    { user_id: personId },
-    { participant_id: personId },
-    { participant_ids: [personId] },
-    { participants: [personId] },
-    { conversation_type: 'direct', recipient_id: personId },
-    { type: 'direct', recipient_id: personId },
-  ]
-  let lastError = null
-
-  for (const payload of payloads) {
-    try {
-      const res = await startConversation(payload)
-      return getConversationData(res)
-    } catch (err) {
-      lastError = err
-      const status = err?.response?.status
-      if (status !== 400 && status !== 409 && status !== 422) throw err
-    }
-  }
-
-  throw lastError || new Error('Failed to create conversation.')
-}
-
 export default function Messaging() {
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const autoOpenedUserRef = useRef('')
   const [conversations, setConversations] = useState([])
   const [connections, setConnections] = useState([])
+  const [projects, setProjects] = useState([])
   const [calls, setCalls] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedConversationId, setSelectedConversationId] = useState('')
@@ -199,6 +230,13 @@ export default function Messaging() {
     return list
   }
 
+  const fetchProjects = async () => {
+    const res = await getMyProjects({ per_page: 100 })
+    const list = extractProjectList(res).filter((project) => getProjectId(project))
+    setProjects(list)
+    return list
+  }
+
   const fetchCalls = async () => {
     const res = await listCalls({ per_page: 20 })
     setCalls(extractCalls(res))
@@ -208,7 +246,7 @@ export default function Messaging() {
     setLoading(true)
     setError(null)
     try {
-      await Promise.allSettled([fetchConversations(), fetchConnections(), fetchCalls()])
+      await Promise.allSettled([fetchConversations(), fetchConnections(), fetchProjects(), fetchCalls()])
     } catch (err) {
       setError(err?.response?.data?.message || err.message || 'Failed to load messaging.')
     } finally {
@@ -226,19 +264,8 @@ export default function Messaging() {
     const existingId = getConversationId(existing)
     if (existingId) return existing
 
-    let created
-    try {
-      created = await createDirectConversation(personId)
-    } catch (err) {
-      if (err?.response?.status !== 409 && err?.response?.status !== 422) throw err
-      const freshConversations = await fetchConversations()
-      const existingAfterRefresh = freshConversations.find((conversation) => conversationIncludesPerson(conversation, personId))
-      if (existingAfterRefresh) return existingAfterRefresh
-      throw err
-    }
-
+    const created = createFirebaseDirectConversation(getCurrentUserId(user), person)
     const createdId = getConversationId(created)
-    if (!createdId) throw new Error('The API created a conversation but did not return its ID.')
 
     setConversations((prev) => {
       const exists = prev.some((conversation) => normalizeKey(getConversationId(conversation)) === normalizeKey(createdId))
@@ -293,11 +320,45 @@ export default function Messaging() {
 
     setStarting(true)
     try {
-      const call = await initiateCall({ conversation_id: selectedConversationId, status: 'active' })
+      const roomName = buildDirectCallRoom(selectedConversationId)
+      const callUrl = buildDirectCallUrl(roomName)
+      await sendRealtimeMessage(selectedConversationId, {
+        text: `${user?.full_name || user?.name || user?.username || 'Someone'} started a video call.`,
+        senderId: getCurrentUserId(user),
+        senderName: user?.full_name || user?.name || user?.username || user?.email || 'You',
+        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        messageType: 'call_invite',
+        callUrl,
+        callRoomName: roomName,
+      })
+      openCallInPage({
+        id: roomName,
+        call_type: 'direct',
+        status: 'active',
+        room_name: roomName,
+        join_url: callUrl,
+      })
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || 'Failed to start call.')
+    } finally {
+      setStarting(false)
+    }
+  }
+
+  const handleStartProjectCall = async (projectId) => {
+    setError(null)
+    if (!projectId) {
+      setError('Choose a project first.')
+      return
+    }
+
+    setStarting(true)
+    try {
+      const call = await initiateCall({ project_id: projectId, status: 'active' })
       openCallInPage(call)
       await fetchCalls()
     } catch (err) {
-      setError(err?.response?.data?.message || err.message || 'Failed to start call.')
+      setError(err?.response?.data?.message || err.message || 'Failed to start project call.')
     } finally {
       setStarting(false)
     }
@@ -388,6 +449,7 @@ export default function Messaging() {
     <MessagingUI
       loading={loading}
       connectedPeople={connectedPeople}
+      projects={projects}
       preparingConversation={preparingConversation}
       selectedPersonId={selectedPersonId}
       selectedPerson={selectedPerson}
@@ -406,8 +468,10 @@ export default function Messaging() {
       onRefresh={loadPage}
       onSelectPerson={handleSelectPerson}
       onStartCall={handleStartCall}
+      onStartProjectCall={handleStartProjectCall}
       onJoinCall={handleJoinCall}
       onShowCallDetail={handleShowCallDetail}
+      onCloseCallDetail={() => setSelectedCallDetail(null)}
       onLeaveCall={handleLeaveCall}
       onEndCall={handleEndCall}
       onCancelCall={handleCancelCall}

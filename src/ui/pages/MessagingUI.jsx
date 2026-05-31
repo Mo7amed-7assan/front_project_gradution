@@ -1,16 +1,16 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import RealtimeChatPanel from '../../components/RealtimeChatPanel'
 
 function CallStatusBadge({ status }) {
-  const map = { active: 'badge-green', scheduled: 'badge-yellow', cancelled: 'badge-slate', ended: 'badge-slate' }
-  return <span className={`badge ${map[status] || 'badge-indigo'} capitalize`}>{status}</span>
+  const map = { active: 'bg-green-100 text-green-700', scheduled: 'bg-yellow-100 text-yellow-700', cancelled: 'bg-slate-100 text-slate-600', ended: 'bg-slate-100 text-slate-600' }
+  return <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${map[status] || 'bg-indigo-100 text-indigo-700'}`}>{status}</span>
 }
 
 function PersonAvatar({ name, avatar }) {
   const letter = (name || 'U').charAt(0).toUpperCase()
-  if (avatar) return <img src={avatar} alt={name} className="w-10 h-10 rounded-full object-cover bg-slate-100 shrink-0" onError={(e) => { e.target.style.display = 'none' }} />
+  if (avatar) return <img src={avatar} alt={name} className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0" onError={(e) => { e.target.style.display = 'none' }} />
   return (
-    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-semibold text-sm shrink-0">
+    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-semibold text-sm shrink-0 border border-indigo-200">
       {letter}
     </div>
   )
@@ -26,6 +26,7 @@ const canJoin = (call) => ['scheduled', 'active'].includes(`${call.status || ''}
 export default function MessagingUI({
   loading,
   connectedPeople,
+  projects = [],
   preparingConversation,
   selectedPersonId,
   selectedPerson,
@@ -35,271 +36,416 @@ export default function MessagingUI({
   selectedCallDetail,
   activeCall,
   callFrameUrl,
-  frameHeight,
-  wideFrame,
   processingCallId,
   starting,
   error,
   conversations,
-  onRefresh,
   onSelectPerson,
   onStartCall,
+  onStartProjectCall,
   onJoinCall,
   onShowCallDetail,
+  onCloseCallDetail,
   onLeaveCall,
   onEndCall,
   onCancelCall,
-  onGrowFrame,
-  onShrinkFrame,
-  onResetFrame,
-  onToggleWide,
   setSelectedConversationId,
 }) {
+  const [activeRightTab, setActiveRightTab] = useState('messages')
+  const [sidebarTab, setSidebarTab] = useState('connections')
+  const [isFullScreen, setIsFullScreen] = useState(false)
+  const [localFullScreen, setLocalFullScreen] = useState(false)
+  const [showNewCallModal, setShowNewCallModal] = useState(false)
+  const [callOnlyMode, setCallOnlyMode] = useState(false)
+  const videoContainerRef = useRef(null)
+
+  useEffect(() => {
+    if (activeCall) {
+      setActiveRightTab('video')
+      // If no person selected, enter call-only mode
+      if (!selectedPerson) setCallOnlyMode(true)
+    }
+  }, [activeCall])
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const hasFullScreenElement = !!document.fullscreenElement
+      setIsFullScreen(hasFullScreenElement)
+      if (hasFullScreenElement) setLocalFullScreen(false)
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const toggleFullScreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.()
+      return
+    }
+
+    if (localFullScreen) {
+      setLocalFullScreen(false)
+      return
+    }
+
+    if (videoContainerRef.current?.requestFullscreen) {
+      videoContainerRef.current.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`)
+        setLocalFullScreen(true)
+      })
+      return
+    }
+
+    setLocalFullScreen(true)
+  }
+
+  const getProjectId = (project) => project?.id || project?.uuid || project?.project_id || project?.project_uuid
+  const getProjectName = (project) => project?.title || project?.name || `Project ${getProjectId(project) || ''}`.trim()
+  const formatCallDate = (value) => value ? new Date(value).toLocaleString() : '-'
+  const callDetailRows = selectedCallDetail ? [
+    ['Status', selectedCallDetail.status || '-'],
+    ['Type', selectedCallDetail.call_type || '-'],
+    ['Room', selectedCallDetail.room_name || '-'],
+    ['Participants', selectedCallDetail.active_participants_count ?? selectedCallDetail.participants?.length ?? 0],
+    ['Conversation ID', selectedCallDetail.conversation_id || '-'],
+    ['Project ID', selectedCallDetail.project_id || '-'],
+    ['Start', formatCallDate(selectedCallDetail.start_time)],
+    ['End', formatCallDate(selectedCallDetail.end_time)],
+    ['Created', formatCallDate(selectedCallDetail.created_at)],
+  ] : []
+  const isCallExpanded = isFullScreen || localFullScreen
+  const fullScreenContainerClass = isCallExpanded ? 'fixed inset-0 z-[80] rounded-none border-none' : ''
+  const fullScreenTitle = isCallExpanded ? 'Exit Full Screen' : 'Full Screen'
+  const fullScreenIcon = isCallExpanded ? (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M15 9V4.5M15 9h4.5M9 15v4.5M9 15H4.5M15 15v4.5M15 15h4.5" /></svg>
+  ) : (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+  )
+
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="page-title">Messaging & Calls</h1>
-          <p className="page-subtitle">Premium video calling and real-time chat with your connections.</p>
+    <div className="fixed top-0 left-64 right-0 bottom-0 flex bg-white overflow-hidden z-30">
+      
+      {/* Sidebar */}
+      <div className="w-80 flex-shrink-0 border-r border-slate-200 flex flex-col bg-slate-50/50 relative z-10">
+        <div className="p-5 border-b border-slate-200 bg-white shadow-sm shrink-0">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Messages</h2>
+          <div className="flex gap-2 mt-4 bg-slate-100 p-1.5 rounded-xl border border-slate-200/60">
+             <button 
+               onClick={() => setSidebarTab('connections')} 
+               className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'connections' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+               Chats
+             </button>
+             <button 
+               onClick={() => setSidebarTab('calls')} 
+               className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'calls' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+               Calls
+             </button>
+          </div>
         </div>
-        <button onClick={onRefresh} className="btn-secondary">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
-          </svg>
-          Refresh
-        </button>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+          {error && (
+            <div className="px-3 py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-semibold mb-2 text-center">
+               {error}
+            </div>
+          )}
+
+          {sidebarTab === 'connections' ? (
+             <>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[1,2,3].map(i => <div key={i} className="h-16 skeleton rounded-2xl" />)}
+                  </div>
+                ) : connectedPeople.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm font-medium text-slate-500">No connections yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {connectedPeople.map((item) => {
+                      const active = String(item.id) === String(selectedPersonId)
+                      return (
+                        <button
+                          key={item.connection?.id || item.id}
+                          onClick={() => onSelectPerson(item)}
+                          disabled={preparingConversation}
+                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${active ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-white border border-transparent hover:shadow-sm'}`}
+                        >
+                           <PersonAvatar name={item.name} avatar={item.avatar} />
+                           <div className="flex-1 min-w-0 text-left">
+                             <p className={`font-bold text-sm truncate ${active ? 'text-indigo-900' : 'text-slate-900'}`}>{item.name}</p>
+                             <p className={`text-[11px] font-medium truncate ${active ? 'text-indigo-600' : 'text-slate-400'}`}>Start chatting...</p>
+                           </div>
+                           {active && <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0 shadow-sm"/>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+             </>
+          ) : (
+             <div className="flex flex-col h-full">
+                <div className="mb-4">
+                  <button onClick={() => setShowNewCallModal(true)} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-all">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    New Call
+                  </button>
+                </div>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[1,2].map(i => <div key={i} className="h-20 skeleton rounded-2xl" />)}
+                  </div>
+                ) : calls.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm font-medium text-slate-500">No recent calls.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {calls.map((call) => {
+                      const status = `${call.status || 'scheduled'}`.toLowerCase()
+                      return (
+                        <div key={call.id} className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all">
+                           <div className="flex items-start justify-between gap-2 mb-3">
+                             <div className="min-w-0">
+                               <p className="font-bold text-slate-900 text-sm truncate">{getCallLabel(call)}</p>
+                               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{call.call_type || 'call'}</p>
+                             </div>
+                             <CallStatusBadge status={status} />
+                           </div>
+                           <div className="flex gap-2">
+                              <button
+                                onClick={() => onShowCallDetail(call.id)}
+                                disabled={loadingCallDetail}
+                                className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs px-3 py-1.5 flex-1 justify-center rounded-lg transition-colors border border-indigo-200 disabled:opacity-50"
+                              >
+                                {loadingCallDetail ? 'Loading...' : 'Details'}
+                              </button>
+                              {canJoin(call) && (
+                                <button onClick={() => { onJoinCall(call.id); if (!selectedPerson) { setCallOnlyMode(true) } setActiveRightTab('video') }} className="btn-primary text-xs px-3 py-1.5 flex-1 justify-center rounded-lg shadow-sm">Join</button>
+                              )}
+                              {status === 'active' && (
+                                <button onClick={() => onEndCall(call)} className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs px-3 py-1.5 flex-1 justify-center rounded-lg transition-colors border border-rose-200">End</button>
+                              )}
+                              {status === 'scheduled' && (
+                                <button onClick={() => onCancelCall(call)} className="bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs px-3 py-1.5 flex-1 justify-center rounded-lg transition-colors border border-slate-200">Cancel</button>
+                              )}
+                           </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+             </div>
+          )}
+        </div>
       </div>
 
-      {error && (
-        <div className="px-4 py-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2">
-          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          {error}
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
+         {sidebarTab === 'connections' && selectedPerson ? (
+           <>
+              {/* Header */}
+              <div className="h-[76px] border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white/80 backdrop-blur-md z-20">
+                 <div className="flex items-center gap-4">
+                    <PersonAvatar name={selectedPerson.name} avatar={selectedPerson.avatar} />
+                    <div>
+                       <h3 className="font-bold text-slate-900 text-lg leading-none mb-1.5">{selectedPerson.name}</h3>
+                       <p className="text-xs text-emerald-500 font-bold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                       </p>
+                    </div>
+                 </div>
+                 
+                 <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Messages</span>
+                 </div>
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 overflow-hidden relative bg-slate-50">
+                 {true ? (
+                    <div className="absolute inset-0 flex flex-col [&>section]:border-none [&>section]:shadow-none [&>section]:h-full [&>section]:bg-transparent">
+                       <RealtimeChatPanel
+                          conversations={conversations}
+                          selectedConversationId={selectedConversationId}
+                          onSelectConversation={setSelectedConversationId}
+                          compact={false}
+                          showConversationSelector={false}
+                        />
+                    </div>
+                 ) : (
+                    <div className="absolute inset-0 p-6 flex flex-col bg-slate-100">
+                       {callFrameUrl ? (
+                         <div ref={videoContainerRef} className={`group rounded-3xl overflow-hidden bg-slate-900 shadow-2xl relative border border-slate-300 flex flex-col transition-all duration-300 ${isCallExpanded ? 'w-full h-full' : 'flex-1'} ${fullScreenContainerClass}`}>
+                           <iframe
+                              title="Video call"
+                              src={callFrameUrl}
+                              className="w-full h-full bg-[#0F0F1A]"
+                              allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+                              referrerPolicy="no-referrer-when-downgrade"
+                            />
+                            {/* Fullscreen Toggle */}
+                            <div className="absolute top-6 right-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={toggleFullScreen} className="p-3 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-all shadow-lg border border-white/10" title={fullScreenTitle}>
+                                {fullScreenIcon}
+                              </button>
+                            </div>
+                            
+                            <div className="absolute top-6 left-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                               <button onClick={onLeaveCall} disabled={processingCallId === activeCall?.id} className="px-4 py-2 rounded-full font-bold bg-rose-600/95 hover:bg-rose-500 text-white shadow-xl transition-all border border-rose-400/40 flex items-center gap-2 text-sm">
+                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                 {processingCallId === activeCall?.id ? 'Leaving...' : 'End Call'}
+                               </button>
+                            </div>
+                         </div>
+                       ) : (
+                         <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                            <div className="w-28 h-28 rounded-[2rem] bg-indigo-100 flex items-center justify-center mb-8 shadow-inner border border-white">
+                               <svg className="w-14 h-14 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            </div>
+                            <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Ready to connect?</h2>
+                            <p className="text-slate-500 max-w-md mx-auto mb-10 text-base leading-relaxed">Start a high-definition video call with <strong className="text-slate-700">{selectedPerson.name}</strong> instantly. Face-to-face collaboration is just one click away.</p>
+                            <button 
+                              onClick={() => { onStartCall(); setActiveRightTab('video') }}
+                              disabled={starting || !selectedConversationId}
+                              className="btn-primary px-10 py-4 text-lg rounded-2xl shadow-xl shadow-indigo-600/30 hover:-translate-y-1 transition-all flex items-center gap-3"
+                            >
+                               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                               {starting ? 'Starting Call...' : 'Start Video Call'}
+                            </button>
+                         </div>
+                       )}
+                    </div>
+                 )}
+              </div>
+           </>
+         ) : sidebarTab === 'calls' && callFrameUrl ? (
+           // Call-only view — joined from calls tab without selecting a person
+           <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-100">
+             <div className="h-[76px] border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white/80 backdrop-blur-md z-20">
+               <h3 className="font-bold text-slate-900 text-lg">
+                 {activeCall ? getCallLabel(activeCall) : 'Active Call'}
+               </h3>
+               <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1">Live</span>
+             </div>
+             <div ref={videoContainerRef} className={`group flex-1 relative bg-slate-900 ${fullScreenContainerClass}`}>
+               <iframe
+                 title="Video call"
+                 src={callFrameUrl}
+                 className="absolute inset-0 w-full h-full bg-[#0F0F1A]"
+                 allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+                 referrerPolicy="no-referrer-when-downgrade"
+               />
+               <div className="absolute top-6 right-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button onClick={toggleFullScreen} className="p-3 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-all shadow-lg border border-white/10" title={fullScreenTitle}>
+                   {fullScreenIcon}
+                 </button>
+               </div>
+               <div className="absolute top-6 left-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button onClick={onLeaveCall} disabled={processingCallId === activeCall?.id} className="flex items-center gap-2 px-4 py-2 bg-rose-600/95 hover:bg-rose-500 text-white rounded-full font-bold text-sm transition-all shadow-xl border border-rose-400/40">
+                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                   {processingCallId === activeCall?.id ? 'Leaving...' : 'End Call'}
+                 </button>
+               </div>
+             </div>
+           </div>
+         ) : (
+           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50">
+             <div className="w-24 h-24 bg-white rounded-[2rem] shadow-sm flex items-center justify-center mb-6 border border-slate-100">
+               <svg className="w-12 h-12 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+             </div>
+             <h2 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">
+               {sidebarTab === 'calls' ? 'No Active Call' : 'Your Messages'}
+             </h2>
+             <p className="text-slate-500 max-w-sm text-base">
+               {sidebarTab === 'calls' ? 'Start or join a call from the calls list.' : 'Select a connection from the left sidebar to start chatting.'}
+             </p>
+           </div>
+         )}
+      </div>
+
+      {/* New Call Modal */}
+      {showNewCallModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">New Call</h3>
+                <p className="text-sm text-slate-500 mt-0.5">Choose a project to start from</p>
+              </div>
+              <button onClick={() => setShowNewCallModal(false)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-4 max-h-96 overflow-y-auto space-y-2">
+              {loading ? (
+                <div className="py-8 text-center text-slate-400">Loading projects...</div>
+              ) : projects.length === 0 ? (
+                <div className="py-8 text-center text-slate-400">No projects available for calls.</div>
+              ) : (
+                projects.map((project) => {
+                  const projectId = getProjectId(project)
+                  const projectName = getProjectName(project)
+                  const projectInitial = (projectName || 'P').charAt(0).toUpperCase()
+                  return (
+                  <button
+                    key={projectId}
+                    disabled={starting || !projectId}
+                    onClick={async () => {
+                      setShowNewCallModal(false)
+                      await onStartProjectCall(projectId)
+                      setCallOnlyMode(true)
+                      setActiveRightTab('video')
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left disabled:opacity-50"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 border border-indigo-200">
+                      {projectInitial}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-sm text-slate-900 truncate">{projectName}</p>
+                      <p className="text-xs text-slate-400 truncate">{project.status || 'Project call'}</p>
+                    </div>
+                    <svg className="w-5 h-5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  </button>
+                )})
+              )}
+            </div>
+          </div>
         </div>
       )}
 
-      <div className={`grid grid-cols-1 ${wideFrame ? 'xl:grid-cols-4' : 'lg:grid-cols-3'} gap-6`}>
-        {/* LEFT SIDEBAR */}
-        <div className={`${wideFrame ? 'xl:col-span-1' : 'lg:col-span-1'} space-y-4`}>
-          {/* Connected People */}
-          <div className="card p-4">
-            <h3 className="font-semibold text-slate-900 text-sm mb-3">Connections</h3>
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map(i => <div key={i} className="h-14 skeleton rounded-xl"/>)}
+      {selectedCallDetail && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Call Details</h3>
+                <p className="text-sm text-slate-500 mt-0.5">{getCallLabel(selectedCallDetail)}</p>
               </div>
-            ) : connectedPeople.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-4">No accepted connections yet.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {connectedPeople.map((item) => {
-                  const active = String(item.id) === String(selectedPersonId)
-                  return (
-                    <button
-                      key={item.connection?.id || item.id}
-                      type="button"
-                      onClick={() => onSelectPerson(item)}
-                      disabled={preparingConversation}
-                      className={`w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all duration-150 disabled:opacity-60 ${
-                        active ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <PersonAvatar name={item.name} avatar={item.avatar} />
-                      <div className="min-w-0 flex-1">
-                        <p className={`font-medium text-sm truncate ${active ? 'text-white' : 'text-slate-900'}`}>{item.name}</p>
-                        <p className={`text-xs truncate ${active ? 'text-indigo-200' : 'text-slate-400'}`}>{item.username || item.id}</p>
-                      </div>
-                      {active && <span className="w-2 h-2 rounded-full bg-white shrink-0"/>}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-            {preparingConversation && (
-              <p className="text-xs text-slate-400 mt-3 text-center animate-pulse">Opening conversation…</p>
-            )}
-          </div>
-
-          {/* Start a Call */}
-          <div className="card p-4">
-            <h3 className="font-semibold text-slate-900 text-sm mb-3">Video Call</h3>
-            <div className="mb-3 rounded-xl bg-slate-50 border border-slate-200 p-3">
-              <p className="text-[11px] text-slate-400 uppercase tracking-wide font-semibold mb-1">Selected</p>
-              <p className="text-sm font-medium text-slate-800 truncate">
-                {selectedPerson ? selectedPerson.name : 'Choose a connection first'}
-              </p>
+              <button onClick={onCloseCallDetail} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
             </div>
-            <button
-              onClick={onStartCall}
-              disabled={starting || preparingConversation || !selectedConversationId}
-              className="btn-primary w-full justify-center"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M15.05 5A5 5 0 0119 8.95M15.05 1A9 9 0 0123 8.94m-1 7.98v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.57 19.79 19.79 0 01.1 1.02 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09"/>
-              </svg>
-              {starting ? 'Starting…' : 'Start Video Call'}
-            </button>
-          </div>
-
-          {/* My Calls */}
-          <div className="card p-4">
-            <h3 className="font-semibold text-slate-900 text-sm mb-3">My Calls</h3>
-            {loading ? (
-              <div className="space-y-2">{[1, 2].map(i => <div key={i} className="h-16 skeleton rounded-xl"/>)}</div>
-            ) : calls.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-4">No calls yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {calls.map((call) => {
-                  const status = `${call.status || 'scheduled'}`.toLowerCase()
-                  return (
-                    <div key={call.id} className="rounded-xl border border-slate-200 p-3">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="min-w-0">
-                          <p className="font-medium text-slate-900 text-sm truncate">{getCallLabel(call)}</p>
-                          <p className="text-xs text-slate-400 capitalize mt-0.5">{call.call_type || 'call'}</p>
-                        </div>
-                        <CallStatusBadge status={status} />
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        <button onClick={() => onShowCallDetail(call.id)} disabled={loadingCallDetail} className="btn-secondary text-xs px-2.5 py-1.5">Details</button>
-                        {canJoin(call) && (
-                          <button onClick={() => onJoinCall(call.id)} disabled={processingCallId === call.id} className="btn-primary text-xs px-2.5 py-1.5">
-                            {processingCallId === call.id ? 'Joining…' : 'Join'}
-                          </button>
-                        )}
-                        {status === 'active' && (
-                          <button onClick={() => onEndCall(call)} disabled={processingCallId === call.id} className="btn-danger text-xs px-2.5 py-1.5">End</button>
-                        )}
-                        {status === 'scheduled' && (
-                          <button onClick={() => onCancelCall(call)} disabled={processingCallId === call.id} className="btn-ghost text-xs px-2.5 py-1.5">Cancel</button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Call Detail */}
-          <div className="card p-4">
-            <h3 className="font-semibold text-slate-900 text-sm mb-3">Call Details</h3>
-            {loadingCallDetail ? (
-              <div className="space-y-2">{[1, 2, 3, 4].map(i => <div key={i} className="h-6 skeleton rounded"/>)}</div>
-            ) : !selectedCallDetail ? (
-              <p className="text-sm text-slate-400 text-center py-4">Click any call to view details.</p>
-            ) : (
-              <div className="space-y-2 text-sm">
-                {[
-                  ['Status', selectedCallDetail.status || '-'],
-                  ['Type', selectedCallDetail.call_type || '-'],
-                  ['Room', selectedCallDetail.room_name || '-'],
-                  ['Participants', selectedCallDetail.active_participants_count ?? selectedCallDetail.participants?.length ?? 0],
-                  ['Start', selectedCallDetail.start_time ? new Date(selectedCallDetail.start_time).toLocaleString() : '-'],
-                  ['End', selectedCallDetail.end_time ? new Date(selectedCallDetail.end_time).toLocaleString() : '-'],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex justify-between gap-3 py-1.5 border-b border-slate-50 last:border-0">
-                    <span className="text-slate-400 text-xs font-medium">{label}</span>
-                    <span className="font-medium text-slate-800 text-right text-xs capitalize truncate max-w-[60%]">{value}</span>
-                  </div>
-                ))}
-                {selectedCallDetail.room_url && (
-                  <div className="pt-2">
-                    <p className="text-[11px] text-slate-400 mb-1">Room URL</p>
-                    <p className="font-mono text-[10px] break-all text-slate-600">{selectedCallDetail.room_url}</p>
-                  </div>
-                )}
-                {canJoin(selectedCallDetail) && (
-                  <button onClick={() => onJoinCall(selectedCallDetail.id)} disabled={processingCallId === selectedCallDetail.id} className="btn-primary w-full justify-center mt-3">
-                    {processingCallId === selectedCallDetail.id ? 'Joining…' : 'Join This Call'}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className={wideFrame ? 'xl:col-span-3' : 'lg:col-span-2'}>
-          <div className={`grid grid-cols-1 ${wideFrame ? '2xl:grid-cols-2' : 'xl:grid-cols-2'} gap-6 items-start`}>
-            {/* Video call frame */}
-            <div>
-              {callFrameUrl ? (
-                <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl shadow-brand-primary/20 border border-slate-800 flex flex-col group">
-                  {/* Top Bar (Glassmorphic) */}
-                  <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-5 py-4 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
-                    <div className="flex items-center gap-3">
-                       <span className="flex h-3 w-3 relative">
-                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                         <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                       </span>
-                      <p className="font-semibold text-white text-sm truncate drop-shadow-md">{activeCall ? getCallLabel(activeCall) : 'Live Video Call'}</p>
-                    </div>
-                    <div className="text-[11px] text-white/70 font-mono tracking-wider drop-shadow-md pointer-events-auto flex gap-2">
-                       <button onClick={onShrinkFrame} className="hover:text-white transition-colors">-</button>
-                       <span>{frameHeight}vh</span>
-                       <button onClick={onGrowFrame} className="hover:text-white transition-colors">+</button>
-                    </div>
-                  </div>
-
-                  {/* The actual iframe */}
-                  <iframe
-                    title="Video call"
-                    src={callFrameUrl}
-                    className="w-full bg-[#0F0F1A]"
-                    style={{ height: `${frameHeight}vh` }}
-                    allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-
-                  {/* Bottom Controls Overlay (Glassmorphic) */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                    <button type="button" className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors" title="Mute/Unmute">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-                    </button>
-                    <button type="button" className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors" title="Start/Stop Video">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                    </button>
-                    <button type="button" className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors" title="Share Screen">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    </button>
-                    <div className="w-px h-8 bg-white/20 mx-1"></div>
-                    <button type="button" onClick={onToggleWide} className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors" title="Toggle Layout">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-                    </button>
-                    <button onClick={onLeaveCall} disabled={processingCallId === activeCall?.id} className="ml-2 px-6 py-3 rounded-xl font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors disabled:opacity-50">
-                      {processingCallId === activeCall?.id ? 'Leaving…' : 'Leave'}
-                    </button>
-                  </div>
+            <div className="p-5 space-y-3">
+              {callDetailRows.map(([label, value]) => (
+                <div key={label} className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</span>
+                  <span className="text-sm font-semibold text-slate-800 text-right break-all">{value}</span>
                 </div>
-              ) : (
-                <div className="card min-h-[36rem] flex flex-col items-center justify-center text-center p-8 bg-gradient-to-b from-brand-primaryLight/30 to-slate-50 border-brand-primaryLight relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiM2QzYzRkYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-50"></div>
-                  <div className="w-20 h-20 rounded-3xl bg-white shadow-xl shadow-brand-primary/10 flex items-center justify-center mb-6 relative z-10 border border-brand-primaryLight">
-                    <svg className="w-10 h-10 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-brand-secondary mb-2 relative z-10">Premium Video Calling</h3>
-                  <p className="text-sm text-slate-500 max-w-sm relative z-10">Select a connection to initiate a high-definition video session, or join an active scheduled call from your list.</p>
+              ))}
+              {selectedCallDetail.room_url && (
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Room URL</p>
+                  <p className="text-xs font-mono text-slate-700 break-all">{selectedCallDetail.room_url}</p>
                 </div>
               )}
             </div>
-
-            {/* Chat panel */}
-            <RealtimeChatPanel
-              conversations={conversations}
-              selectedConversationId={selectedConversationId}
-              onSelectConversation={setSelectedConversationId}
-              compact={wideFrame}
-              showConversationSelector={false}
-            />
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
