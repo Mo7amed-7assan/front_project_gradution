@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { getProjects } from '../services/project'
 import { getCurrentUserId, getProjectOwnerId } from '../utils/projectAccess'
 import ProjectsUI from '../ui/pages/ProjectsUI'
+import MyProjects from './MyProjects'
 
 export default function Projects() {
   const { user } = useAuth()
@@ -67,6 +68,8 @@ export default function Projects() {
       setShowFilters={setShowFilters}
       setPage={setPage}
       user={user}
-    />
+    >
+      {activeTab === 'my-projects' && <MyProjects />}
+    </ProjectsUI>
   )
 }

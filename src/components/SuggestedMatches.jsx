@@ -57,6 +57,118 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
 
   if (!target) return null
 
+  if (kind === 'project') {
+    return (
+      <div
+        onMouseEnter={() => onViewed(match)}
+        className={`card bg-white p-0 overflow-hidden border ${match.is_viewed || match.viewed ? 'border-slate-200' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
+      >
+        <div className="p-5">
+          {/* Post Header */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
+                {target?.owner?.profile_picture_url || target?.owner?.avatar ? (
+                  <img src={target.owner.profile_picture_url || target.owner.avatar} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="font-bold text-indigo-600 text-lg">{(target?.owner?.full_name || target?.owner?.username || 'U')[0]}</span>
+                )}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  {target?.owner?.full_name || target?.owner?.username || 'Unknown User'}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {target?.created_at ? new Date(target.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'} • Suggested Project
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-1.5">
+              <span className="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                {score}% Match
+              </span>
+              <button
+                type="button"
+                onClick={() => onSave(match)}
+                className={`text-xs font-bold ${isSaved ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-600'}`}
+              >
+                {isSaved ? 'Saved' : 'Save'}
+              </button>
+            </div>
+          </div>
+
+          {/* Post Content */}
+          <div className="space-y-3">
+            <h4 className="text-xl font-bold text-slate-900 leading-tight">
+              <Link to={`/projects/${target?.id}`} className="hover:text-indigo-600 transition-colors">
+                {target?.title || target?.name}
+              </Link>
+            </h4>
+            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+              {target?.description || target?.short_description || 'No description provided.'}
+            </p>
+          </div>
+
+          {/* Tags */}
+          {skills.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {skills.map((skill, idx) => (
+                <span key={idx} className="badge-slate text-[11px] font-medium px-2.5 py-1 rounded-md">
+                  {skill.skill_name || skill.name || String(skill)}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Feedback */}
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            {feedbackSent ? (
+              <div className="text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-lg p-2.5">
+                Feedback sent: {match.feedback_type || match.feedback || 'submitted'}
+              </div>
+            ) : (
+              <div className="space-y-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">Improve Suggestions</label>
+                <div className="flex gap-2">
+                  <select
+                    value={feedbackType}
+                    onChange={(e) => setFeedbackType(e.target.value)}
+                    className="form-select text-xs py-1.5 flex-1"
+                  >
+                    {FEEDBACK_TYPES.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={submitFeedback}
+                    disabled={submitting}
+                    className="btn-secondary text-xs px-3 py-1.5 whitespace-nowrap"
+                  >
+                    {submitting ? 'Sending...' : 'Send'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="px-5 py-3 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+          <div className="flex gap-3">
+            <Link to={`/projects/${target?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+              Apply
+            </Link>
+          </div>
+          <Link to={`/projects/${target?.id}`} className="btn-secondary text-xs px-4 py-2 shadow-sm">
+            View Details
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       onMouseEnter={() => onViewed(match)}
@@ -213,7 +325,7 @@ export default function SuggestedMatches({ kind }) {
           <p className="text-sm mt-1">Complete your profile to get better suggestions.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className={kind === 'project' ? "max-w-2xl mx-auto space-y-8" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"}>
           {matches.map((match) => (
             <SuggestedMatchCard
               key={match.id}

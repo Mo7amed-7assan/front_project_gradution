@@ -68,10 +68,10 @@ export default function App(){
       <Route path="/reset-password" element={<ResetPassword/>} />
       <Route path="/reset-password/:token" element={<ResetPassword/>} />
       <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
-      <Route path="/projects" element={<ProtectedRoute><Layout><Projects/></Layout></ProtectedRoute>} />
+      <Route path="/projects" element={<Layout><Projects/></Layout>} />
       <Route path="/projects/create" element={<ProtectedRoute><Layout><CreateProject/></Layout></ProtectedRoute>} />
-      <Route path="/projects/:id/edit" element={<ProtectedRoute><Layout><EditProjectRoute/></Layout></ProtectedRoute>} />
-      <Route path="/projects/:id" element={<ProtectedRoute><Layout><ProjectDetailsRoute/></Layout></ProtectedRoute>} />
+      <Route path="/projects/:id/edit" element={<Layout><EditProjectRoute/></Layout>} />
+      <Route path="/projects/:id" element={<Layout><ProjectDetailsRoute/></Layout>} />
       <Route path="/projects/:id/applications" element={<ProtectedRoute><Layout><ProjectApplicationsRoute/></Layout></ProtectedRoute>} />
       <Route path="/my-projects" element={<ProtectedRoute><Layout><MyProjects/></Layout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Layout><Profile/></Layout></ProtectedRoute>} />

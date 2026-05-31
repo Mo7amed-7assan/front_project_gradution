@@ -95,9 +95,8 @@ const icons = {
 /* ─── Nav Config ───────────────────────────────────────────────────── */
 const NAV_ITEMS = [
   { to: '/dashboard',         label: 'Dashboard',        icon: 'Home' },
-  { to: '/projects',          label: 'Explore Projects',  icon: 'Projects' },
-  { to: '/my-projects',       label: 'My Projects',       icon: 'Mine' },
-  { to: '/projects/create',   label: 'Create Project',    icon: 'New' },
+  { to: '/projects',          label: 'Projects',         icon: 'Projects' },
+  { to: '/connections',       label: 'My Network',       icon: 'People' },
   { to: '/applications/mine', label: 'My Applications',   icon: 'Apps' },
   { to: '/invitations',       label: 'Invitations',       icon: 'Invite' },
   { to: '/messages',          label: 'Messages',          icon: 'Chat' },
@@ -161,7 +160,7 @@ function Sidebar() {
   const isAdmin = user && ['administrator', 'admin', 'moderator'].includes(user.role)
 
   return (
-    <aside className="w-64 bg-slate-900 min-h-screen flex flex-col select-none shrink-0">
+    <aside className="w-64 bg-slate-900 h-screen sticky top-0 flex flex-col select-none shrink-0">
 
       {/* Brand */}
       <div className="px-5 pt-6 pb-5 border-b border-slate-700/60">

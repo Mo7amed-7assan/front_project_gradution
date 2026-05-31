@@ -2,8 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { listenToConversationMessages, sendRealtimeMessage } from '../services/realtimeChat'
 
+const EMOJIS = ['😀', '😂', '😍', '😎', '😊', '👍', '🔥', '🎉', '❤️', '🙏', '💡', '✅', '🚀', '👏', '😅', '🤝', '💬', '⭐']
+const MAX_INLINE_FILE_SIZE = 4 * 1024 * 1024
+
 const getConversationLabel = (c) =>
   c?.title || c?.name || c?.conversation_type || `Conversation ${c?.id || ''}`
+
+const getConversationId = (conversation) =>
+  conversation?.id || conversation?.uuid || conversation?.conversation_id
 
 const getUserName = (user) =>
   user?.full_name || user?.name || user?.username || user?.email || 'You'
@@ -13,6 +19,14 @@ const formatMessageTime = (value) => {
   if (!date || Number.isNaN(date.getTime())) return ''
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
 
 function Avatar({ name, isMine }) {
   const letter = (name || 'U').charAt(0).toUpperCase()
@@ -60,11 +74,16 @@ export default function RealtimeChatPanel({
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [chatError, setChatError] = useState(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const fileInputRef = useRef(null)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
   const currentConversation = useMemo(
-    () => conversations.find(c => String(c.id) === String(selectedConversationId)),
+    () => conversations.find(c => String(getConversationId(c)) === String(selectedConversationId)),
     [conversations, selectedConversationId]
   )
 
@@ -109,9 +128,108 @@ export default function RealtimeChatPanel({
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e) }
   }
 
-  // Quick Action Handlers (Visual placeholders for future integration)
-  const handleAttach = () => console.log('Attach file')
-  const handleEmoji = () => console.log('Insert emoji')
+  const handleAttach = () => fileInputRef.current?.click()
+
+  const handleEmoji = () => setShowEmojiPicker((value) => !value)
+
+  const appendEmoji = (emoji) => {
+    setDraft((prev) => `${prev}${emoji}`)
+    setShowEmojiPicker(false)
+    inputRef.current?.focus()
+  }
+
+  const sendAttachment = async (file) => {
+    if (!file || !selectedConversationId) return
+    if (file.size > MAX_INLINE_FILE_SIZE) {
+      setChatError('File is too large. Please choose a file under 4 MB.')
+      return
+    }
+
+    setSending(true)
+    setChatError(null)
+    try {
+      const fileData = await fileToDataUrl(file)
+      await sendRealtimeMessage(selectedConversationId, {
+        text: file.type.startsWith('image/') ? 'Sent an image.' : `Sent a file: ${file.name}`,
+        senderId: user?.id,
+        senderName: getUserName(user),
+        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        messageType: file.type.startsWith('image/') ? 'image' : 'file',
+        fileName: file.name,
+        fileType: file.type || 'application/octet-stream',
+        fileData,
+      })
+    } catch (err) {
+      setChatError(err?.message || 'Failed to send file.')
+    } finally {
+      setSending(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0]
+    sendAttachment(file)
+  }
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop()
+  }
+
+  const startRecording = async () => {
+    if (!selectedConversationId || recording) return
+    setChatError(null)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      mediaRecorderRef.current = recorder
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data)
+      }
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop())
+        setRecording(false)
+        const audioBlob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' })
+        if (!audioBlob.size) return
+        if (audioBlob.size > MAX_INLINE_FILE_SIZE) {
+          setChatError('Voice note is too large. Please record a shorter note.')
+          return
+        }
+
+        setSending(true)
+        try {
+          const audioData = await fileToDataUrl(audioBlob)
+          await sendRealtimeMessage(selectedConversationId, {
+            text: 'Sent a voice note.',
+            senderId: user?.id,
+            senderName: getUserName(user),
+            senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+            messageType: 'audio',
+            audioData,
+            audioType: audioBlob.type || 'audio/webm',
+          })
+        } catch (err) {
+          setChatError(err?.message || 'Failed to send voice note.')
+        } finally {
+          setSending(false)
+        }
+      }
+
+      recorder.start()
+      setRecording(true)
+    } catch (err) {
+      setChatError('Microphone permission is required to record audio.')
+    }
+  }
+
+  const handleAudioRecord = () => {
+    if (recording) stopRecording()
+    else startRecording()
+  }
+
   const handleCode = () => {
     setDraft(prev => prev + '\n```\n// Your code here\n```\n')
     inputRef.current?.focus()
@@ -147,7 +265,7 @@ export default function RealtimeChatPanel({
               className="form-select text-xs py-2 w-48 bg-slate-50 border-none focus:ring-1 focus:ring-brand-primary"
             >
               {conversations.map(c => (
-                <option key={c.id} value={c.id}>{getConversationLabel(c)}</option>
+                <option key={getConversationId(c)} value={getConversationId(c)}>{getConversationLabel(c)}</option>
               ))}
             </select>
           )}
@@ -201,6 +319,41 @@ export default function RealtimeChatPanel({
                         : 'bg-white text-slate-700 border border-slate-100 rounded-2xl rounded-bl-sm'
                     }`}>
                       <p className="whitespace-pre-wrap break-words leading-relaxed">{message.text}</p>
+                      {message.fileData && message.fileType?.startsWith('image/') && (
+                        <a href={message.fileData} target="_blank" rel="noreferrer" className="mt-3 block">
+                          <img src={message.fileData} alt={message.fileName || 'Attachment'} className="max-h-64 rounded-xl object-contain border border-white/20" />
+                        </a>
+                      )}
+                      {message.fileData && !message.fileType?.startsWith('image/') && (
+                        <a
+                          href={message.fileData}
+                          download={message.fileName || 'attachment'}
+                          className={`mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-colors ${
+                            isMine ? 'bg-white text-brand-primary hover:bg-slate-100' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
+                          <span className="truncate">{message.fileName || 'Download file'}</span>
+                        </a>
+                      )}
+                      {message.audioData && (
+                        <audio controls src={message.audioData} className="mt-3 w-64 max-w-full" />
+                      )}
+                      {message.callUrl && (
+                        <a
+                          href={message.callUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-colors ${
+                            isMine
+                              ? 'bg-white text-brand-primary hover:bg-slate-100'
+                              : 'bg-brand-primary text-white hover:bg-brand-primaryDark'
+                          }`}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                          Join Call
+                        </a>
+                      )}
                       
                       {/* Message Actions (Hover) */}
                       <div className={`absolute top-1/2 -translate-y-1/2 ${isMine ? '-left-12' : '-right-12'} opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1`}>
@@ -224,6 +377,28 @@ export default function RealtimeChatPanel({
       {/* Input */}
       <form onSubmit={handleSend} className="p-4 border-t border-slate-100 bg-white shrink-0 z-10">
         <div className="flex flex-col gap-2 p-1 rounded-2xl border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-brand-primary/20 focus-within:border-brand-primary/50 transition-all">
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          {showEmojiPicker && (
+            <div className="mx-2 mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
+              <div className="grid grid-cols-9 gap-1">
+                {EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => appendEmoji(emoji)}
+                    className="h-8 w-8 rounded-lg text-lg hover:bg-brand-primaryLight transition-colors"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <textarea
             ref={inputRef}
             rows={1}
@@ -245,9 +420,28 @@ export default function RealtimeChatPanel({
                 <button type="button" onClick={handleEmoji} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </button>
+                <button
+                  type="button"
+                  onClick={handleAudioRecord}
+                  disabled={!selectedConversationId || sending}
+                  className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                    recording
+                      ? 'text-rose-600 bg-rose-50 hover:bg-rose-100'
+                      : 'text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50'
+                  }`}
+                  title={recording ? 'Stop recording' : 'Record voice note'}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.5a5 5 0 005-5V7a5 5 0 00-10 0v6.5a5 5 0 005 5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19 11v2.5a7 7 0 01-14 0V11M12 20v2m-3 0h6" /></svg>
+                </button>
                 <button type="button" onClick={handleCode} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
                 </button>
+                {recording && (
+                  <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    Recording
+                  </span>
+                )}
              </div>
              
              <button
