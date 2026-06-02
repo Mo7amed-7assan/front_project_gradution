@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { submitApplication, getProjectApplications, getApplicationDetails, reviewApplication, getMyApplications } from '../services/applications'
 import { useAuth } from '../context/AuthContext'
 import { deleteProject } from '../services/projects'
@@ -49,6 +49,7 @@ function extractApplications(data) {
 export default function ProjectDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { user } = useAuth()
 
   const [project, setProject] = useState(null)
@@ -209,12 +210,12 @@ export default function ProjectDetails() {
     return () => window.removeEventListener(APPLICATION_REFRESH_EVENT, onRefresh)
   }, [id, user?.id, project?.id])
 
-  const resolveUserId = (item) => item.user?.id
-  const resolveApplicantId = (app) => app.applicant_id || app.user_id || app.applicant?.id || app.user?.id
-  const resolveProjectId = (app) => app.project_id || app.project?.id
-  const resolveUserName = (item) => item.user?.full_name || item.user?.name || item.user?.username || item.full_name || item.name || item.username || 'Unknown member'
-  const resolveRoleValue = (item) => item.role_name || item.role?.role_name || item.role?.name || item.role?.title || item.position || item.title || ''
-  const resolvePermissionValue = (item) => item.permission_level ?? item.permissions ?? item.permission ?? ''
+  const resolveUserId = (item) => item?.user?.id || item?.id
+  const resolveApplicantId = (app) => app?.applicant_id || app?.user_id || app?.applicant?.id || app?.user?.id
+  const resolveProjectId = (app) => app?.project_id || app?.project?.id
+  const resolveUserName = (item) => item?.user?.full_name || item?.user?.name || item?.user?.username || item?.full_name || item?.name || item?.username || 'Unknown member'
+  const resolveRoleValue = (item) => item?.role_name || item?.role?.role_name || item?.role?.name || item?.role?.title || item?.position || item?.title || ''
+  const resolvePermissionValue = (item) => item?.permission_level ?? item?.permissions ?? item?.permission ?? ''
 
   const isOwner = () => {
     return getProjectRelation({ ...project, team }, user).isOwner
@@ -264,6 +265,13 @@ export default function ProjectDetails() {
     await fetchProjectRoles()
     await fetchUserSkills()
     setShowApplyModal(true)
+  }
+
+  const closeApply = () => {
+    setShowApplyModal(false)
+    if (searchParams.get('apply') === 'true') {
+      navigate(`/projects/${id}`, { replace: true })
+    }
   }
 
   const addSkillToApplication = () => {
@@ -507,15 +515,23 @@ export default function ProjectDetails() {
     }
   }
 
-  if (loading) return <div className="min-h-[16rem] flex items-center justify-center"><Spinner /></div>
-  if (!project) return <div className="p-8">Project not found.</div>
-
   const currentApplicationStatus = (currentUserApplication()?.status || '').toLowerCase()
   const currentUserId = getCurrentUserId(user)
   const currentMember = isCurrentTeamMember()
     ? team.find((member) => normalizeId(resolveUserId(member)) === currentUserId) || { user: { id: currentUserId }, role: 'Member' }
     : null
-  const isAcceptingApplications = isTruthyBoolean(project.is_accepting_applications)
+  const isAcceptingApplications = isTruthyBoolean(project?.is_accepting_applications ?? project?.accepting_applications)
+
+  useEffect(() => {
+    if (project && searchParams.get('apply') === 'true' && !loading && !showApplyModal) {
+      if (!isOwner() && !currentMember && !hasApplied() && isAcceptingApplications) {
+        openApply()
+      }
+    }
+  }, [project, loading, searchParams, currentMember, isAcceptingApplications, showApplyModal])
+
+  if (loading) return <div className="min-h-[16rem] flex items-center justify-center"><Spinner /></div>
+  if (!project) return <div className="p-8">Project not found.</div>
 
   return (
     <div className="max-w-6xl mx-auto bg-white p-6 rounded shadow">
@@ -539,6 +555,14 @@ export default function ProjectDetails() {
           )}
           {!isOwner() && currentApplicationStatus && currentApplicationStatus !== 'accepted' && (
             <span className="px-4 py-2 rounded bg-gray-100 text-gray-700 capitalize">Application {currentApplicationStatus}</span>
+          )}
+          {!isOwner() && (
+            <Link
+              to={`/reports/submit?projectId=${id}`}
+              className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-sm font-bold border border-rose-200 transition-colors flex items-center gap-1.5"
+            >
+              🚩 Report
+            </Link>
           )}
         </div>
       </div>
@@ -836,7 +860,7 @@ export default function ProjectDetails() {
               </div>
 
               <div className="flex items-center justify-end gap-2 mt-4">
-                <button onClick={() => setShowApplyModal(false)} className="px-3 py-2 rounded border">Cancel</button>
+                <button onClick={closeApply} className="px-3 py-2 rounded border">Cancel</button>
                 <button onClick={handleSubmitApplication} disabled={applying || (!projectRoleId && !proposedRole.trim())} className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed">{applying ? 'Submitting...' : 'Submit application'}</button>
               </div>
             </div>

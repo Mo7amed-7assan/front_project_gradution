@@ -3,14 +3,17 @@ import { Link } from 'react-router-dom'
 import Spinner from '../../components/Spinner'
 
 const statusMap = {
-  pending:   { cls: 'badge-yellow', label: 'Pending',   icon: '⏳' },
-  approved:  { cls: 'badge-green',  label: 'Approved',  icon: '✅' },
-  rejected:  { cls: 'badge-red',    label: 'Rejected',  icon: '❌' },
-  submitted: { cls: 'badge-blue',   label: 'Submitted', icon: '📤' },
+  pending:      { cls: 'badge-yellow', label: 'Pending',      icon: '⏳' },
+  under_review: { cls: 'badge-blue',   label: 'Under Review', icon: '🔍' },
+  verified:     { cls: 'badge-green',  label: 'Verified',     icon: '✅' },
+  approved:     { cls: 'badge-green',  label: 'Approved',     icon: '✅' },
+  rejected:     { cls: 'badge-red',    label: 'Rejected',     icon: '❌' },
+  escalated:    { cls: 'badge-red',    label: 'Escalated',    icon: '⚠️' },
+  submitted:    { cls: 'badge-blue',   label: 'Submitted',    icon: '📤' },
 }
 const getBadge = (status) => statusMap[`${status || 'pending'}`.toLowerCase()] || { cls: 'badge-slate', label: status || 'Unknown', icon: '📋' }
 
-export default function AdminVerificationsUI({ items, loading }) {
+export default function AdminVerificationsUI({ items, loading, statusFilter, setStatusFilter }) {
   if (loading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
 
   const pendingCount = items.filter(it => `${it.status || it.verification_status || ''}`.toLowerCase() === 'pending').length
@@ -22,18 +25,36 @@ export default function AdminVerificationsUI({ items, loading }) {
           <h1 className="page-title text-brand-secondary">Identity Verifications</h1>
           <p className="page-subtitle">Review and approve user identity verification submissions.</p>
         </div>
-        {pendingCount > 0 && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-bold px-4 py-2.5 rounded-2xl">
-            <span className="text-amber-500">⏳</span> {pendingCount} awaiting review
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          {pendingCount > 0 && (
+            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm font-bold px-4 py-2.5 rounded-2xl">
+              <span className="text-amber-500">⏳</span> {pendingCount} awaiting review
+            </div>
+          )}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="form-select w-auto"
+          >
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="under_review">Under Review</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+            <option value="escalated">Escalated</option>
+          </select>
+        </div>
       </div>
 
       {items.length === 0 ? (
         <div className="card text-center py-16 border-2 border-dashed border-slate-200">
           <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 text-2xl">🪪</div>
           <h3 className="font-bold text-slate-800 text-lg mb-1">No verification submissions</h3>
-          <p className="text-slate-500 text-sm">Verification requests from users will appear here.</p>
+          <p className="text-slate-500 text-sm">
+            {statusFilter && statusFilter !== 'all'
+              ? 'No verification submissions match the selected filter.'
+              : 'Verification requests from users will appear here.'}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">

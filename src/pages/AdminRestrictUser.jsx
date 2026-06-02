@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { restrictUser } from '../services/adminRestrictions'
 import Spinner from '../components/Spinner'
 
@@ -13,7 +13,11 @@ const RESTRICTION_TYPES = [
 
 export default function AdminRestrictUser() {
   const navigate = useNavigate()
-  const [targetUserId, setTargetUserId] = useState('')
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const queryUserId = searchParams.get('userId') || location.state?.userId || ''
+
+  const [targetUserId, setTargetUserId] = useState(queryUserId)
   const [restrictionType, setRestrictionType] = useState('messaging')
   const [reason, setReason] = useState('')
   const [duration, setDuration] = useState('')

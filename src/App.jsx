@@ -29,6 +29,9 @@ import AdminVerifications from './pages/AdminVerifications'
 import AdminVerificationDetail from './pages/AdminVerificationDetail'
 import AdminReports from './pages/AdminReports'
 import AdminReportDetail from './pages/AdminReportDetail'
+import MyReports from './pages/MyReports'
+import SubmitReport from './pages/SubmitReport'
+import ReportDetail from './pages/ReportDetail'
 import AdminModeration from './pages/AdminModeration'
 import AdminModerationLog from './pages/AdminModerationLog'
 import AdminRestrictions from './pages/AdminRestrictions'
@@ -68,10 +71,10 @@ export default function App(){
       <Route path="/reset-password" element={<ResetPassword/>} />
       <Route path="/reset-password/:token" element={<ResetPassword/>} />
       <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
-      <Route path="/projects" element={<ProtectedRoute><Layout><Projects/></Layout></ProtectedRoute>} />
+      <Route path="/projects" element={<Layout><Projects/></Layout>} />
       <Route path="/projects/create" element={<ProtectedRoute><Layout><CreateProject/></Layout></ProtectedRoute>} />
-      <Route path="/projects/:id/edit" element={<ProtectedRoute><Layout><EditProjectRoute/></Layout></ProtectedRoute>} />
-      <Route path="/projects/:id" element={<ProtectedRoute><Layout><ProjectDetailsRoute/></Layout></ProtectedRoute>} />
+      <Route path="/projects/:id/edit" element={<Layout><EditProjectRoute/></Layout>} />
+      <Route path="/projects/:id" element={<Layout><ProjectDetailsRoute/></Layout>} />
       <Route path="/projects/:id/applications" element={<ProtectedRoute><Layout><ProjectApplicationsRoute/></Layout></ProtectedRoute>} />
       <Route path="/my-projects" element={<ProtectedRoute><Layout><MyProjects/></Layout></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Layout><Profile/></Layout></ProtectedRoute>} />
@@ -85,6 +88,9 @@ export default function App(){
       <Route path="/messages/:id" element={<ProtectedRoute><Layout><Conversation/></Layout></ProtectedRoute>} />
       <Route path="/verification" element={<ProtectedRoute><Layout><IdentityVerification/></Layout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><Layout><Notifications/></Layout></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute><Layout><MyReports/></Layout></ProtectedRoute>} />
+      <Route path="/reports/submit" element={<ProtectedRoute><Layout><SubmitReport/></Layout></ProtectedRoute>} />
+      <Route path="/reports/:id" element={<ProtectedRoute><Layout><ReportDetail/></Layout></ProtectedRoute>} />
       <Route path="/admin/verifications" element={<ProtectedRoute><Layout><AdminVerifications/></Layout></ProtectedRoute>} />
       <Route path="/admin/verifications/:id" element={<ProtectedRoute><Layout><AdminVerificationDetail/></Layout></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute><Layout><AdminReports/></Layout></ProtectedRoute>} />

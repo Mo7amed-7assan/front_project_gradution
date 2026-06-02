@@ -19,6 +19,7 @@ export default function ProjectsUI({
   setShowFilters,
   setPage,
   user,
+  children,
 }) {
   return (
     <div className="space-y-6">
@@ -77,6 +78,18 @@ export default function ProjectsUI({
           >
             Suggested Projects
             {activeTab === 'suggestions' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"/>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('my-projects')}
+            className={`py-3 text-sm font-semibold relative transition-colors ${
+              activeTab === 'my-projects' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            My Projects
+            {activeTab === 'my-projects' && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"/>
             )}
           </button>
@@ -165,16 +178,18 @@ export default function ProjectsUI({
         )}
       </header>
 
-      {activeTab === 'suggestions' ? (
+      {activeTab === 'my-projects' ? (
+        children
+      ) : activeTab === 'suggestions' ? (
         <SuggestedMatches kind="project" />
       ) : (
         <>
-          {/* Projects Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Projects Feed */}
+          <div className="max-w-2xl mx-auto space-y-8">
             {loading ? (
               Array.from({ length: perPage }).map((_, i) => <SkeletonCard key={i} />)
             ) : projects.length === 0 ? (
-              <div className="card col-span-full py-16 text-center">
+              <div className="card py-16 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -188,49 +203,71 @@ export default function ProjectsUI({
                 const relation = getProjectRelation(p, user)
                 const isAccepting = String(p?.accepting_applications) === 'true' || p?.accepting_applications === true || p?.accepting_applications === 1
                 return (
-                  <div key={p?.id} className="card-hover p-6 flex flex-col justify-between h-full bg-white">
-                    <div className="space-y-4">
-                      {/* Top Bar */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <h3 className="text-base font-bold text-slate-900 truncate">
-                            <Link to={`/projects/${p?.id}`} className="hover:text-indigo-600 transition-colors">
-                              {p?.title || p?.name}
-                            </Link>
-                          </h3>
-                          <p className="text-xs text-slate-400 truncate mt-0.5">
-                            Created by: <span className="font-semibold">{p?.owner?.full_name || p?.owner?.username || 'Unknown'}</span>
-                          </p>
+                  <div key={p?.id} className="card bg-white p-0 overflow-hidden border border-slate-200">
+                    <div className="p-5">
+                      {/* Post Header */}
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
+                            {p?.owner?.profile_picture_url || p?.owner?.avatar ? (
+                              <img src={p.owner.profile_picture_url || p.owner.avatar} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="font-bold text-indigo-600 text-lg">{(p?.owner?.full_name || p?.owner?.username || 'U')[0]}</span>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-bold text-slate-900">
+                              {p?.owner?.full_name || p?.owner?.username || 'Unknown User'}
+                            </h3>
+                            <p className="text-xs text-slate-500">
+                              {p?.created_at ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'} • Project Post
+                            </p>
+                          </div>
                         </div>
-                        {(relation.isOwner || relation.isMember) && (
-                          <span className="badge-indigo text-[10px] uppercase font-bold shrink-0">
-                            {relation.isOwner ? 'Owner' : 'Member'}
+                        <div className="flex items-center gap-2">
+                           {(relation.isOwner || relation.isMember) && (
+                            <span className="badge-indigo text-[10px] uppercase font-bold">
+                              {relation.isOwner ? 'Owner' : 'Member'}
+                            </span>
+                          )}
+                           <span className={`badge text-[10px] uppercase font-bold ${p?.status?.toLowerCase() === 'active' ? 'badge-green' : p?.status?.toLowerCase() === 'planning' ? 'badge-indigo' : 'badge-slate'}`}>
+                            {p?.status || 'Active'}
                           </span>
-                        )}
+                        </div>
                       </div>
 
-                      {/* Description */}
-                      <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
-                        {p?.short_description || p?.description || 'No description provided.'}
-                      </p>
+                      {/* Post Content */}
+                      <div className="space-y-3">
+                        <h4 className="text-xl font-bold text-slate-900 leading-tight">
+                          <Link to={`/projects/${p?.id}`} className="hover:text-indigo-600 transition-colors">
+                            {p?.title || p?.name}
+                          </Link>
+                        </h4>
+                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                          {p?.description || p?.short_description || 'No description provided.'}
+                        </p>
+                      </div>
 
-                      {/* Badges/Skills */}
-                      <div className="flex flex-wrap gap-1.5 pt-2">
-                        {(p?.skills || p?.required_skills || p?.roles || []).slice(0, 4).map((s, idx) => (
-                          <span key={idx} className="badge-slate text-[10px] font-medium">
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {(p?.skills || p?.required_skills || p?.roles || []).map((s, idx) => (
+                          <span key={idx} className="badge-slate text-[11px] font-medium px-2.5 py-1 rounded-md">
                             {s.skill_name || s.role_name || s.name || s.title || String(s)}
                           </span>
                         ))}
                       </div>
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between border-t border-slate-100 mt-6 pt-4 shrink-0">
-                      <span className={`badge text-[10px] uppercase font-bold ${isAccepting ? 'badge-green' : 'badge-red'}`}>
-                        {isAccepting ? 'Accepting' : 'Closed'}
-                      </span>
-                      <Link to={`/projects/${p?.id}`} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
-                        View Details →
+                    {/* Post Footer Actions */}
+                    <div className="px-5 py-3 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+                      <div className="flex gap-3">
+                        <Link to={`/projects/${p?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                          Apply
+                        </Link>
+                      </div>
+                      <Link to={`/projects/${p?.id}`} className="btn-secondary text-xs px-4 py-2 shadow-sm">
+                        View Details
                       </Link>
                     </div>
                   </div>
