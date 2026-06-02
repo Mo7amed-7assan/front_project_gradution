@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import SkeletonCard from '../../components/SkeletonCard'
 import SuggestedMatches from '../../components/SuggestedMatches'
@@ -9,6 +9,7 @@ export default function ProjectsUI({
   setActiveTab,
   projects,
   loading,
+  loadingMore,
   page,
   perPage,
   setPerPage,
@@ -21,6 +22,18 @@ export default function ProjectsUI({
   user,
   children,
 }) {
+  const observer = useRef()
+  const lastProjectElementRef = useCallback(node => {
+    if (loading || loadingMore) return
+    if (observer.current) observer.current.disconnect()
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && page < totalPages) {
+        setPage(prevPage => prevPage + 1)
+      }
+    })
+    if (node) observer.current.observe(node)
+  }, [loading, loadingMore, page, totalPages, setPage])
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -199,11 +212,12 @@ export default function ProjectsUI({
                 <p className="text-sm text-slate-400">Try adjusting your filters or keywords.</p>
               </div>
             ) : (
-              projects.map(p => {
+              projects.map((p, index) => {
                 const relation = getProjectRelation(p, user)
                 const isAccepting = String(p?.accepting_applications) === 'true' || p?.accepting_applications === true || p?.accepting_applications === 1
+                const isLast = index === projects.length - 1
                 return (
-                  <div key={p?.id} className="card bg-white p-0 overflow-hidden border border-slate-200">
+                  <div ref={isLast ? lastProjectElementRef : null} key={p?.id} className="card bg-white p-0 overflow-hidden border border-slate-200">
                     <div className="p-5">
                       {/* Post Header */}
                       <div className="flex items-start justify-between gap-3 mb-4">
@@ -261,10 +275,12 @@ export default function ProjectsUI({
                     {/* Post Footer Actions */}
                     <div className="px-5 py-3 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
                       <div className="flex gap-3">
-                        <Link to={`/projects/${p?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                          Apply
-                        </Link>
+                        {(!relation.isOwner && !relation.isMember) && (
+                          <Link to={`/projects/${p?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            Apply
+                          </Link>
+                        )}
                       </div>
                       <Link to={`/projects/${p?.id}`} className="btn-secondary text-xs px-4 py-2 shadow-sm">
                         View Details
@@ -276,26 +292,9 @@ export default function ProjectsUI({
             )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-3">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="btn-secondary text-xs px-3.5 py-2"
-              >
-                Previous
-              </button>
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Page {page} of {totalPages}
-              </div>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="btn-secondary text-xs px-3.5 py-2"
-              >
-                Next
-              </button>
+          {loadingMore && (
+            <div className="flex justify-center py-4 mt-4">
+              <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </>

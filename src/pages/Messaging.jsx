@@ -6,8 +6,8 @@ import {
 } from '../services/calls'
 import { getConversations } from '../services/messaging'
 import { getConnections } from '../services/connections'
-import { getMyProjects } from '../services/projects'
-import { sendRealtimeMessage } from '../services/realtimeChat'
+import { getMyProjects, getProjectDetails } from '../services/project'
+import { createFirebaseConversation, createFirebaseGroupConversation, getGroupConversation, listenToUserConversations, listenToUserPresence, sendRealtimeMessage } from '../services/realtimeChat'
 import { getCurrentUserId } from '../utils/projectAccess'
 import { useAuth } from '../context/AuthContext'
 import MessagingUI from '../ui/pages/MessagingUI'
@@ -83,6 +83,9 @@ const getPersonAvatar = (person) =>
 const getConversationId = (conversation) =>
   conversation?.id || conversation?.uuid || conversation?.conversation_id
 
+const getCallId = (call) =>
+  call?.id || call?.uuid || call?.call_id
+
 const getProjectId = (project) =>
   project?.id || project?.uuid || project?.project_id || project?.project_uuid
 
@@ -102,38 +105,74 @@ const safeFirebaseKey = (value) =>
     .trim()
     .replace(/[.#$[\]/]/g, '_')
 
-const buildDirectCallRoom = (conversationId) =>
-  `cofound-${safeFirebaseKey(conversationId)}-${Date.now()}`
+const buildFirebaseDirectConversation = (myId, person) => {
+    const otherUser = person?.person || person
+    const personId = getPersonId(otherUser || person?.id)
+    const participants = [normalizeId(myId), normalizeId(personId)].filter(Boolean).sort()
 
-const buildDirectCallUrl = (roomName) =>
-  `https://meet.jit.si/${encodeURIComponent(roomName)}`
+    if (participants.length < 2) {
+      throw new Error('Cannot create a chat without both user IDs.')
+    }
 
-const createFirebaseDirectConversation = (myId, person) => {
-  const otherUser = person?.person || person
-  const personId = getPersonId(otherUser || person?.id)
-  const participants = [normalizeId(myId), normalizeId(personId)].filter(Boolean).sort()
-
-  if (participants.length < 2) {
-    throw new Error('Cannot create a chat without both user IDs.')
+    return {
+      conversation_type: 'direct',
+      title: getPersonName(otherUser),
+      participant_ids: participants,
+      participants,
+      users: [
+        { id: normalizeId(myId) },
+        {
+          id: normalizeId(personId),
+          full_name: getPersonName(otherUser),
+          username: otherUser?.username || otherUser?.email || '',
+          profile_picture_url: getPersonAvatar(otherUser),
+        },
+      ],
+    }
   }
 
-  return {
-    id: `direct_${participants.map(safeFirebaseKey).join('_')}`,
-    conversation_type: 'direct',
-    title: getPersonName(otherUser),
-    participant_ids: participants,
-    users: [
-      { id: normalizeId(myId) },
-      {
-        id: normalizeId(personId),
-        full_name: getPersonName(otherUser),
-        username: otherUser?.username || otherUser?.email || '',
-        profile_picture_url: getPersonAvatar(otherUser),
-      },
-    ],
-    is_firebase_only: true,
+  const getProjectTeamMembers = (project) => {
+    const rawTeam = project?.team || project?.team_members || project?.teamMembers || project?.members || project?.project_team || []
+    if (!Array.isArray(rawTeam)) return []
+    return rawTeam.map((member) => {
+      const source = member?.user || member
+      return getPersonId(source) || normalizeId(source)
+    }).filter(Boolean)
   }
-}
+
+  const buildFirebaseProjectConversation = (myId, project, teamMembers = []) => {
+    const projectId = getProjectId(project)
+    if (!projectId) throw new Error('Cannot identify this project.')
+
+    const members = Array.isArray(teamMembers) ? teamMembers : []
+    const participantIds = new Set([normalizeId(myId)])
+    const users = [{ id: normalizeId(myId) }]
+
+    members.forEach((member) => {
+      const source = member?.user || member
+      const memberId = getPersonId(source)
+      if (!memberId) return
+      const normalizedId = normalizeId(memberId)
+      if (participantIds.has(normalizedId)) return
+      participantIds.add(normalizedId)
+      users.push({
+        id: normalizedId,
+        full_name: getPersonName(source),
+        username: source?.username || source?.email || '',
+        profile_picture_url: getPersonAvatar(source),
+      })
+    })
+
+    return {
+      id: projectId,
+      conversation_type: 'project',
+      title: `Project: ${getProjectName(project)}`,
+      project_id: projectId,
+      participant_ids: Array.from(participantIds),
+      participants: Array.from(participantIds),
+      users,
+    }
+  }
 
 const getConversationParticipantIds = (conversation) => {
   const fields = [
@@ -173,6 +212,7 @@ export default function Messaging() {
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const autoOpenedUserRef = useRef('')
+  const autoOpenedProjectRef = useRef('')
   const [conversations, setConversations] = useState([])
   const [connections, setConnections] = useState([])
   const [projects, setProjects] = useState([])
@@ -180,6 +220,8 @@ export default function Messaging() {
   const [loading, setLoading] = useState(true)
   const [selectedConversationId, setSelectedConversationId] = useState('')
   const [selectedPersonId, setSelectedPersonId] = useState('')
+  const [selectedProjectId, setSelectedProjectId] = useState('')
+  const [selectedPersonPresence, setSelectedPersonPresence] = useState(null)
   const [activeCall, setActiveCall] = useState(null)
   const [selectedCallDetail, setSelectedCallDetail] = useState(null)
   const [loadingCallDetail, setLoadingCallDetail] = useState(false)
@@ -216,8 +258,34 @@ export default function Messaging() {
     [connectedPeople, selectedPersonId]
   )
 
+  const selectedProject = useMemo(
+    () => projects.find((item) => normalizeKey(getProjectId(item)) === normalizeKey(selectedProjectId)),
+    [projects, selectedProjectId]
+  )
+
+  const selectedConversation = useMemo(
+    () => conversations.find((conversation) => normalizeKey(getConversationId(conversation)) === normalizeKey(selectedConversationId)),
+    [conversations, selectedConversationId]
+  )
+
+  useEffect(() => {
+    if (!selectedPerson?.id) {
+      setSelectedPersonPresence(null)
+      return undefined
+    }
+
+    return listenToUserPresence(
+      selectedPerson.id,
+      (presence) => setSelectedPersonPresence(presence),
+      () => {}
+    )
+  }, [selectedPerson?.id])
+
   const fetchConversations = async () => {
-    const res = await getConversations()
+    const userId = getCurrentUserId(user)
+    if (!userId) return []
+
+    const res = await getConversations(userId)
     const list = extractConversations(res)
     setConversations(list)
     return list
@@ -242,6 +310,17 @@ export default function Messaging() {
     setCalls(extractCalls(res))
   }
 
+  const upsertCall = (call) => {
+    const callId = getCallId(call)
+    if (!callId) return
+    setCalls((prev) => {
+      const exists = prev.some((item) => normalizeKey(getCallId(item)) === normalizeKey(callId))
+      return exists
+        ? prev.map((item) => normalizeKey(getCallId(item)) === normalizeKey(callId) ? { ...item, ...call } : item)
+        : [call, ...prev]
+    })
+  }
+
   const loadPage = async () => {
     setLoading(true)
     setError(null)
@@ -256,19 +335,71 @@ export default function Messaging() {
 
   useEffect(() => { loadPage() }, [])
 
+  useEffect(() => {
+    const userId = getCurrentUserId(user)
+    if (!userId) return undefined
+    return listenToUserConversations(userId, setConversations, (err) => {
+      setError(err?.message || 'Failed to load conversations.')
+    })
+  }, [user])
+
+  const findDirectConversationForPerson = (personId) => {
+    const myId = normalizeKey(getCurrentUserId(user))
+    const targetId = normalizeKey(personId)
+    return conversations.find((conversation) => {
+      if (`${conversation?.conversation_type || ''}`.toLowerCase() !== 'direct') return false
+      const participants = (conversation?.participants || conversation?.participant_ids || []).map(normalizeKey)
+      return participants.length === 2 && participants.includes(myId) && participants.includes(targetId)
+    })
+  }
+
   const ensureConversationForPerson = async (person) => {
     const personId = getPersonId(person?.person || person?.id)
     if (!personId) throw new Error('Cannot identify this user.')
 
-    const existing = conversations.find((conversation) => conversationIncludesPerson(conversation, personId))
+    const existing = findDirectConversationForPerson(personId)
     const existingId = getConversationId(existing)
     if (existingId) return existing
 
-    const created = createFirebaseDirectConversation(getCurrentUserId(user), person)
-    const createdId = getConversationId(created)
+    const createdPayload = buildFirebaseDirectConversation(getCurrentUserId(user), person)
+    const created = await createFirebaseConversation(createdPayload)
 
     setConversations((prev) => {
-      const exists = prev.some((conversation) => normalizeKey(getConversationId(conversation)) === normalizeKey(createdId))
+      const exists = prev.some((conversation) => normalizeKey(getConversationId(conversation)) === normalizeKey(getConversationId(created)))
+      return exists ? prev : [created, ...prev]
+    })
+    return created
+  }
+
+  const ensureConversationForProject = async (project) => {
+    const projectId = getProjectId(project)
+    if (!projectId) throw new Error('Cannot identify this project.')
+
+    const existing = conversations.find((conversation) => normalizeKey(conversation?.project_id) === normalizeKey(projectId))
+    const existingId = getConversationId(existing)
+    if (existingId) return existing
+
+    const projectDetails = await getProjectDetails(projectId)
+    const teamMembers = getProjectTeamMembers(projectDetails)
+    const currentUserId = normalizeKey(getCurrentUserId(user))
+    if (!teamMembers.map(normalizeKey).includes(currentUserId)) {
+      throw new Error('You are not authorized to join this project chat.')
+    }
+
+    const existingGroupConversation = await getGroupConversation(projectId)
+    if (existingGroupConversation) {
+      setConversations((prev) => {
+        const exists = prev.some((conversation) => normalizeKey(getConversationId(conversation)) === normalizeKey(getConversationId(existingGroupConversation)))
+        return exists ? prev : [existingGroupConversation, ...prev]
+      })
+      return existingGroupConversation
+    }
+
+    const createdPayload = buildFirebaseProjectConversation(getCurrentUserId(user), projectDetails, projectDetails.team || teamMembers)
+    const created = await createFirebaseGroupConversation(projectId, createdPayload)
+
+    setConversations((prev) => {
+      const exists = prev.some((conversation) => normalizeKey(getConversationId(conversation)) === normalizeKey(getConversationId(created)))
       return exists ? prev : [created, ...prev]
     })
     return created
@@ -277,6 +408,7 @@ export default function Messaging() {
   const handleSelectPerson = async (person) => {
     if (normalizeKey(person.id) === normalizeKey(selectedPersonId) && selectedConversationId) return
     setError(null)
+    setSelectedProjectId('')
     setSelectedPersonId(person.id)
     setPreparingConversation(true)
     try {
@@ -284,6 +416,25 @@ export default function Messaging() {
       setSelectedConversationId(getConversationId(conversation))
     } catch (err) {
       setError(err?.response?.data?.message || err.message || 'Failed to open conversation with this connection.')
+    } finally {
+      setPreparingConversation(false)
+    }
+  }
+
+  const handleSelectProject = async (project) => {
+    const projectId = getProjectId(project)
+    if (!projectId) return
+    if (normalizeKey(projectId) === normalizeKey(selectedProjectId) && selectedConversationId) return
+
+    setError(null)
+    setSelectedPersonId('')
+    setSelectedProjectId(projectId)
+    setPreparingConversation(true)
+    try {
+      const conversation = await ensureConversationForProject(project)
+      setSelectedConversationId(getConversationId(conversation))
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || 'Failed to open project conversation.')
     } finally {
       setPreparingConversation(false)
     }
@@ -299,7 +450,21 @@ export default function Messaging() {
       handleSelectPerson(person)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, connectedPeople])
+  }, [searchParams, connectedPeople, preparingConversation])
+
+  useEffect(() => {
+    const requestedProjectId = searchParams.get('project')
+    if (!requestedProjectId || preparingConversation) return
+    if (normalizeKey(autoOpenedProjectRef.current) === normalizeKey(requestedProjectId)) return
+    if (projects.length === 0) return
+
+    const project = projects.find((item) => normalizeKey(getProjectId(item)) === normalizeKey(requestedProjectId)) || { id: requestedProjectId, project_id: requestedProjectId }
+    if (project) {
+      autoOpenedProjectRef.current = requestedProjectId
+      handleSelectProject(project)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, projects, preparingConversation])
 
   const openCallInPage = (call) => {
     const url = buildCallFrameUrl(call)
@@ -314,32 +479,44 @@ export default function Messaging() {
   const handleStartCall = async () => {
     setError(null)
     if (!selectedConversationId) {
-      setError('Choose a connected person first. Calls must be linked to a conversation.')
+      setError('Choose a connected person or project first. Calls must be linked to a conversation.')
       return
     }
 
+    const selectedConversation = conversations.find((conversation) =>
+      normalizeKey(getConversationId(conversation)) === normalizeKey(selectedConversationId)
+    )
+
     setStarting(true)
     try {
-      const roomName = buildDirectCallRoom(selectedConversationId)
-      const callUrl = buildDirectCallUrl(roomName)
+      const payload = selectedConversation?.conversation_type === 'project'
+        ? { project_id: selectedConversation.project_id, status: 'active' }
+        : { conversation_id: selectedConversationId, status: 'active' }
+
+      const call = await initiateCall(payload)
+      const callId = getCallId(call)
+      if (!callId) throw new Error('The call was created, but no call ID was returned.')
+
       await sendRealtimeMessage(selectedConversationId, {
         text: `${user?.full_name || user?.name || user?.username || 'Someone'} started a video call.`,
         senderId: getCurrentUserId(user),
         senderName: user?.full_name || user?.name || user?.username || user?.email || 'You',
         senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
         messageType: 'call_invite',
-        callUrl,
-        callRoomName: roomName,
-      })
-      openCallInPage({
-        id: roomName,
-        call_type: 'direct',
-        status: 'active',
-        room_name: roomName,
-        join_url: callUrl,
-      })
+        callId,
+        callConversationId: call?.conversation_id || selectedConversationId,
+        callProjectId: call?.project_id || selectedConversation?.project_id || '',
+        callRoomUrl: call?.room_url || '',
+        callJoinToken: call?.join_token || '',
+        callRoomName: call?.room_name || '',
+      }, selectedConversation?.conversation_type)
+      upsertCall(call)
+      openCallInPage(call)
+      await fetchCalls()
+      return call
     } catch (err) {
       setError(err?.response?.data?.message || err.message || 'Failed to start call.')
+      throw err
     } finally {
       setStarting(false)
     }
@@ -354,11 +531,35 @@ export default function Messaging() {
 
     setStarting(true)
     try {
+      const project = projects.find((item) => normalizeKey(getProjectId(item)) === normalizeKey(projectId))
+      const conversation = await ensureConversationForProject(project || { id: projectId, project_id: projectId })
+      setSelectedProjectId(projectId)
+      setSelectedPersonId('')
+      setSelectedConversationId(getConversationId(conversation))
+
       const call = await initiateCall({ project_id: projectId, status: 'active' })
+
+      await sendRealtimeMessage(getConversationId(conversation), {
+        text: `${user?.full_name || user?.name || user?.username || 'Someone'} started a project call.`,
+        senderId: getCurrentUserId(user),
+        senderName: user?.full_name || user?.name || user?.username || user?.email || 'You',
+        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        messageType: 'call_invite',
+        callId: getCallId(call),
+        callProjectId: call?.project_id || projectId,
+        callRoomUrl: call?.room_url || '',
+        callJoinToken: call?.join_token || '',
+        callRoomName: call?.room_name || '',
+        callUrl: call?.join_url || call?.meeting_url || call?.call_url || '',
+      }, 'project')
+
+      upsertCall(call)
       openCallInPage(call)
       await fetchCalls()
+      return call
     } catch (err) {
       setError(err?.response?.data?.message || err.message || 'Failed to start project call.')
+      throw err
     } finally {
       setStarting(false)
     }
@@ -369,10 +570,13 @@ export default function Messaging() {
     setError(null)
     try {
       const call = await joinCall(callId)
+      upsertCall(call)
       openCallInPage(call)
       await fetchCalls()
+      return call
     } catch (err) {
       setError(err?.response?.data?.message || err.message || 'Failed to join call.')
+      throw err
     } finally {
       setProcessingCallId(null)
     }
@@ -454,6 +658,7 @@ export default function Messaging() {
       selectedPersonId={selectedPersonId}
       selectedPerson={selectedPerson}
       selectedConversationId={selectedConversationId}
+      selectedProject={selectedProject}
       calls={calls}
       loadingCallDetail={loadingCallDetail}
       selectedCallDetail={selectedCallDetail}
@@ -467,6 +672,7 @@ export default function Messaging() {
       conversations={conversations}
       onRefresh={loadPage}
       onSelectPerson={handleSelectPerson}
+      onSelectProject={handleSelectProject}
       onStartCall={handleStartCall}
       onStartProjectCall={handleStartProjectCall}
       onJoinCall={handleJoinCall}
@@ -480,6 +686,8 @@ export default function Messaging() {
       onResetFrame={resetFrame}
       onToggleWide={handleToggleWide}
       setSelectedConversationId={setSelectedConversationId}
+      selectedConversation={selectedConversation}
+      selectedPersonPresence={selectedPersonPresence}
     />
   )
 }

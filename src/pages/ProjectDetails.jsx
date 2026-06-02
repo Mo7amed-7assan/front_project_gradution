@@ -550,6 +550,9 @@ export default function ProjectDetails() {
           {!isOwner() && !currentMember && !hasApplied() && isAcceptingApplications && (
             <button onClick={openApply} disabled={applying} className="bg-blue-600 text-white px-4 py-2 rounded">Apply</button>
           )}
+          {(isOwner() || currentMember) && (
+            <button onClick={() => navigate(`/messages?project=${id}`)} className="bg-indigo-600 text-white px-4 py-2 rounded">Open Project Chat</button>
+          )}
           {!isOwner() && currentMember && (
             <button onClick={handleLeaveTeam} className="bg-red-600 text-white px-4 py-2 rounded">Leave Project</button>
           )}

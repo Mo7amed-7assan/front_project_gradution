@@ -10,6 +10,7 @@ export default function Projects() {
   const [activeTab, setActiveTab] = useState('projects')
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(9)
   const [totalPages, setTotalPages] = useState(1)
@@ -23,8 +24,9 @@ export default function Projects() {
   })
   const [showFilters, setShowFilters] = useState(false)
 
-  const fetchProjects = async () => {
-    setLoading(true)
+  const fetchProjects = async (isLoadMore = false) => {
+    if (isLoadMore) setLoadingMore(true)
+    else setLoading(true)
     try {
       const params = { page, per_page: perPage, ...filters }
       // remove empty filters
@@ -35,7 +37,8 @@ export default function Projects() {
       console.log('GET /projects projects array:', response?.data?.data)
       console.log('Current User:', getCurrentUserId(user))
       projectItems.forEach((project) => console.log('Project Owner:', getProjectOwnerId(project)))
-      setProjects(projectItems)
+      
+      setProjects(prev => isLoadMore ? [...prev, ...projectItems] : projectItems)
       
       // try to set pagination meta
       const meta = response?.data?.meta || {}
@@ -46,11 +49,19 @@ export default function Projects() {
     } catch (err) {
       console.error(err)
     } finally {
-      setLoading(false)
+      if (!isLoadMore) setLoading(false)
+      setLoadingMore(false)
     }
   }
 
-  useEffect(() => { fetchProjects() }, [page, perPage, filters, user?.id])
+  useEffect(() => { 
+    if (page > 1) fetchProjects(true) 
+  }, [page])
+
+  useEffect(() => {
+    if (page === 1) fetchProjects(false)
+    else setPage(1)
+  }, [perPage, filters, user?.id])
 
   return (
     <ProjectsUI
@@ -58,6 +69,7 @@ export default function Projects() {
       setActiveTab={setActiveTab}
       projects={projects}
       loading={loading}
+      loadingMore={loadingMore}
       page={page}
       perPage={perPage}
       setPerPage={setPerPage}

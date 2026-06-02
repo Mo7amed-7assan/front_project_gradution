@@ -1,23 +1,29 @@
-import api from './api'
+import
+    {
+        getFirebaseConversations,
+        getFirebaseConversationMessages,
+        sendRealtimeMessage as sendRealtimeMessageToFirebase,
+        createFirebaseConversation,
+    } from './realtimeChat'
 
-export const getConversations = async () =>
+export const getConversations = async (userId = '') =>
 {
-    return api.get('/conversations')
+    return getFirebaseConversations(userId)
 }
 
 export const getConversationMessages = async (conversationId) =>
 {
-    return api.get(`/conversations/${conversationId}/messages`)
+    return getFirebaseConversationMessages(conversationId)
 }
 
 export const sendMessage = async (conversationId, payload) =>
 {
-    return api.post(`/conversations/${conversationId}/messages`, payload)
+    return sendRealtimeMessageToFirebase(conversationId, payload)
 }
 
 export const startConversation = async (payload) =>
 {
-    return api.post('/conversations', payload)
+    return createFirebaseConversation(payload)
 }
 
 export default { getConversations, getConversationMessages, sendMessage, startConversation }

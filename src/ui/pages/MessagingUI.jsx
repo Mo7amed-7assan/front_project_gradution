@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import RealtimeChatPanel from '../../components/RealtimeChatPanel'
 
 function CallStatusBadge({ status }) {
@@ -30,7 +31,10 @@ export default function MessagingUI({
   preparingConversation,
   selectedPersonId,
   selectedPerson,
+  selectedProject,
+  selectedConversation,
   selectedConversationId,
+  selectedPersonPresence,
   calls,
   loadingCallDetail,
   selectedCallDetail,
@@ -41,6 +45,7 @@ export default function MessagingUI({
   error,
   conversations,
   onSelectPerson,
+  onSelectProject,
   onStartCall,
   onStartProjectCall,
   onJoinCall,
@@ -55,12 +60,24 @@ export default function MessagingUI({
   const [sidebarTab, setSidebarTab] = useState('connections')
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [localFullScreen, setLocalFullScreen] = useState(false)
-  const [showNewCallModal, setShowNewCallModal] = useState(false)
   const [callOnlyMode, setCallOnlyMode] = useState(false)
   const videoContainerRef = useRef(null)
+  const navigate = useNavigate()
+
+  const handleHeaderClick = () => {
+    if (selectedProject) {
+      const projectId = getProjectId(selectedProject)
+      if (projectId) navigate(`/projects/${projectId}`)
+      return
+    }
+    if (selectedPerson?.id) {
+      navigate(`/users/${selectedPerson.id}`)
+    }
+  }
 
   useEffect(() => {
     if (activeCall) {
+      setSidebarTab('calls')
       setActiveRightTab('video')
       // If no person selected, enter call-only mode
       if (!selectedPerson) setCallOnlyMode(true)
@@ -123,13 +140,12 @@ export default function MessagingUI({
   )
 
   return (
-    <div className="fixed top-0 left-64 right-0 bottom-0 flex bg-white overflow-hidden z-30">
+    <div className="flex bg-white overflow-hidden h-[calc(100vh-4rem)]">
       
       {/* Sidebar */}
       <div className="w-80 flex-shrink-0 border-r border-slate-200 flex flex-col bg-slate-50/50 relative z-10">
         <div className="p-5 border-b border-slate-200 bg-white shadow-sm shrink-0">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Messages</h2>
-          <div className="flex gap-2 mt-4 bg-slate-100 p-1.5 rounded-xl border border-slate-200/60">
+          <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200/60">
              <button 
                onClick={() => setSidebarTab('connections')} 
                className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'connections' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
@@ -184,16 +200,47 @@ export default function MessagingUI({
                     })}
                   </div>
                 )}
+                <div className="pt-4 border-t border-slate-200">
+                  <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-wide text-slate-500 font-bold">
+                    <span>Project Chats</span>
+                  </div>
+                  {loading ? (
+                    <div className="text-sm text-slate-400">Loading projects...</div>
+                  ) : projects.length === 0 ? (
+                    <div className="text-sm text-slate-400">No project chats available.</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {projects.map((project) => {
+                        const projectId = getProjectId(project)
+                        const projectName = getProjectName(project)
+                        const active = String(projectId) === String(getProjectId(selectedProject) || '')
+                        return (
+                          <button
+                            key={projectId}
+                            onClick={() => onSelectProject(project)}
+                            disabled={preparingConversation}
+                            className={`w-full text-left p-3 rounded-2xl transition-all ${active ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-white border border-transparent hover:shadow-sm'}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 border border-indigo-200">
+                                {projectName?.charAt(0).toUpperCase() || 'P'}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-bold text-sm truncate ${active ? 'text-indigo-900' : 'text-slate-900'}`}>{projectName}</p>
+                                <p className="text-[11px] font-medium text-slate-400 truncate">Project group chat</p>
+                              </div>
+                              {active && <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0 shadow-sm"/>}
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
              </>
           ) : (
              <div className="flex flex-col h-full">
-                <div className="mb-4">
-                  <button onClick={() => setShowNewCallModal(true)} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-all">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                    New Call
-                  </button>
-                </div>
-                {loading ? (
+                   {loading ? (
                   <div className="space-y-3">
                     {[1,2].map(i => <div key={i} className="h-20 skeleton rounded-2xl" />)}
                   </div>
@@ -244,22 +291,42 @@ export default function MessagingUI({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
-         {sidebarTab === 'connections' && selectedPerson ? (
+         {sidebarTab === 'connections' && (selectedPerson || selectedProject) ? (
            <>
               {/* Header */}
-              <div className="h-[76px] border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white/80 backdrop-blur-md z-20">
-                 <div className="flex items-center gap-4">
-                    <PersonAvatar name={selectedPerson.name} avatar={selectedPerson.avatar} />
+              <div className="sticky top-0 z-20 h-[76px] border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white/80 backdrop-blur-md">
+                 <button
+                   type="button"
+                   onClick={handleHeaderClick}
+                   className="flex items-center gap-4 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500/30 rounded-2xl px-2 py-1"
+                 >
+                    <PersonAvatar name={selectedProject ? getProjectName(selectedProject) : selectedPerson.name} avatar={selectedPerson?.avatar} />
                     <div>
-                       <h3 className="font-bold text-slate-900 text-lg leading-none mb-1.5">{selectedPerson.name}</h3>
-                       <p className="text-xs text-emerald-500 font-bold flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                       <h3 className="font-bold text-slate-900 text-lg leading-none mb-1.5 hover:text-indigo-600 transition-colors">
+                         {selectedProject ? getProjectName(selectedProject) : selectedPerson.name}
+                       </h3>
+                       <p className="text-xs font-bold flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedProject ? 'bg-indigo-500' : selectedPersonPresence?.online ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                          {selectedProject
+                            ? 'Project group chat'
+                            : selectedPersonPresence
+                              ? selectedPersonPresence.online ? 'Online' : 'Offline'
+                              : 'Checking status...'}
                        </p>
                     </div>
-                 </div>
-                 
+                 </button>
                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Messages</span>
+                    <button
+                      type="button"
+                      onClick={onStartCall}
+                      disabled={!selectedConversationId || starting}
+                      className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Start call"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
                  </div>
               </div>
 
@@ -270,9 +337,22 @@ export default function MessagingUI({
                        <RealtimeChatPanel
                           conversations={conversations}
                           selectedConversationId={selectedConversationId}
+                          selectedConversation={selectedConversation}
+                          selectedPersonPresence={selectedPersonPresence}
                           onSelectConversation={setSelectedConversationId}
+                          onStartConversationCall={async () => {
+                            await onStartCall()
+                            setSidebarTab('calls')
+                            setActiveRightTab('video')
+                          }}
+                          onJoinConversationCall={async (callId) => {
+                            await onJoinCall(callId)
+                            setSidebarTab('calls')
+                            setActiveRightTab('video')
+                          }}
                           compact={false}
                           showConversationSelector={false}
+                          hideHeader={true}
                         />
                     </div>
                  ) : (
@@ -366,56 +446,6 @@ export default function MessagingUI({
          )}
       </div>
 
-      {/* New Call Modal */}
-      {showNewCallModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">New Call</h3>
-                <p className="text-sm text-slate-500 mt-0.5">Choose a project to start from</p>
-              </div>
-              <button onClick={() => setShowNewCallModal(false)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-            <div className="p-4 max-h-96 overflow-y-auto space-y-2">
-              {loading ? (
-                <div className="py-8 text-center text-slate-400">Loading projects...</div>
-              ) : projects.length === 0 ? (
-                <div className="py-8 text-center text-slate-400">No projects available for calls.</div>
-              ) : (
-                projects.map((project) => {
-                  const projectId = getProjectId(project)
-                  const projectName = getProjectName(project)
-                  const projectInitial = (projectName || 'P').charAt(0).toUpperCase()
-                  return (
-                  <button
-                    key={projectId}
-                    disabled={starting || !projectId}
-                    onClick={async () => {
-                      setShowNewCallModal(false)
-                      await onStartProjectCall(projectId)
-                      setCallOnlyMode(true)
-                      setActiveRightTab('video')
-                    }}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all text-left disabled:opacity-50"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 border border-indigo-200">
-                      {projectInitial}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm text-slate-900 truncate">{projectName}</p>
-                      <p className="text-xs text-slate-400 truncate">{project.status || 'Project call'}</p>
-                    </div>
-                    <svg className="w-5 h-5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  </button>
-                )})
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {selectedCallDetail && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

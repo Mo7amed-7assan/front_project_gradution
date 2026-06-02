@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import RealtimeChatPanel from '../components/RealtimeChatPanel'
+import { useAuth } from '../context/AuthContext'
+import { getCurrentUserId } from '../utils/projectAccess'
 import { getConversations } from '../services/messaging'
 
 const extractConversations = (value) => {
@@ -22,17 +24,22 @@ export default function Conversation() {
 
   useEffect(() => { setSelectedConversationId(id) }, [id])
 
+  const { user } = useAuth()
+
   useEffect(() => {
     const loadConversations = async () => {
       try {
-        const res = await getConversations()
+        const userId = getCurrentUserId(user)
+        const res = await getConversations(userId)
         setConversations(extractConversations(res))
       } catch (err) {
         setError(err?.response?.data?.message || err.message || 'Failed to load conversations.')
       }
     }
-    loadConversations()
-  }, [])
+    if (user) {
+      loadConversations()
+    }
+  }, [user])
 
   return (
     <div className="h-[calc(100vh-8rem)]">

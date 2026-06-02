@@ -279,9 +279,12 @@ function Sidebar() {
 
 /* ─── Layout ───────────────────────────────────────────────────────── */
 export default function Layout({ children }) {
+  const location = useLocation()
+  const showSidebar = true
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar />
+      {showSidebar && <Sidebar />}
       <main className="flex-1 overflow-y-auto min-h-screen">
         <div className="max-w-7xl mx-auto px-6 py-8">
           {children}

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { buildCallFrameUrl, cancelCall, endCall, getCall, initiateCall, joinCall, leaveCall } from '../services/calls'
 import { listenToConversationMessages, sendRealtimeMessage } from '../services/realtimeChat'
 
 const EMOJIS = ['😀', '😂', '😍', '😎', '😊', '👍', '🔥', '🎉', '❤️', '🙏', '💡', '✅', '🚀', '👏', '😅', '🤝', '💬', '⭐']
@@ -13,6 +15,12 @@ const getConversationId = (conversation) =>
 
 const getUserName = (user) =>
   user?.full_name || user?.name || user?.username || user?.email || 'You'
+
+const getCallId = (call) =>
+  call?.id || call?.uuid || call?.call_id
+
+const isCallJoinable = (call) =>
+  ['scheduled', 'active'].includes(`${call?.status || ''}`.toLowerCase())
 
 const formatMessageTime = (value) => {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null
@@ -65,9 +73,14 @@ function ChatPlaceholder({ hasConversation }) {
 export default function RealtimeChatPanel({
   conversations = [],
   selectedConversationId,
+  selectedConversation,
+  selectedPersonPresence,
   onSelectConversation,
+  onStartConversationCall,
+  onJoinConversationCall,
   compact = false,
   showConversationSelector = true,
+  hideHeader = false,
 }) {
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
@@ -76,16 +89,50 @@ export default function RealtimeChatPanel({
   const [chatError, setChatError] = useState(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [recording, setRecording] = useState(false)
+  const [startingCall, setStartingCall] = useState(false)
+  const [joiningCallId, setJoiningCallId] = useState('')
+  const [hiddenCallIds, setHiddenCallIds] = useState([])
+  const [verifiedIncomingCall, setVerifiedIncomingCall] = useState(null)
+  const [checkingIncomingCall, setCheckingIncomingCall] = useState(false)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
   const fileInputRef = useRef(null)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
+  const navigate = useNavigate()
+
   const currentConversation = useMemo(
-    () => conversations.find(c => String(getConversationId(c)) === String(selectedConversationId)),
-    [conversations, selectedConversationId]
+    () => selectedConversation || conversations.find(c => String(getConversationId(c)) === String(selectedConversationId)),
+    [conversations, selectedConversationId, selectedConversation]
   )
+
+  const goToProfile = (userId) => {
+    if (!userId) return
+    const normalized = String(userId)
+    if (normalized === String(user?.id)) {
+      navigate('/profile')
+      return
+    }
+    navigate(`/users/${normalized}`)
+  }
+
+  const latestIncomingCandidate = useMemo(() => {
+    return [...messages].reverse().find((message) =>
+      message.messageType === 'call_invite' &&
+      message.callId &&
+      !hiddenCallIds.includes(String(message.callId)) &&
+      String(message.senderId) !== String(user?.id)
+    )
+  }, [hiddenCallIds, messages, user?.id])
+
+  const hideCall = (callId) => {
+    if (!callId) return
+    setHiddenCallIds((prev) => {
+      const normalized = String(callId)
+      return prev.includes(normalized) ? prev : [...prev, normalized]
+    })
+  }
 
   useEffect(() => {
     setMessages([])
@@ -93,14 +140,58 @@ export default function RealtimeChatPanel({
     if (!selectedConversationId) return undefined
     return listenToConversationMessages(
       selectedConversationId,
+      currentConversation?.conversation_type,
       setMessages,
       (err) => setChatError(err?.message || 'Failed to load messages.')
     )
-  }, [selectedConversationId])
+  }, [selectedConversationId, currentConversation?.conversation_type])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    let ignore = false
+    const callId = latestIncomingCandidate?.callId
+    let intervalId = null
+
+    setVerifiedIncomingCall(null)
+    if (!callId) {
+      setCheckingIncomingCall(false)
+      return undefined
+    }
+
+    const verifyIncomingCall = (showLoading = false) => {
+      if (showLoading) setCheckingIncomingCall(true)
+      return getCall(callId)
+      .then((call) => {
+        if (ignore) return
+        if (isCallJoinable(call)) {
+          setVerifiedIncomingCall({
+            ...latestIncomingCandidate,
+            callConversationId: call?.conversation_id || latestIncomingCandidate.callConversationId || selectedConversationId,
+            callProjectId: call?.project_id || latestIncomingCandidate.callProjectId || '',
+          })
+          return
+        }
+        hideCall(callId)
+      })
+      .catch(() => {
+        if (!ignore) hideCall(callId)
+      })
+      .finally(() => {
+        if (!ignore && showLoading) setCheckingIncomingCall(false)
+      })
+    }
+
+    verifyIncomingCall(true)
+    intervalId = window.setInterval(() => verifyIncomingCall(false), 5000)
+
+    return () => {
+      ignore = true
+      if (intervalId) window.clearInterval(intervalId)
+    }
+  }, [latestIncomingCandidate])
 
   const handleSend = async (event) => {
     event.preventDefault()
@@ -114,7 +205,7 @@ export default function RealtimeChatPanel({
         senderId: user?.id,
         senderName: getUserName(user),
         senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
-      })
+      }, currentConversation?.conversation_type)
       setDraft('')
       inputRef.current?.focus()
     } catch (err) {
@@ -158,7 +249,7 @@ export default function RealtimeChatPanel({
         fileName: file.name,
         fileType: file.type || 'application/octet-stream',
         fileData,
-      })
+      }, currentConversation?.conversation_type)
     } catch (err) {
       setChatError(err?.message || 'Failed to send file.')
     } finally {
@@ -210,7 +301,7 @@ export default function RealtimeChatPanel({
             messageType: 'audio',
             audioData,
             audioType: audioBlob.type || 'audio/webm',
-          })
+          }, currentConversation?.conversation_type)
         } catch (err) {
           setChatError(err?.message || 'Failed to send voice note.')
         } finally {
@@ -235,42 +326,188 @@ export default function RealtimeChatPanel({
     inputRef.current?.focus()
   }
 
+  const openCallWindow = (url, callWindow) => {
+    if (!url) throw new Error('The call did not return a room URL.')
+
+    if (callWindow && !callWindow.closed) {
+      callWindow.location.href = url
+      callWindow.focus()
+      return callWindow
+    }
+
+    const opened = window.open(url, '_blank')
+    if (!opened) throw new Error('Please allow pop-ups to open the call room.')
+    opened.opener = null
+    return opened
+  }
+
+  const closeCallOnWindowClose = (callId, callWindow, isHost = false) => {
+    if (!callId || !callWindow) return
+
+    const intervalId = window.setInterval(async () => {
+      if (!callWindow.closed) return
+      window.clearInterval(intervalId)
+
+      try {
+        const call = await getCall(callId)
+        const status = `${call?.status || ''}`.toLowerCase()
+        if (status === 'scheduled') await cancelCall(callId)
+        else if (status === 'active' && isHost) await endCall(callId)
+        else if (status === 'active') await leaveCall(callId)
+      } catch (err) {
+        // The call may already be closed by another participant.
+      }
+    }, 1500)
+  }
+
+  const handleStartCall = async () => {
+    if (!selectedConversationId || startingCall) return
+    let callWindow = null
+    setStartingCall(true)
+    setChatError(null)
+
+    try {
+      if (onStartConversationCall) {
+        await onStartConversationCall(selectedConversationId)
+        return
+      }
+
+      callWindow = window.open('about:blank', '_blank')
+      const call = await initiateCall({
+        conversation_id: selectedConversationId,
+        status: 'active',
+      })
+      const callId = getCallId(call)
+      const callUrl = buildCallFrameUrl(call)
+
+      if (!callId) throw new Error('The call was created, but no call ID was returned.')
+
+      await sendRealtimeMessage(selectedConversationId, {
+        text: `${getUserName(user)} started a video call.`,
+        senderId: user?.id,
+        senderName: getUserName(user),
+        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        messageType: 'call_invite',
+        callId,
+        callConversationId: call?.conversation_id || selectedConversationId,
+        callRoomName: call?.room_name || '',
+      })
+
+      const openedCallWindow = openCallWindow(callUrl, callWindow)
+      closeCallOnWindowClose(callId, openedCallWindow, true)
+    } catch (err) {
+      callWindow?.close()
+      setChatError(err?.response?.data?.message || err.message || 'Failed to start call.')
+    } finally {
+      setStartingCall(false)
+    }
+  }
+
+  const handleJoinCall = async (message) => {
+    const callId = message?.callId
+    if (!callId || joiningCallId) return
+    let callWindow = null
+    setJoiningCallId(callId)
+    setChatError(null)
+
+    try {
+      if (onJoinConversationCall) {
+        await onJoinConversationCall(callId)
+        hideCall(callId)
+        return
+      }
+
+      callWindow = window.open('about:blank', '_blank')
+      const call = await joinCall(callId)
+      const openedCallWindow = openCallWindow(buildCallFrameUrl(call), callWindow)
+      closeCallOnWindowClose(callId, openedCallWindow, false)
+    } catch (err) {
+      callWindow?.close()
+      hideCall(callId)
+      setChatError(err?.response?.data?.message || err.message || 'Failed to join call.')
+    } finally {
+      setJoiningCallId('')
+    }
+  }
+
   return (
-    <section className="card flex flex-col overflow-hidden bg-white shadow-xl shadow-brand-primary/5 border-brand-primaryLight" style={{ minHeight: '36rem' }}>
+    <section className="card flex h-full flex-col overflow-hidden bg-white shadow-xl shadow-brand-primary/5 border-brand-primaryLight" style={{ minHeight: '36rem' }}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-md shrink-0 z-10 sticky top-0">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-             <div className="w-10 h-10 rounded-xl bg-brand-primaryLight flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                </svg>
-             </div>
-             <div className="min-w-0">
-                <h3 className="font-bold text-brand-secondary text-sm truncate">
-                  {currentConversation ? getConversationLabel(currentConversation) : 'Live Chat'}
-                </h3>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
-                  <p className="text-xs text-slate-500 truncate">
-                    {selectedConversationId ? 'Connected & Secured' : 'Select a conversation'}
-                  </p>
-                </div>
-             </div>
-          </div>
-          {showConversationSelector && conversations.length > 0 && (
-            <select
-              value={selectedConversationId || ''}
-              onChange={(e) => onSelectConversation?.(e.target.value)}
-              className="form-select text-xs py-2 w-48 bg-slate-50 border-none focus:ring-1 focus:ring-brand-primary"
+      {!hideHeader && (
+        <div className="px-6 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-md shrink-0 z-10 sticky top-0">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+               <div className="w-10 h-10 rounded-xl bg-brand-primaryLight flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                  </svg>
+               </div>
+               <div className="min-w-0">
+                  <h3 className="font-bold text-brand-secondary text-sm truncate">
+                    {currentConversation ? getConversationLabel(currentConversation) : 'Live Chat'}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                    <p className="text-xs text-slate-500 truncate">
+                      {selectedConversationId ? 'Connected & Secured' : 'Select a conversation'}
+                    </p>
+                  </div>
+               </div>
+            </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {showConversationSelector && conversations.length > 0 && (
+              <select
+                value={selectedConversationId || ''}
+                onChange={(e) => onSelectConversation?.(e.target.value)}
+                className="form-select text-xs py-2 w-48 bg-slate-50 border-none focus:ring-1 focus:ring-brand-primary"
+              >
+                {conversations.map(c => (
+                  <option key={getConversationId(c)} value={getConversationId(c)}>{getConversationLabel(c)}</option>
+                ))}
+              </select>
+            )}
+            <button
+              type="button"
+              onClick={handleStartCall}
+              disabled={!selectedConversationId || startingCall}
+              title={startingCall ? 'Starting call' : 'Start video call'}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary text-white shadow-sm shadow-brand-primary/25 hover:bg-brand-primaryDark transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {conversations.map(c => (
-                <option key={getConversationId(c)} value={getConversationId(c)}>{getConversationLabel(c)}</option>
-              ))}
-            </select>
-          )}
+              {startingCall ? (
+                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
+      )}
+
+      {verifiedIncomingCall && (
+        <div className="mx-6 mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-emerald-800 shrink-0 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Incoming call</p>
+            <p className="text-sm font-semibold truncate">{verifiedIncomingCall.senderName || 'Someone'} is calling you.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleJoinCall(verifiedIncomingCall)}
+            disabled={joiningCallId === verifiedIncomingCall.callId || checkingIncomingCall}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            {joiningCallId === verifiedIncomingCall.callId ? 'Joining...' : 'Join'}
+          </button>
+        </div>
+      )}
 
       {/* Error */}
       {chatError && (
@@ -302,8 +539,15 @@ export default function RealtimeChatPanel({
                 <div key={message.id} className={`flex items-end gap-3 relative ${isMine ? 'flex-row-reverse' : 'flex-row'} ${prevMine === isMine ? 'mt-2' : 'mt-6'}`}>
                   {(!isMine || true) && ( // Always render space for alignment, but only show avatar if not mine or if we want to show our own
                      <div className={`shrink-0 ${isMine ? 'hidden sm:block' : 'block'}`}>
+                     <button
+                       type="button"
+                       onClick={() => goToProfile(message.senderId)}
+                       title="View profile"
+                       className="rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+                     >
                         <Avatar name={message.senderName} isMine={isMine} />
-                     </div>
+                     </button>
+                  </div>
                   )}
                   
                   <div className={`max-w-[75%] sm:max-w-[65%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
@@ -339,7 +583,21 @@ export default function RealtimeChatPanel({
                       {message.audioData && (
                         <audio controls src={message.audioData} className="mt-3 w-64 max-w-full" />
                       )}
-                      {message.callUrl && (
+                      {message.callId && !hiddenCallIds.includes(String(message.callId)) ? (
+                        <button
+                          type="button"
+                          onClick={() => handleJoinCall(message)}
+                          disabled={joiningCallId === message.callId}
+                          className={`mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
+                            isMine
+                              ? 'bg-white text-brand-primary hover:bg-slate-100'
+                              : 'bg-brand-primary text-white hover:bg-brand-primaryDark'
+                          }`}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                          {joiningCallId === message.callId ? 'Joining...' : 'Join Call'}
+                        </button>
+                      ) : message.callUrl && (
                         <a
                           href={message.callUrl}
                           target="_blank"
@@ -375,7 +633,7 @@ export default function RealtimeChatPanel({
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="p-4 border-t border-slate-100 bg-white shrink-0 z-10">
+      <form onSubmit={handleSend} className="sticky bottom-0 z-10 p-4 border-t border-slate-100 bg-white shrink-0">
         <div className="flex flex-col gap-2 p-1 rounded-2xl border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-brand-primary/20 focus-within:border-brand-primary/50 transition-all">
           <input
             ref={fileInputRef}
