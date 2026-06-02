@@ -5,11 +5,12 @@ import { getReportById, updateReport } from '../services/adminReports'
 import { useAuth } from '../context/AuthContext'
 
 const statusMap = {
-  open:     { cls: 'badge-yellow', label: 'Open' },
-  pending:  { cls: 'badge-yellow', label: 'Pending' },
-  assigned: { cls: 'badge-blue',   label: 'Assigned' },
-  resolved: { cls: 'badge-green',  label: 'Resolved' },
-  closed:   { cls: 'badge-slate',  label: 'Closed' },
+  pending:      { cls: 'badge-yellow', label: 'Pending' },
+  under_review: { cls: 'badge-blue',   label: 'Under Review' },
+  resolved:     { cls: 'badge-green',  label: 'Resolved' },
+  dismissed:    { cls: 'badge-slate',  label: 'Dismissed' },
+  escalated:    { cls: 'badge-red',    label: 'Escalated' },
+  withdrawn:    { cls: 'badge-slate',  label: 'Withdrawn' },
 }
 
 function InfoRow({ label, children }) {
@@ -30,8 +31,10 @@ export default function AdminReportDetail() {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [status, setStatus] = useState('')
+  const [priority, setPriority] = useState('')
   const [assignedTo, setAssignedTo] = useState('')
-  const [internalNotes, setInternalNotes] = useState('')
+  const [resolutionAction, setResolutionAction] = useState('')
+  const [resolutionNotes, setResolutionNotes] = useState('')
   const [message, setMessage] = useState(null)
 
   const fetch = async () => {
@@ -40,8 +43,10 @@ export default function AdminReportDetail() {
       const res = await getReportById(id)
       setData(res)
       setStatus(res.status || '')
-      setAssignedTo(res.assigned_to_id || res.assigned_to?.id || '')
-      setInternalNotes(res.internal_notes || '')
+      setPriority(res.priority || 'medium')
+      setAssignedTo(res.assigned_to?.id || res.assigned_to_id || '')
+      setResolutionAction(res.resolution_action || '')
+      setResolutionNotes(res.resolution_notes || '')
     } catch (err) {
       console.error(err)
       setMessage({ type: 'error', text: 'Failed to load report' })
@@ -60,8 +65,10 @@ export default function AdminReportDetail() {
     try {
       const payload = {
         status: status || undefined,
-        assigned_to_id: assignedTo || undefined,
-        internal_notes: internalNotes || undefined,
+        priority: priority || undefined,
+        assigned_to: assignedTo || null,
+        resolution_action: resolutionAction || undefined,
+        resolution_notes: resolutionNotes || undefined,
       }
       await updateReport(id, payload)
       setMessage({ type: 'success', text: 'Report updated successfully.' })
@@ -88,7 +95,17 @@ export default function AdminReportDetail() {
           </Link>
           <h1 className="page-title text-brand-secondary">Report Detail</h1>
         </div>
-        <span className={`badge ${badge.cls}`}>{badge.label}</span>
+        <div className="flex items-center gap-2">
+          {data.reported_user?.id && (
+            <Link
+              to={`/admin/restrict-user?userId=${data.reported_user.id}`}
+              className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-rose-500/20"
+            >
+              🔒 Restrict Reported User
+            </Link>
+          )}
+          <span className={`badge ${badge.cls}`}>{badge.label}</span>
+        </div>
       </div>
 
       {message && (
@@ -104,14 +121,30 @@ export default function AdminReportDetail() {
             
             <div className="grid grid-cols-2 gap-6 mb-6">
               <InfoRow label="Reported By">
-                <span className="text-brand-primary cursor-pointer hover:underline">
-                  {data.reporter?.full_name || data.reporter?.name || data.reporter_id || 'Unknown'}
-                </span>
+                {data.reporter?.id ? (
+                  <Link to={`/admin/users/${data.reporter.id}`} className="text-brand-primary font-bold hover:underline">
+                    {data.reporter.full_name || data.reporter.name || data.reporter.username || data.reporter_id}
+                  </Link>
+                ) : (
+                  <span className="text-slate-500 font-semibold">{data.reporter_id || 'Unknown'}</span>
+                )}
               </InfoRow>
               <InfoRow label="Reported User / Target">
-                <span className="text-rose-600 cursor-pointer hover:underline">
-                  {data.reported_user?.full_name || data.reported_user?.name || data.target_id || 'Unknown'}
-                </span>
+                {data.reported_user?.id ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link to={`/admin/users/${data.reported_user.id}`} className="text-rose-600 font-bold hover:underline">
+                      {data.reported_user.full_name || data.reported_user.name || data.reported_user.username || data.reported_user.id}
+                    </Link>
+                    <Link
+                      to={`/admin/restrict-user?userId=${data.reported_user.id}`}
+                      className="text-[10px] bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-lg border border-rose-200 transition-colors ml-1"
+                    >
+                      🛡️ Restrict
+                    </Link>
+                  </div>
+                ) : (
+                  <span className="text-slate-500 font-semibold">{data.target_id || 'Unknown'}</span>
+                )}
               </InfoRow>
               <InfoRow label="Report Type">
                 {data.report_type || data.reason || 'Unknown'}
@@ -136,12 +169,22 @@ export default function AdminReportDetail() {
             <div className="space-y-4">
               <div>
                 <label className="form-label">Status</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="form-select">
-                  <option value="">-- Select status --</option>
-                  <option value="open">Open</option>
-                  <option value="assigned">Assigned</option>
+                <select value={status} onChange={(e) => setStatus(e.target.value)} className="form-select bg-slate-50">
+                  <option value="pending">Pending</option>
+                  <option value="under_review">Under Review</option>
                   <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
+                  <option value="dismissed">Dismissed</option>
+                  <option value="escalated">Escalated</option>
+                  <option value="withdrawn">Withdrawn</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="form-label">Priority</label>
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="form-select bg-slate-50">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </select>
               </div>
 
@@ -151,17 +194,28 @@ export default function AdminReportDetail() {
                   type="text"
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  className="form-input font-mono"
+                  className="form-input font-mono bg-slate-50"
                   placeholder="Leave empty if not assigned"
                 />
               </div>
 
               <div>
-                <label className="form-label">Internal Notes</label>
+                <label className="form-label">Resolution Action</label>
+                <input
+                  type="text"
+                  value={resolutionAction}
+                  onChange={(e) => setResolutionAction(e.target.value)}
+                  className="form-input bg-slate-50"
+                  placeholder="e.g. Banned user, Dismissed"
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Resolution Notes</label>
                 <textarea
-                  value={internalNotes}
-                  onChange={(e) => setInternalNotes(e.target.value)}
-                  className="form-input"
+                  value={resolutionNotes}
+                  onChange={(e) => setResolutionNotes(e.target.value)}
+                  className="form-input bg-slate-50"
                   rows={4}
                   placeholder="Notes visible only to admins..."
                 />

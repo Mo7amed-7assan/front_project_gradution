@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom'
 import Spinner from '../../components/Spinner'
 
 const statusMap = {
-  open:     { cls: 'badge-yellow', label: 'Open' },
-  pending:  { cls: 'badge-yellow', label: 'Pending' },
-  assigned: { cls: 'badge-blue',   label: 'Assigned' },
-  resolved: { cls: 'badge-green',  label: 'Resolved' },
-  closed:   { cls: 'badge-slate',  label: 'Closed' },
+  pending:      { cls: 'badge-yellow', label: 'Pending' },
+  under_review: { cls: 'badge-blue',   label: 'Under Review' },
+  resolved:     { cls: 'badge-green',  label: 'Resolved' },
+  dismissed:    { cls: 'badge-slate',  label: 'Dismissed' },
+  escalated:    { cls: 'badge-red',    label: 'Escalated' },
+  withdrawn:    { cls: 'badge-slate',  label: 'Withdrawn' },
 }
 
 const getStatusBadge = (status) => statusMap[`${status || ''}`.toLowerCase()] || { cls: 'badge-slate', label: status || 'Unknown' }
@@ -30,10 +31,11 @@ export default function AdminReportsUI({ items, loading, filterStatus, setFilter
           className="form-select w-auto"
         >
           <option value="all">All Statuses</option>
-          <option value="open">Open</option>
-          <option value="assigned">Assigned</option>
+          <option value="pending">Pending</option>
+          <option value="under_review">Under Review</option>
           <option value="resolved">Resolved</option>
-          <option value="closed">Closed</option>
+          <option value="dismissed">Dismissed</option>
+          <option value="escalated">Escalated</option>
         </select>
       </div>
 

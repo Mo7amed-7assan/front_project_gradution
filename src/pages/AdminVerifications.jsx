@@ -6,13 +6,15 @@ import AdminVerificationsUI from '../ui/pages/AdminVerificationsUI'
 export default function AdminVerifications() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState('all')
   const { user } = useAuth()
 
   useEffect(() => {
     async function load() {
       setLoading(true)
       try {
-        const data = await listVerifications({ per_page: 50 })
+        const params = statusFilter !== 'all' ? { status: statusFilter, per_page: 50 } : { per_page: 50 }
+        const data = await listVerifications(params)
         if (Array.isArray(data)) setItems(data)
         else if (Array.isArray(data?.data)) setItems(data.data)
         else setItems(data || [])
@@ -23,7 +25,14 @@ export default function AdminVerifications() {
       }
     }
     load()
-  }, [user?.id])
+  }, [user?.id, statusFilter])
 
-  return <AdminVerificationsUI items={items} loading={loading} />
+  return (
+    <AdminVerificationsUI
+      items={items}
+      loading={loading}
+      statusFilter={statusFilter}
+      setStatusFilter={setStatusFilter}
+    />
+  )
 }

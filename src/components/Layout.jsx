@@ -104,6 +104,7 @@ const NAV_ITEMS = [
   { to: '/discover',          label: 'Discover People',   icon: 'People' },
   { to: '/profile',           label: 'My Profile',        icon: 'User' },
   { to: '/verification',      label: 'Verification',      icon: 'Check' },
+  { to: '/reports',           label: 'My Reports',        icon: 'Report' },
 ]
 
 const ADMIN_NAV_ITEMS = [
