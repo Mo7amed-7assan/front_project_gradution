@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import RealtimeChatPanel from '../../components/RealtimeChatPanel'
 
 function CallStatusBadge({ status }) {
-  const map = { active: 'bg-green-100 text-green-700', scheduled: 'bg-yellow-100 text-yellow-700', cancelled: 'bg-slate-100 text-slate-600', ended: 'bg-slate-100 text-slate-600' }
+  const map = { active: 'bg-green-100 text-green-700', scheduled: 'bg-yellow-100 text-yellow-700', cancelled: 'bg-slate-100 text-slate-600', canceled: 'bg-slate-100 text-slate-600', ended: 'bg-slate-100 text-slate-600' }
   return <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${map[status] || 'bg-indigo-100 text-indigo-700'}`}>{status}</span>
 }
 
@@ -22,7 +22,15 @@ const getCallLabel = (call) => {
   return call.room_name || call.title || ctx
 }
 
-const canJoin = (call) => ['scheduled', 'active'].includes(`${call.status || ''}`.toLowerCase())
+const canJoin = (call) => {
+  const status = `${call.status || ''}`.toLowerCase()
+  if (status === 'active') return true
+  if (status === 'scheduled') {
+    const startTime = call.start_time ? new Date(call.start_time) : null
+    return startTime ? startTime.getTime() <= Date.now() : false
+  }
+  return false
+}
 
 export default function MessagingUI({
   loading,
@@ -47,6 +55,7 @@ export default function MessagingUI({
   onSelectPerson,
   onSelectProject,
   onStartCall,
+  onScheduleCall,
   onStartProjectCall,
   onJoinCall,
   onShowCallDetail,
@@ -61,6 +70,10 @@ export default function MessagingUI({
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [localFullScreen, setLocalFullScreen] = useState(false)
   const [callOnlyMode, setCallOnlyMode] = useState(false)
+  const [showCallOptions, setShowCallOptions] = useState(false)
+  const [scheduleTime, setScheduleTime] = useState('')
+  const [scheduling, setScheduling] = useState(false)
+  const [callOptionError, setCallOptionError] = useState(null)
   const videoContainerRef = useRef(null)
   const navigate = useNavigate()
 
@@ -118,6 +131,33 @@ export default function MessagingUI({
 
   const getProjectId = (project) => project?.id || project?.uuid || project?.project_id || project?.project_uuid
   const getProjectName = (project) => project?.title || project?.name || `Project ${getProjectId(project) || ''}`.trim()
+  const toggleCallOptions = () => {
+    setShowCallOptions((prev) => !prev)
+    setCallOptionError(null)
+  }
+  const handleCallNow = async () => {
+    setCallOptionError(null)
+    setShowCallOptions(false)
+    await onStartCall?.()
+  }
+  const handleScheduleNow = async () => {
+    if (!scheduleTime) {
+      setCallOptionError('Please select a date and time.')
+      return
+    }
+    setCallOptionError(null)
+    setScheduling(true)
+    try {
+      await onScheduleCall?.(scheduleTime)
+      setShowCallOptions(false)
+      setScheduleTime('')
+      setSidebarTab('calls')
+    } catch (err) {
+      setCallOptionError(err?.message || 'Failed to schedule call.')
+    } finally {
+      setScheduling(false)
+    }
+  }
   const formatCallDate = (value) => value ? new Date(value).toLocaleString() : '-'
   const callDetailRows = selectedCallDetail ? [
     ['Status', selectedCallDetail.status || '-'],
@@ -315,10 +355,10 @@ export default function MessagingUI({
                        </p>
                     </div>
                  </button>
-                 <div className="flex items-center gap-3">
+                 <div className="flex items-center gap-3 relative">
                     <button
                       type="button"
-                      onClick={onStartCall}
+                      onClick={toggleCallOptions}
                       disabled={!selectedConversationId || starting}
                       className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Start call"
@@ -327,6 +367,40 @@ export default function MessagingUI({
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                     </button>
+                    {showCallOptions && (
+                      <div className="absolute right-0 top-full mt-2 w-[280px] rounded-3xl border border-slate-200 bg-white shadow-2xl p-4 z-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-bold text-slate-900">Video Call</span>
+                          <button type="button" onClick={() => setShowCallOptions(false)} className="text-slate-400 hover:text-slate-600 transition-colors">✕</button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCallNow}
+                          disabled={!selectedConversationId || starting}
+                          className="w-full mb-2 rounded-2xl bg-indigo-600 text-white py-2 text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {starting ? 'Starting...' : 'Call now'}
+                        </button>
+                        <div className="border-t border-slate-200 pt-3">
+                          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-semibold mb-2">Schedule</p>
+                          <input
+                            type="datetime-local"
+                            value={scheduleTime}
+                            onChange={(e) => setScheduleTime(e.target.value)}
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleScheduleNow}
+                            disabled={!scheduleTime || scheduling}
+                            className="w-full mt-3 rounded-2xl bg-yellow-500 text-white py-2 text-sm font-bold hover:bg-yellow-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {scheduling ? 'Scheduling...' : 'Schedule call'}
+                          </button>
+                          {callOptionError && <p className="mt-2 text-xs text-rose-600">{callOptionError}</p>}
+                        </div>
+                      </div>
+                    )}
                  </div>
               </div>
 

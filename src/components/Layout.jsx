@@ -182,9 +182,13 @@ function Sidebar() {
       <div className="px-4 py-3 border-b border-slate-700/60">
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow">
-              {avatar}
-            </div>
+            {(user?.profile_picture || user?.profile_picture_url || user?.avatar) ? (
+              <img src={user.profile_picture || user.profile_picture_url || user.avatar} alt={displayName} className="w-9 h-9 rounded-xl object-cover shadow" />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shadow">
+                {avatar}
+              </div>
+            )}
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full"/>
           </div>
           <div className="min-w-0">

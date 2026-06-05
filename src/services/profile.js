@@ -10,7 +10,7 @@ export async function getMyProfile(params = {})
 
 export async function updateMyProfile(payload)
 {
-    const res = await api.put('/profile', payload)
+    const res = await api.post('/profile', payload)
     return getData(res)
 }
 

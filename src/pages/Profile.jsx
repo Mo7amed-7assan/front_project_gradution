@@ -23,7 +23,7 @@ const extractArray = (response) => {
 }
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user, fetchMe } = useAuth()
   const [activeTab, setActiveTab] = useState('about')
   const [profile, setProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(true)
@@ -46,6 +46,9 @@ export default function Profile() {
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSuccess, setProfileSuccess] = useState(null)
   const [profileSavingError, setProfileSavingError] = useState(null)
+  const [profilePictureUploading, setProfilePictureUploading] = useState(false)
+  const [profilePictureError, setProfilePictureError] = useState(null)
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null)
 
   const [passwordForm, setPasswordForm] = useState({
     current_password: '',
@@ -139,6 +142,30 @@ export default function Profile() {
     setProfileForm((prev) => ({ ...prev, [key]: e.target.value }))
   }
 
+  const handleProfilePictureSelect = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setProfilePictureError(null)
+    setProfilePicturePreview(URL.createObjectURL(file))
+    setProfilePictureUploading(true)
+    setProfileSuccess(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('profile_picture', file)
+      await updateMyProfile(formData)
+      setProfileSuccess('Profile picture updated successfully.')
+      fetchProfile()
+      fetchMe()
+    } catch (err) {
+      setProfilePictureError(err?.response?.data?.message || err.message)
+    } finally {
+      setProfilePictureUploading(false)
+      e.target.value = ''
+    }
+  }
+
   const handleSaveProfile = async (e) => {
     e.preventDefault()
     setProfileSaving(true)
@@ -148,6 +175,7 @@ export default function Profile() {
       await updateMyProfile(profileForm)
       setProfileSuccess('Profile updated successfully.')
       fetchProfile()
+      fetchMe()
     } catch (err) {
       setProfileSavingError(err?.response?.data?.message || err.message)
     } finally {
@@ -336,6 +364,10 @@ export default function Profile() {
       portfolioActionError={portfolioActionError}
       handleProfileChange={handleProfileChange}
       handleSaveProfile={handleSaveProfile}
+      handleProfilePictureSelect={handleProfilePictureSelect}
+      profilePictureUploading={profilePictureUploading}
+      profilePictureError={profilePictureError}
+      profilePicturePreview={profilePicturePreview}
       setPasswordForm={setPasswordForm}
       handlePasswordChange={handlePasswordChange}
       handleSkillModalOpen={handleSkillModalOpen}

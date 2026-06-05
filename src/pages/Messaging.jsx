@@ -476,6 +476,58 @@ export default function Messaging() {
     setCallFrameUrl(url)
   }
 
+  const handleScheduleCall = async (scheduledAt) => {
+    setError(null)
+    if (!selectedConversationId) {
+      setError('Choose a connected person or project first. Calls must be linked to a conversation.')
+      throw new Error('No conversation selected.')
+    }
+    if (!scheduledAt) {
+      setError('Please choose a date and time for the scheduled call.')
+      throw new Error('No schedule date selected.')
+    }
+
+    const selectedConversation = conversations.find((conversation) =>
+      normalizeKey(getConversationId(conversation)) === normalizeKey(selectedConversationId)
+    )
+
+    setStarting(true)
+    try {
+      const startTime = new Date(scheduledAt)
+      if (Number.isNaN(startTime.getTime())) {
+        throw new Error('Invalid scheduled date.')
+      }
+      const payload = selectedConversation?.conversation_type === 'project'
+        ? { project_id: selectedConversation.project_id, status: 'scheduled', start_time: startTime.toISOString() }
+        : { conversation_id: selectedConversationId, status: 'scheduled', start_time: startTime.toISOString() }
+
+      const call = await initiateCall(payload)
+      const callId = getCallId(call)
+      if (!callId) throw new Error('The scheduled call was created, but no call ID was returned.')
+
+      await sendRealtimeMessage(selectedConversationId, {
+        text: `${user?.full_name || user?.name || user?.username || 'Someone'} scheduled a video call for ${startTime.toLocaleString()}.`,
+        senderId: getCurrentUserId(user),
+        senderName: user?.full_name || user?.name || user?.username || user?.email || 'You',
+        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        messageType: 'call_invite',
+        callId,
+        callConversationId: call?.conversation_id || selectedConversationId,
+        callProjectId: call?.project_id || selectedConversation?.project_id || '',
+        callRoomName: call?.room_name || '',
+      }, selectedConversation?.conversation_type)
+
+      upsertCall(call)
+      await fetchCalls()
+      return call
+    } catch (err) {
+      setError(err?.response?.data?.message || err.message || 'Failed to schedule the call.')
+      throw err
+    } finally {
+      setStarting(false)
+    }
+  }
+
   const handleStartCall = async () => {
     setError(null)
     if (!selectedConversationId) {
@@ -610,13 +662,43 @@ export default function Messaging() {
     }
   }
 
+  const getCallConversationContext = (call) => {
+    const projectConversation = call?.project_id
+      ? conversations.find((conversation) => normalizeKey(conversation?.project_id) === normalizeKey(call.project_id))
+      : null
+
+    const conversationId = call?.conversation_id || getConversationId(projectConversation) || selectedConversationId
+    const conversationType =
+      selectedConversation?.conversation_type ||
+      projectConversation?.conversation_type ||
+      (call?.project_id ? 'project' : undefined)
+
+    return { conversationId, conversationType }
+  }
+
   const handleEndCall = async (call) => {
-    setProcessingCallId(call.id)
+    const callId = getCallId(call)
+    if (!callId) return
+    setProcessingCallId(callId)
     try {
-      await endCall(call.id)
-      if (activeCall?.id === call.id) {
+      await endCall(callId)
+      if (normalizeKey(getCallId(activeCall)) === normalizeKey(callId)) {
         setActiveCall(null)
         setCallFrameUrl('')
+      }
+      const { conversationId, conversationType } = getCallConversationContext(call)
+      if (conversationId) {
+        await sendRealtimeMessage(conversationId, {
+          text: `${user?.full_name || user?.name || user?.username || 'Someone'} ended the video call.`,
+          senderId: getCurrentUserId(user),
+          senderName: user?.full_name || user?.name || user?.username || user?.email || 'You',
+          senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+          messageType: 'call_status',
+          callId,
+          callConversationId: call?.conversation_id || conversationId,
+          callProjectId: call?.project_id || '',
+          callStatus: 'ended',
+        }, conversationType)
       }
       await fetchCalls()
     } catch (err) {
@@ -627,9 +709,37 @@ export default function Messaging() {
   }
 
   const handleCancelCall = async (call) => {
-    setProcessingCallId(call.id)
+    const callId = getCallId(call)
+    if (!callId) return
+    setProcessingCallId(callId)
     try {
-      await cancelCall(call.id)
+      const cancelledCall = await cancelCall(callId)
+      const nextCall = {
+        ...call,
+        ...cancelledCall,
+        id: getCallId(cancelledCall) || callId,
+        status: cancelledCall?.status || 'cancelled',
+      }
+      upsertCall(nextCall)
+      if (normalizeKey(getCallId(activeCall)) === normalizeKey(callId)) {
+        setActiveCall(null)
+        setCallFrameUrl('')
+      }
+
+      const { conversationId, conversationType } = getCallConversationContext(nextCall)
+      if (conversationId) {
+        await sendRealtimeMessage(conversationId, {
+          text: `${user?.full_name || user?.name || user?.username || 'Someone'} cancelled the video call.`,
+          senderId: getCurrentUserId(user),
+          senderName: user?.full_name || user?.name || user?.username || user?.email || 'You',
+          senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+          messageType: 'call_status',
+          callId,
+          callConversationId: nextCall?.conversation_id || conversationId,
+          callProjectId: nextCall?.project_id || '',
+          callStatus: 'cancelled',
+        }, conversationType)
+      }
       await fetchCalls()
     } catch (err) {
       setError(err?.response?.data?.message || err.message || 'Failed to cancel call.')
@@ -674,6 +784,7 @@ export default function Messaging() {
       onSelectPerson={handleSelectPerson}
       onSelectProject={handleSelectProject}
       onStartCall={handleStartCall}
+      onScheduleCall={handleScheduleCall}
       onStartProjectCall={handleStartProjectCall}
       onJoinCall={handleJoinCall}
       onShowCallDetail={handleShowCallDetail}

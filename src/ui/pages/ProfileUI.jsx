@@ -36,6 +36,10 @@ export default function ProfileUI({
   portfolioActionError,
   handleProfileChange,
   handleSaveProfile,
+  handleProfilePictureSelect,
+  profilePictureUploading,
+  profilePictureError,
+  profilePicturePreview,
   setPasswordForm,
   handlePasswordChange,
   handleSkillModalOpen,
@@ -59,13 +63,29 @@ export default function ProfileUI({
       <div className="relative rounded-3xl overflow-hidden bg-brand-primaryDark h-48 sm:h-64 flex items-end p-6 md:p-8 shadow-xl shadow-brand-primary/10">
         <div className="absolute inset-0 bg-gradient-to-t from-brand-secondaryDark/90 to-transparent z-0"></div>
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-end gap-6 w-full">
-           <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white shrink-0">
-             <img 
-               src={user?.avatar || user?.profile_picture_url || `https://ui-avatars.com/api/?name=${profile.full_name}&background=EEEDFF&color=4F46E5`} 
-               alt={profile.full_name} 
-               className="w-full h-full object-cover" 
+           <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white shrink-0">
+             <label htmlFor="profile-picture-input" className="absolute inset-0 cursor-pointer">
+               <img
+                 src={profilePicturePreview || profile?.profile_picture || user?.profile_picture || user?.avatar || user?.profile_picture_url || `https://ui-avatars.com/api/?name=${profile.full_name}&background=EEEDFF&color=4F46E5`}
+                 alt={profile.full_name}
+                 className="w-full h-full object-cover"
+               />
+               <div className="absolute inset-0 bg-slate-900/40 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-center px-2">
+                 <span className="text-xs text-white uppercase tracking-[0.22em] font-semibold">Change picture</span>
+                 {profilePictureUploading && <span className="text-[11px] text-slate-200 mt-1">Uploading...</span>}
+               </div>
+             </label>
+             <input
+               id="profile-picture-input"
+               type="file"
+               accept="image/*"
+               className="hidden"
+               onChange={handleProfilePictureSelect}
              />
            </div>
+           {profilePictureError && (
+             <div className="mt-2 text-xs text-rose-600">{profilePictureError}</div>
+           )}
            <div className="text-center sm:text-left flex-1 mb-2">
               <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{profile.full_name}</h1>
               <p className="text-brand-primaryLight text-sm font-medium mt-1">{profile.location || 'Global Visionary'}</p>

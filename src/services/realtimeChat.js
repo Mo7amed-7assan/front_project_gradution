@@ -2,6 +2,7 @@ import
 {
   off,
   get,
+  onDisconnect,
   onValue,
   orderByChild,
   push,
@@ -195,6 +196,51 @@ export const createFirebaseGroupConversation = async (projectId, conversation) =
 
 const getPresenceRef = (userId) => ref(db, `presence/${String(userId)}`)
 
+export const trackUserPresence = (userId) =>
+{
+  if (!userId) return () => { }
+
+  const presenceRef = getPresenceRef(userId)
+  const connectedRef = ref(db, '.info/connected')
+  const onlineStatus = {
+    state: 'online',
+    status: 'online',
+    online: true,
+    last_changed: serverTimestamp(),
+  }
+  const offlineStatus = {
+    state: 'offline',
+    status: 'offline',
+    online: false,
+    last_changed: serverTimestamp(),
+  }
+
+  const markOffline = () => {
+    set(presenceRef, offlineStatus).catch(() => { })
+  }
+
+  const unsubscribe = onValue(connectedRef, (snapshot) =>
+  {
+    if (snapshot.val() !== true) return
+
+    onDisconnect(presenceRef)
+      .set(offlineStatus)
+      .then(() => set(presenceRef, onlineStatus))
+      .catch(() => { })
+  })
+
+  window.addEventListener('pagehide', markOffline)
+  window.addEventListener('beforeunload', markOffline)
+
+  return () =>
+  {
+    unsubscribe()
+    window.removeEventListener('pagehide', markOffline)
+    window.removeEventListener('beforeunload', markOffline)
+    markOffline()
+  }
+}
+
 export const listenToUserPresence = (userId, onPresence, onError) =>
 {
   if (!userId || typeof onPresence !== 'function') return () => { }
@@ -272,6 +318,7 @@ export const sendRealtimeMessage = async (conversationId, payload, conversationT
     callJoinToken: payload.callJoinToken || '',
     callUrl: payload.callUrl || '',
     callRoomName: payload.callRoomName || '',
+    callStatus: payload.callStatus || '',
     fileName: payload.fileName || '',
     fileType: payload.fileType || '',
     fileData: payload.fileData || '',

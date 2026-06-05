@@ -45,12 +45,6 @@ export default function MyReports() {
           <h1 className="page-title text-brand-secondary">My Submitted Reports</h1>
           <p className="page-subtitle">Track and manage reports you have submitted to moderation.</p>
         </div>
-        <Link
-          to="/reports/submit"
-          className="btn-primary text-sm px-5 py-2.5 shadow-brand-primary/20 shrink-0"
-        >
-          🚩 File a Report
-        </Link>
       </div>
 
       {error && (

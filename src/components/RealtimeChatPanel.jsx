@@ -22,6 +22,16 @@ const getCallId = (call) =>
 const isCallJoinable = (call) =>
   ['scheduled', 'active'].includes(`${call?.status || ''}`.toLowerCase())
 
+const CALL_FINAL_STATUS_LABELS = {
+  cancelled: 'Call cancelled',
+  canceled: 'Call cancelled',
+  ended: 'Call ended',
+  completed: 'Call ended',
+  closed: 'Call ended',
+}
+
+const normalizeCallStatus = (status) => `${status || ''}`.toLowerCase()
+
 const formatMessageTime = (value) => {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null
   if (!date || Number.isNaN(date.getTime())) return ''
@@ -94,6 +104,8 @@ export default function RealtimeChatPanel({
   const [hiddenCallIds, setHiddenCallIds] = useState([])
   const [verifiedIncomingCall, setVerifiedIncomingCall] = useState(null)
   const [checkingIncomingCall, setCheckingIncomingCall] = useState(false)
+  const [joinableCallIds, setJoinableCallIds] = useState([])
+  const [callStatuses, setCallStatuses] = useState({})
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
   const fileInputRef = useRef(null)
@@ -126,6 +138,70 @@ export default function RealtimeChatPanel({
     )
   }, [hiddenCallIds, messages, user?.id])
 
+  const callMessageIds = useMemo(() => {
+    return [...new Set(messages
+      .filter((message) => message.callId)
+      .map((message) => String(message.callId))
+    )]
+  }, [messages])
+
+  useEffect(() => {
+    if (callMessageIds.length === 0) return undefined
+    let ignore = false
+
+    const checkCallStatus = async (callId) => {
+      try {
+        const call = await getCall(callId)
+        if (ignore) return
+        const status = normalizeCallStatus(call?.status)
+        const startTime = call?.start_time ? new Date(call.start_time) : null
+        const joinable = status === 'active' || (status === 'scheduled' && startTime && startTime.getTime() <= Date.now())
+        const normalized = String(callId)
+
+        setCallStatuses((prev) => ({
+          ...prev,
+          [normalized]: {
+            status,
+            startTime: call?.start_time || null,
+          },
+        }))
+
+        setJoinableCallIds((prev) => {
+          if (joinable) {
+            return prev.includes(normalized) ? prev : [...prev, normalized]
+          }
+          return prev.filter((id) => id !== normalized)
+        })
+      } catch (err) {
+        if (!ignore) {
+          setJoinableCallIds((prev) => prev.filter((id) => id !== String(callId)))
+        }
+      }
+    }
+
+    callMessageIds.forEach(checkCallStatus)
+    const intervalId = window.setInterval(() => callMessageIds.forEach(checkCallStatus), 60000)
+    return () => {
+      ignore = true
+      window.clearInterval(intervalId)
+    }
+  }, [callMessageIds])
+
+  const getMessageCallStatus = (message) => {
+    if (!message?.callId) return normalizeCallStatus(message?.callStatus)
+    return normalizeCallStatus(callStatuses[String(message.callId)]?.status || message.callStatus)
+  }
+
+  const getMessageCallStatusLabel = (message) =>
+    CALL_FINAL_STATUS_LABELS[getMessageCallStatus(message)] || ''
+
+  const isMessageJoinable = (message) => {
+    if (!message?.callId) return false
+    if (getMessageCallStatusLabel(message)) return false
+    if (message.callUrl || message.callJoinToken) return true
+    return joinableCallIds.includes(String(message.callId))
+  }
+
   const hideCall = (callId) => {
     if (!callId) return
     setHiddenCallIds((prev) => {
@@ -137,6 +213,8 @@ export default function RealtimeChatPanel({
   useEffect(() => {
     setMessages([])
     setChatError(null)
+    setJoinableCallIds([])
+    setCallStatuses({})
     if (!selectedConversationId) return undefined
     return listenToConversationMessages(
       selectedConversationId,
@@ -204,7 +282,7 @@ export default function RealtimeChatPanel({
         text,
         senderId: user?.id,
         senderName: getUserName(user),
-        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        senderAvatar: user?.profile_picture || user?.profile_picture_url || user?.avatar || user?.avatar_url || user?.profile_photo_url,
       }, currentConversation?.conversation_type)
       setDraft('')
       inputRef.current?.focus()
@@ -244,7 +322,7 @@ export default function RealtimeChatPanel({
         text: file.type.startsWith('image/') ? 'Sent an image.' : `Sent a file: ${file.name}`,
         senderId: user?.id,
         senderName: getUserName(user),
-        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        senderAvatar: user?.profile_picture || user?.profile_picture_url || user?.avatar || user?.avatar_url || user?.profile_photo_url,
         messageType: file.type.startsWith('image/') ? 'image' : 'file',
         fileName: file.name,
         fileType: file.type || 'application/octet-stream',
@@ -297,7 +375,7 @@ export default function RealtimeChatPanel({
             text: 'Sent a voice note.',
             senderId: user?.id,
             senderName: getUserName(user),
-            senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+            senderAvatar: user?.profile_picture || user?.profile_picture_url || user?.avatar || user?.avatar_url || user?.profile_photo_url,
             messageType: 'audio',
             audioData,
             audioType: audioBlob.type || 'audio/webm',
@@ -386,7 +464,7 @@ export default function RealtimeChatPanel({
         text: `${getUserName(user)} started a video call.`,
         senderId: user?.id,
         senderName: getUserName(user),
-        senderAvatar: user?.avatar || user?.avatar_url || user?.profile_photo_url,
+        senderAvatar: user?.profile_picture || user?.profile_picture_url || user?.avatar || user?.avatar_url || user?.profile_photo_url,
         messageType: 'call_invite',
         callId,
         callConversationId: call?.conversation_id || selectedConversationId,
@@ -534,6 +612,9 @@ export default function RealtimeChatPanel({
               const isMine = String(message.senderId) === String(user?.id)
               const isLast = idx === messages.length - 1
               const prevMine = idx > 0 && String(messages[idx - 1].senderId) === String(user?.id)
+              const callStatusLabel = getMessageCallStatusLabel(message)
+              const showJoinAction = message.callId && !hiddenCallIds.includes(String(message.callId)) && isMessageJoinable(message)
+              const showCallUrlAction = message.callUrl && !callStatusLabel
               
               return (
                 <div key={message.id} className={`flex items-end gap-3 relative ${isMine ? 'flex-row-reverse' : 'flex-row'} ${prevMine === isMine ? 'mt-2' : 'mt-6'}`}>
@@ -545,7 +626,7 @@ export default function RealtimeChatPanel({
                        title="View profile"
                        className="rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
                      >
-                        <Avatar name={message.senderName} isMine={isMine} />
+                        <Avatar name={message.senderName} avatarUrl={message.senderAvatar} isMine={isMine} />
                      </button>
                   </div>
                   )}
@@ -583,7 +664,17 @@ export default function RealtimeChatPanel({
                       {message.audioData && (
                         <audio controls src={message.audioData} className="mt-3 w-64 max-w-full" />
                       )}
-                      {message.callId && !hiddenCallIds.includes(String(message.callId)) ? (
+                      {callStatusLabel && (
+                        <span className={`mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold ${
+                          isMine
+                            ? 'bg-white/15 text-white'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          {callStatusLabel}
+                        </span>
+                      )}
+                      {showJoinAction ? (
                         <button
                           type="button"
                           onClick={() => handleJoinCall(message)}
@@ -597,7 +688,8 @@ export default function RealtimeChatPanel({
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                           {joiningCallId === message.callId ? 'Joining...' : 'Join Call'}
                         </button>
-                      ) : message.callUrl && (
+                      ) : null}
+                      {showCallUrlAction && (
                         <a
                           href={message.callUrl}
                           target="_blank"

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import api from '../services/api'
 import { authLogin, authRegister, authGuest, authEmailVerify, authPasswordForgot, authPasswordReset, getAccessToken, getAuthUser } from '../services/auth'
+import { trackUserPresence } from '../services/realtimeChat'
 
 const AuthContext = createContext(null)
 
@@ -40,6 +41,11 @@ export function AuthProvider({ children }){
     fetchMe()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (!user?.id) return undefined
+    return trackUserPresence(user.id)
+  }, [user?.id])
 
   const login = async (email, password) => {
     const res = await authLogin(email, password)
