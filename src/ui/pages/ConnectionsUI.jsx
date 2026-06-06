@@ -30,7 +30,8 @@ export default function ConnectionsUI({
   getRequesterId,
   getRecipientId,
   normalizeKey,
-  getCurrentUserId
+  getCurrentUserId,
+  children
 }) {
   if (loading) {
     return (
@@ -256,6 +257,12 @@ export default function ConnectionsUI({
                 </div>
               )
             )}
+          </div>
+        )}
+
+        {activeTab === 'reports' && (
+          <div className="space-y-6">
+            {children}
           </div>
         )}
       </div>

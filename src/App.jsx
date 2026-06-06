@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -61,16 +61,47 @@ function ProjectApplicationsRoute() {
   return <ProjectApplications key={id} />
 }
 
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-red-500 p-8">
+          <div className="bg-slate-800 p-6 rounded-xl border border-red-900 max-w-2xl w-full">
+            <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+            <pre className="text-xs whitespace-pre-wrap">{this.state.error?.toString()}</pre>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 export default function App(){
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Routes>
       <Route path="/login" element={<Login/>} />
       <Route path="/register" element={<Register/>} />
       <Route path="/auth/email/verify/:token" element={<EmailVerify/>} />
       <Route path="/forgot-password" element={<ForgotPassword/>} />
       <Route path="/reset-password" element={<ResetPassword/>} />
       <Route path="/reset-password/:token" element={<ResetPassword/>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
+      <Route path="/home" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
+      <Route path="/dashboard" element={<Navigate to="/home" replace />} />
       <Route path="/projects" element={<Layout><Projects/></Layout>} />
       <Route path="/projects/create" element={<ProtectedRoute><Layout><CreateProject/></Layout></ProtectedRoute>} />
       <Route path="/projects/:id/edit" element={<Layout><EditProjectRoute/></Layout>} />
@@ -108,7 +139,8 @@ export default function App(){
       <Route path="/admin/action-logs/:id" element={<ProtectedRoute><Layout><AdminActionLogDetail/></Layout></ProtectedRoute>} />
       <Route path="/admin/system-logs" element={<ProtectedRoute><Layout><AdminSystemLogs/></Layout></ProtectedRoute>} />
       <Route path="/admin/system-logs/:id" element={<ProtectedRoute><Layout><AdminSystemLogDetail/></Layout></ProtectedRoute>} />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-    </Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </ErrorBoundary>
   )
 }

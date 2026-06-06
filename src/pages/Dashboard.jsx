@@ -20,26 +20,48 @@ export default function Dashboard() {
 
   const [stats, setStats] = useState({ projects: 0, applications: 0, unread: 0 })
   const [recentProjects, setRecentProjects] = useState([])
+  const [allProjects, setAllProjects] = useState([])
   const [myApplications, setMyApplications] = useState([])
   const [loadingStats, setLoadingStats] = useState(true)
+  const [filters, setFilters] = useState({
+    status: '',
+    category: '',
+    skill: '',
+    search: '',
+    accepting_applications: '',
+    sort: 'created_at'
+  })
+  const [showFilters, setShowFilters] = useState(false)
+  const [loadingProjects, setLoadingProjects] = useState(true)
+
+  const loadProjects = async () => {
+    setLoadingProjects(true)
+    try {
+      const params = { per_page: 100, ...filters }
+      Object.keys(params).forEach(k => { if (!params[k]) delete params[k] })
+      const projRes = await getProjects(params)
+      if (projRes) {
+        setAllProjects(extractList(projRes))
+      }
+    } catch (err) {
+      console.error('Dashboard loadProjects error:', err)
+    } finally {
+      setLoadingProjects(false)
+    }
+  }
+
+  useEffect(() => {
+    loadProjects()
+  }, [filters, user])
 
   const load = async () => {
     setLoadingStats(true)
     try {
-      const [projRes, mineProjRes, appRes, notifRes] = await Promise.allSettled([
-        getProjects({ per_page: 100 }),
+      const [mineProjRes, appRes, notifRes] = await Promise.allSettled([
         getMyProjects({ is_user_participant: true, role: 'owner', per_page: 50 }),
         getMyApplications({ per_page: 5 }),
         getNotifications(),
       ])
-
-      // Projects
-      let allProjects = []
-      if (projRes.status === 'fulfilled') {
-        allProjects = extractList(projRes.value)
-        console.log('Current User:', getCurrentUserId(user))
-        allProjects.forEach(p => console.log('Project Owner:', getProjectOwnerId(p)))
-      }
 
       const mineProjects = mineProjRes.status === 'fulfilled' ? extractList(mineProjRes.value) : []
 
@@ -107,10 +129,16 @@ export default function Dashboard() {
     <DashboardUI
       displayName={displayName}
       stats={stats}
+      allProjects={allProjects}
       recentProjects={recentProjects}
       myApplications={myApplications}
       loadingStats={loadingStats}
+      loadingProjects={loadingProjects}
       onWithdraw={handleWithdraw}
+      filters={filters}
+      setFilters={setFilters}
+      showFilters={showFilters}
+      setShowFilters={setShowFilters}
     />
   )
 }

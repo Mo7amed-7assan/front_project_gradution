@@ -41,76 +41,89 @@ export default function ProjectsUI({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="page-title text-3xl">Explore Projects</h1>
-            <p className="page-subtitle">Find startup ideas and talented team members to build with.</p>
           </div>
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="btn-secondary text-sm font-semibold"
-            >
-              <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-              </svg>
-              {showFilters ? 'Hide Filters' : 'Filters'}
-            </button>
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Per Page</label>
-              <select
-                value={perPage}
-                onChange={e => setPerPage(Number(e.target.value))}
-                className="form-select text-xs py-2 w-20"
+          {activeTab === 'projects' && (
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="btn-secondary text-sm font-semibold"
               >
-                <option value={6}>6</option>
-                <option value={9}>9</option>
-                <option value={12}>12</option>
-              </select>
+                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                {showFilters ? 'Hide Filters' : 'Filters'}
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200/80 gap-6">
+        <div className="flex border-b border-[#2D2D4E] gap-6 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
-            className={`py-3 text-sm font-semibold relative transition-colors ${
-              activeTab === 'projects' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+            className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
+              activeTab === 'projects' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
             }`}
           >
             All Projects
             {activeTab === 'projects' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"/>
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C63FF] rounded-full"/>
             )}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('suggestions')}
-            className={`py-3 text-sm font-semibold relative transition-colors ${
-              activeTab === 'suggestions' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+            className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
+              activeTab === 'suggestions' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
             }`}
           >
             Suggested Projects
             {activeTab === 'suggestions' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"/>
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C63FF] rounded-full"/>
             )}
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('my-projects')}
-            className={`py-3 text-sm font-semibold relative transition-colors ${
-              activeTab === 'my-projects' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'
+            className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
+              activeTab === 'my-projects' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
             }`}
           >
             My Projects
             {activeTab === 'my-projects' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"/>
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C63FF] rounded-full"/>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('applications')}
+            className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
+              activeTab === 'applications' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+            }`}
+          >
+            My Applications
+            {activeTab === 'applications' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C63FF] rounded-full"/>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('invitations')}
+            className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
+              activeTab === 'invitations' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+            }`}
+          >
+            Invitations
+            {activeTab === 'invitations' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C63FF] rounded-full"/>
             )}
           </button>
         </div>
 
-        {/* Filters Panel */}
-        {showFilters && (
-          <div className="card p-5 bg-white space-y-4">
+        {/* Filters Panel — only visible on All Projects tab */}
+        {showFilters && activeTab === 'projects' && (
+          <div className="card p-5 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div>
                 <label className="form-label text-xs">Status</label>
@@ -191,7 +204,7 @@ export default function ProjectsUI({
         )}
       </header>
 
-      {activeTab === 'my-projects' ? (
+      {['my-projects', 'applications', 'invitations'].includes(activeTab) ? (
         children
       ) : activeTab === 'suggestions' ? (
         <SuggestedMatches kind="project" />
@@ -203,12 +216,12 @@ export default function ProjectsUI({
               Array.from({ length: perPage }).map((_, i) => <SkeletonCard key={i} />)
             ) : projects.length === 0 ? (
               <div className="card py-16 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#2D2D4E] flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
                   </svg>
                 </div>
-                <h3 className="text-base font-semibold text-slate-900 mb-1">No projects found</h3>
+                <h3 className="text-base font-semibold text-white mb-1">No projects found</h3>
                 <p className="text-sm text-slate-400">Try adjusting your filters or keywords.</p>
               </div>
             ) : (
@@ -217,34 +230,34 @@ export default function ProjectsUI({
                 const isAccepting = String(p?.accepting_applications) === 'true' || p?.accepting_applications === true || p?.accepting_applications === 1
                 const isLast = index === projects.length - 1
                 return (
-                  <div ref={isLast ? lastProjectElementRef : null} key={p?.id} className="card bg-white p-0 overflow-hidden border border-slate-200">
+                  <div ref={isLast ? lastProjectElementRef : null} key={p?.id} className="card p-0 overflow-hidden">
                     <div className="p-5">
                       {/* Post Header */}
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-[#2D2D4E] flex items-center justify-center overflow-hidden shrink-0">
                             {p?.owner?.profile_picture_url || p?.owner?.avatar ? (
                               <img src={p.owner.profile_picture_url || p.owner.avatar} className="w-full h-full object-cover" />
                             ) : (
-                              <span className="font-bold text-indigo-600 text-lg">{(p?.owner?.full_name || p?.owner?.username || 'U')[0]}</span>
+                              <span className="font-bold text-[#6C63FF] text-lg">{(p?.owner?.full_name || p?.owner?.username || 'U')[0]}</span>
                             )}
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900">
+                            <h3 className="text-sm font-bold text-white">
                               {p?.owner?.full_name || p?.owner?.username || 'Unknown User'}
                             </h3>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-slate-400">
                               {p?.created_at ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'} • Project Post
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                            {(relation.isOwner || relation.isMember) && (
-                            <span className="badge-indigo text-[10px] uppercase font-bold">
+                            <span className="badge-primary text-[10px] uppercase font-bold">
                               {relation.isOwner ? 'Owner' : 'Member'}
                             </span>
                           )}
-                           <span className={`badge text-[10px] uppercase font-bold ${p?.status?.toLowerCase() === 'active' ? 'badge-green' : p?.status?.toLowerCase() === 'planning' ? 'badge-indigo' : 'badge-slate'}`}>
+                           <span className={`badge text-[10px] uppercase font-bold ${p?.status?.toLowerCase() === 'active' ? 'badge-green' : p?.status?.toLowerCase() === 'planning' ? 'badge-primary' : 'badge-slate'}`}>
                             {p?.status || 'Active'}
                           </span>
                         </div>
@@ -252,12 +265,12 @@ export default function ProjectsUI({
 
                       {/* Post Content */}
                       <div className="space-y-3">
-                        <h4 className="text-xl font-bold text-slate-900 leading-tight">
-                          <Link to={`/projects/${p?.id}`} className="hover:text-indigo-600 transition-colors">
+                        <h4 className="text-xl font-bold text-white leading-tight">
+                          <Link to={`/projects/${p?.id}`} className="hover:text-[#6C63FF] transition-colors">
                             {p?.title || p?.name}
                           </Link>
                         </h4>
-                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
                           {p?.description || p?.short_description || 'No description provided.'}
                         </p>
                       </div>
@@ -273,7 +286,7 @@ export default function ProjectsUI({
                     </div>
 
                     {/* Post Footer Actions */}
-                    <div className="px-5 py-3 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+                    <div className="px-5 py-3 flex items-center justify-between border-t border-[#2D2D4E]">
                       <div className="flex gap-3">
                         {(!relation.isOwner && !relation.isMember) && (
                           <Link to={`/projects/${p?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
@@ -294,7 +307,7 @@ export default function ProjectsUI({
 
           {loadingMore && (
             <div className="flex justify-center py-4 mt-4">
-              <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-6 h-6 border-2 border-[#6C63FF] border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </>

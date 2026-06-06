@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { getConnections, removeConnection, respondToConnection } from '../services/connections'
 import { getCurrentUserId } from '../utils/projectAccess'
 import ConnectionsUI from '../ui/pages/ConnectionsUI'
+import MyReports from './MyReports'
 
 const CONNECTION_REFRESH_EVENT = 'connections:refresh'
 
@@ -209,7 +210,9 @@ export default function Connections() {
       getRecipientId={getRecipientId}
       normalizeKey={normalizeKey}
       getCurrentUserId={getCurrentUserId}
-    />
+    >
+      {activeTab === 'reports' && <MyReports />}
+    </ConnectionsUI>
   )
 }
 

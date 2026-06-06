@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLocation } from 'react-router-dom'
 import { getProjects } from '../services/project'
 import { getCurrentUserId, getProjectOwnerId } from '../utils/projectAccess'
 import ProjectsUI from '../ui/pages/ProjectsUI'
 import MyProjects from './MyProjects'
+import MyApplications from './MyApplications'
+import Invitations from './Invitations'
 
 export default function Projects() {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState('projects')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'projects')
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -82,6 +86,8 @@ export default function Projects() {
       user={user}
     >
       {activeTab === 'my-projects' && <MyProjects />}
+      {activeTab === 'applications' && <MyApplications />}
+      {activeTab === 'invitations' && <Invitations />}
     </ProjectsUI>
   )
 }

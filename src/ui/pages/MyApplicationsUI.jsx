@@ -24,7 +24,7 @@ export default function MyApplicationsUI({
           <h1 className="page-title text-brand-secondary">My Applications</h1>
           <p className="page-subtitle">Track the status of your project applications.</p>
         </div>
-        <Link to="/projects" className="btn-secondary text-brand-primary shrink-0 self-start sm:self-auto flex items-center gap-2">
+        <Link to="/home" className="btn-secondary text-brand-primary shrink-0 self-start sm:self-auto flex items-center gap-2">
            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
            Browse Projects
         </Link>

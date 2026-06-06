@@ -31,7 +31,7 @@ export default function Register(){
         password_confirmation: passwordConfirmation
       }
       await auth.register(payload)
-      navigate('/dashboard')
+      navigate('/home')
     } catch (err) {
       console.error(err)
       setError(err?.response?.data?.message || err.message || 'Registration failed')
@@ -45,7 +45,7 @@ export default function Register(){
     setLoading(true)
     try {
       await auth.guest()
-      navigate('/dashboard')
+      navigate('/home')
     } catch (err) {
       console.error(err)
       setError(err?.response?.data?.message || err?.message || 'Guest login failed')
