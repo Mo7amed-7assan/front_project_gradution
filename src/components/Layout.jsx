@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { getNotifications } from '../services/notifications'
 import { getMyProjects } from '../services/project'
 import { getConnections } from '../services/connections'
@@ -36,6 +38,12 @@ const icons = {
   Moon: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
   ),
+  Sun: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+  ),
+  Globe: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+  ),
   Link: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
   ),
@@ -61,15 +69,17 @@ function TopNav({ user, logout, unreadCount }) {
   const [isAdminOpen, setIsAdminOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const isAdmin = user && ['administrator', 'admin', 'moderator'].includes(user.role)
+  const { toggleTheme, isDark } = useTheme()
+  const { toggleLocale, locale, t } = useI18n()
 
   const avatar = (user?.full_name || user?.name || user?.username || 'U').charAt(0).toUpperCase()
 
   const navItems = [
-    { to: '/home', icon: icons.Home, label: 'Home' },
-    { to: '/projects', icon: icons.Projects, label: 'Projects' },
-    { to: '/connections', icon: icons.Network, label: 'Network' },
-    { to: '/reports', icon: icons.Report, label: 'Reports' },
-    { to: '/verification', icon: icons.Check, label: 'Verify' },
+    { to: '/home', icon: icons.Home, label: t('nav.home') },
+    { to: '/projects', icon: icons.Projects, label: t('nav.projects') },
+    { to: '/connections', icon: icons.Network, label: t('nav.network') },
+    { to: '/reports', icon: icons.Report, label: t('nav.reports') },
+    { to: '/verification', icon: icons.Check, label: t('nav.verify') },
   ]
 
   return (
@@ -106,7 +116,7 @@ function TopNav({ user, logout, unreadCount }) {
       <div className="flex items-center gap-3">
         {/* Create Project */}
         <Link to="/projects/create" className="hidden sm:flex btn-primary bg-[#6C63FF] hover:bg-[#4F46E5] text-white !py-1.5 !px-4 shadow-[0_0_15px_rgba(108,99,255,0.4)] hover:shadow-[0_0_20px_rgba(108,99,255,0.6)]">
-          + Create Project
+          {t('nav.createProject')}
         </Link>
 
         {/* Admin Dropdown */}
@@ -116,7 +126,7 @@ function TopNav({ user, logout, unreadCount }) {
               onClick={() => setIsAdminOpen(!isAdminOpen)}
               className="flex items-center gap-1 text-xs font-bold bg-[#00D4AA]/10 text-[#00D4AA] px-3 py-1.5 rounded-lg border border-[#00D4AA]/30 hover:bg-[#00D4AA]/20 transition-all shadow-[0_0_10px_rgba(0,212,170,0.15)]"
             >
-              ADMIN {icons.ChevronDown}
+              {t('nav.admin')} {icons.ChevronDown}
             </button>
             {isAdminOpen && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-[#1E1E35] border border-[#2D2D4E] rounded-xl shadow-xl overflow-hidden py-1">
@@ -133,8 +143,11 @@ function TopNav({ user, logout, unreadCount }) {
         <div className="w-px h-6 bg-[#2D2D4E] mx-1"></div>
 
         {/* Icons */}
-        <button onClick={() => document.documentElement.classList.toggle('dark')} className="text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
-          {icons.Moon}
+        <button onClick={toggleLocale} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-white transition-colors px-2 py-1.5 hover:bg-[#2A2A4E] rounded-lg">
+          {icons.Globe} {locale === 'en' ? 'AR' : 'EN'}
+        </button>
+        <button onClick={toggleTheme} className="text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
+          {isDark ? icons.Sun : icons.Moon}
         </button>
         <Link to="/notifications" className="relative text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
           {icons.Bell}
@@ -159,10 +172,10 @@ function TopNav({ user, logout, unreadCount }) {
 
           {isProfileOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-[#1E1E35] border border-[#2D2D4E] rounded-xl shadow-xl overflow-hidden py-1">
-              <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-slate-300 hover:bg-[#2A2A4E] hover:text-white">My Profile</Link>
+              <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-slate-300 hover:bg-[#2A2A4E] hover:text-white">{t('nav.myProfile')}</Link>
               <div className="h-px bg-[#2D2D4E] my-1"></div>
               <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-[#EF4444] hover:bg-[#2A2A4E] flex items-center gap-2">
-                {icons.Logout} Sign Out
+                {icons.Logout} {t('nav.signOut')}
               </button>
             </div>
           )}
@@ -174,12 +187,13 @@ function TopNav({ user, logout, unreadCount }) {
 
 /* ─── Left Sidebar (Profile Card) ──────────────────────────────────── */
 function LeftSidebar({ user, projectCount, connectionCount, skillsData }) {
+  const { t } = useI18n()
   const avatar = (user?.full_name || user?.name || user?.username || 'U').charAt(0).toUpperCase()
   const displayName = user?.full_name || user?.name || user?.username || 'User'
   const username = user?.username ? `@${user.username}` : '@user'
 
-  const userRole = user?.role === 'administrator' || user?.role === 'admin' ? 'Admin' :
-                   user?.role === 'moderator' ? 'Moderator' : 'Regular User'
+  const userRole = user?.role === 'administrator' || user?.role === 'admin' ? t('roles.admin') :
+                   user?.role === 'moderator' ? t('roles.moderator') : t('roles.user')
 
   // Parse skills — prefer skillsData from API, fall back to user.skills
   const rawSkills = (skillsData && skillsData.length > 0) ? skillsData : user?.skills
@@ -213,21 +227,21 @@ function LeftSidebar({ user, projectCount, connectionCount, skillsData }) {
         <h2 className="text-lg font-bold text-white leading-tight">{displayName}</h2>
         <p className="text-sm text-slate-400 mb-3">{username}</p>
         <div className="badge badge-primary mb-4 capitalize">{userRole}</div>
-        <p className="text-xs text-slate-300 mb-2 px-2 italic leading-relaxed">{user?.bio || user?.about || 'No bio provided. Update your profile.'}</p>
+        <p className="text-xs text-slate-300 mb-2 px-2 italic leading-relaxed">{user?.bio || user?.about || t('sidebar.noBio')}</p>
 
         {/* SECTION 2: Stats & Skills */}
         <div className="w-full border-t border-[#2D2D4E] pt-5 mt-4">
           <div className="flex justify-between items-center text-sm mb-3">
-            <span className="text-slate-400 font-medium">Connections</span>
+            <span className="text-slate-400 font-medium">{t('sidebar.connections')}</span>
             <span className="font-bold text-white">{connectionCount}</span>
           </div>
           <div className="flex justify-between items-center text-sm mb-5">
-            <span className="text-slate-400 font-medium">Projects</span>
+            <span className="text-slate-400 font-medium">{t('sidebar.projects')}</span>
             <span className="font-bold text-white">{projectCount}</span>
           </div>
 
           <div className="text-center">
-            <span className="block text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest">My Skills</span>
+            <span className="block text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest">{t('sidebar.mySkills')}</span>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {displayedSkills.length > 0 ? (
                 <>
@@ -241,12 +255,12 @@ function LeftSidebar({ user, projectCount, connectionCount, skillsData }) {
                   })}
                   {remainingSkills > 0 && (
                     <span className="text-[10px] font-bold px-2.5 py-1 bg-[#2D2D4E] text-slate-400 rounded-full border border-[#2D2D4E]">
-                      +{remainingSkills} more
+                      {t('sidebar.moreSkills', remainingSkills)}
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-xs text-slate-500">No skills added</span>
+                <span className="text-xs text-slate-500">{t('sidebar.noSkills')}</span>
               )}
             </div>
           </div>
@@ -258,6 +272,7 @@ function LeftSidebar({ user, projectCount, connectionCount, skillsData }) {
 
 /* ─── Right Sidebar (Widgets) ──────────────────────────────────────── */
 function RightSidebar() {
+  const { t } = useI18n()
   const [suggestedProjects, setSuggestedProjects] = useState([])
   const [suggestedUsers, setSuggestedUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -292,7 +307,7 @@ function RightSidebar() {
   if (loading) {
     return (
       <aside className="hidden lg:flex flex-col gap-6 sticky top-20 self-start pb-6">
-        <div className="text-center text-slate-400 py-10">Loading suggestions...</div>
+        <div className="text-center text-slate-400 py-10">{t('widgets.loadingSuggestions')}</div>
       </aside>
     )
   }
@@ -301,9 +316,9 @@ function RightSidebar() {
     <aside className="hidden lg:flex flex-col gap-6 sticky top-20 self-start pb-6">
       {/* Suggested Projects */}
       <div className="card p-5">
-        <h3 className="text-base font-bold text-white mb-4">Suggested Projects</h3>
+        <h3 className="text-base font-bold text-white mb-4">{t('widgets.suggestedProjects')}</h3>
         {suggestedProjects.length === 0 ? (
-          <p className="text-xs text-slate-400">No project suggestions yet.</p>
+          <p className="text-xs text-slate-400">{t('widgets.noProjectSuggestions')}</p>
         ) : (
           <ul className="space-y-4">
             {suggestedProjects.map((match, idx) => {
@@ -322,7 +337,7 @@ function RightSidebar() {
                       {proj.title || proj.name}
                     </p>
                     <p className="text-[10px] text-slate-400">
-                      {Math.round((match.match_score || match.score || 0) * 100)}% Match
+                      {t('widgets.matchPercent', Math.round((match.match_score || match.score || 0) * 100))}
                     </p>
                   </div>
                 </Link>
@@ -334,9 +349,9 @@ function RightSidebar() {
 
       {/* Suggested Users */}
       <div className="card p-5">
-        <h3 className="text-base font-bold text-white mb-4">Suggested Connections</h3>
+        <h3 className="text-base font-bold text-white mb-4">{t('widgets.suggestedConnections')}</h3>
         {suggestedUsers.length === 0 ? (
-          <p className="text-xs text-slate-400">No user suggestions yet.</p>
+          <p className="text-xs text-slate-400">{t('widgets.noUserSuggestions')}</p>
         ) : (
           <ul className="space-y-4">
             {suggestedUsers.map((match) => {
@@ -356,12 +371,12 @@ function RightSidebar() {
                         {name}
                       </p>
                       <p className="text-[10px] text-slate-400">
-                        {Math.round((match.match_score || match.score || 0) * 100)}% Match
+                        {t('widgets.matchPercent', Math.round((match.match_score || match.score || 0) * 100))}
                       </p>
                     </div>
                   </div>
                   <button className="text-[10px] font-bold px-2 py-1 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-slate-400 transition-colors shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Connect logic here */ }}>
-                    Connect
+                    {t('widgets.connect')}
                   </button>
                 </Link>
               )
@@ -449,7 +464,7 @@ export default function Layout({ children }) {
   }, [user])
 
   return (
-    <div className="min-h-screen bg-[#0F0F1A] text-slate-200 font-sans flex flex-col dark">
+    <div className="min-h-screen font-sans flex flex-col" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)' }}>
       <TopNav user={user} logout={logout} unreadCount={unreadCount} />
 
       {/* pt-16 offsets the fixed navbar height — overflow on body so sticky works */}

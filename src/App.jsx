@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import LandingPage from './pages/LandingPage'
 import Register from './pages/Register'
 import EmailVerify from './pages/EmailVerify'
 import ForgotPassword from './pages/ForgotPassword'
@@ -139,7 +140,7 @@ export default function App(){
       <Route path="/admin/action-logs/:id" element={<ProtectedRoute><Layout><AdminActionLogDetail/></Layout></ProtectedRoute>} />
       <Route path="/admin/system-logs" element={<ProtectedRoute><Layout><AdminSystemLogs/></Layout></ProtectedRoute>} />
       <Route path="/admin/system-logs/:id" element={<ProtectedRoute><Layout><AdminSystemLogDetail/></Layout></ProtectedRoute>} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
       </Routes>
     </ErrorBoundary>
   )

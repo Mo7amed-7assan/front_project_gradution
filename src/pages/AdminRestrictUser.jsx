@@ -4,11 +4,10 @@ import { restrictUser } from '../services/adminRestrictions'
 import Spinner from '../components/Spinner'
 
 const RESTRICTION_TYPES = [
-  { value: 'messaging',    label: 'Messaging',    icon: '💬', desc: 'Cannot send or receive messages' },
-  { value: 'posting',      label: 'Posting',      icon: '📝', desc: 'Cannot create or edit posts' },
-  { value: 'applications', label: 'Applications', icon: '📋', desc: 'Cannot apply to projects' },
-  { value: 'matching',     label: 'Matching',     icon: '🔀', desc: 'Excluded from match suggestions' },
-  { value: 'comments',     label: 'Comments',     icon: '💭', desc: 'Cannot leave comments' },
+  { value: 'messaging_ban',    label: 'Messaging Ban',    icon: '💬', desc: 'Cannot send or receive messages' },
+  { value: 'posting_ban',      label: 'Posting Ban',      icon: '📝', desc: 'Cannot create or edit posts' },
+  { value: 'application_ban',  label: 'Application Ban',  icon: '📋', desc: 'Cannot apply to projects' },
+  { value: 'full_suspension',  label: 'Full Suspension',  icon: '🚫', desc: 'Complete account suspension' },
 ]
 
 export default function AdminRestrictUser() {
@@ -18,7 +17,7 @@ export default function AdminRestrictUser() {
   const queryUserId = searchParams.get('userId') || location.state?.userId || ''
 
   const [targetUserId, setTargetUserId] = useState(queryUserId)
-  const [restrictionType, setRestrictionType] = useState('messaging')
+  const [restrictionType, setRestrictionType] = useState('messaging_ban')
   const [reason, setReason] = useState('')
   const [duration, setDuration] = useState('')
   const [processing, setProcessing] = useState(false)
@@ -30,17 +29,22 @@ export default function AdminRestrictUser() {
     setProcessing(true)
     try {
       const payload = {
-        target_user_id: targetUserId.trim(),
+        user_id: targetUserId.trim(),
         restriction_type: restrictionType,
         reason: reason.trim(),
       }
-      if (duration) {
-        payload.expires_at = new Date(Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000).toISOString()
+      if (duration && !isNaN(duration)) {
+        payload.duration_hours = parseInt(duration)
+      } else {
+        payload.duration_hours = null
       }
+      console.log('Sending restriction payload:', payload)
       await restrictUser(payload)
       navigate('/admin/restrictions')
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to restrict user')
+      console.error('API Error Response:', err?.response?.data)
+      const errorMsg = err?.response?.data ? JSON.stringify(err.response.data) : (err?.message || 'Failed to restrict user')
+      setError(errorMsg)
     } finally {
       setProcessing(false)
     }
@@ -113,7 +117,7 @@ export default function AdminRestrictUser() {
           </div>
 
           <div>
-            <label className="form-label">Duration (days)</label>
+            <label className="form-label">Duration (hours)</label>
             <input
               type="number"
               value={duration}
@@ -123,7 +127,7 @@ export default function AdminRestrictUser() {
               min="1"
             />
             <p className="text-xs text-slate-400 mt-1.5 font-medium">
-              Restriction will auto-lift after this many days. Leave empty for permanent.
+              Restriction will auto-lift after this many hours. Leave empty for permanent.
             </p>
           </div>
 

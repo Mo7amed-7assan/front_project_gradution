@@ -1,0 +1,125 @@
+// src/i18n/ar.js — Arabic translations (العربية)
+const ar = {
+  // Navigation labels
+  nav: {
+    home:         'الرئيسية',
+    projects:     'المشاريع',
+    network:      'الشبكة',
+    reports:      'التقارير',
+    verify:       'التحقق',
+    messages:     'الرسائل',
+    notifications:'الإشعارات',
+    createProject:'+ إنشاء مشروع',
+    admin:        'الإدارة',
+    myProfile:    'ملفي الشخصي',
+    signOut:      'تسجيل الخروج',
+  },
+
+  // Left Sidebar
+  sidebar: {
+    connections:  'التواصل',
+    projects:     'المشاريع',
+    mySkills:     'مهاراتي',
+    noBio:        'لا توجد نبذة. قم بتحديث ملفك الشخصي.',
+    noSkills:     'لم تُضف مهارات بعد',
+    moreSkills:   (n) => `+${n} أخرى`,
+  },
+
+  // Right Sidebar Widgets
+  widgets: {
+    suggestedProjects:    'مشاريع مقترحة',
+    suggestedConnections: 'اتصالات مقترحة',
+    noProjectSuggestions: 'لا توجد مشاريع مقترحة بعد.',
+    noUserSuggestions:    'لا توجد اقتراحات بعد.',
+    loadingSuggestions:   'جاري تحميل الاقتراحات...',
+    matchPercent:         (n) => `${n}% تطابق`,
+    connect:              'تواصل',
+  },
+
+  // Roles
+  roles: {
+    admin:     'مدير',
+    moderator: 'مشرف',
+    user:      'مستخدم عادي',
+  },
+
+  // Common
+  common: {
+    loading:    'جاري التحميل...',
+    save:       'حفظ',
+    cancel:     'إلغاء',
+    confirm:    'تأكيد',
+    delete:     'حذف',
+    edit:       'تعديل',
+    apply:      'تقدم',
+    submit:     'إرسال',
+    back:       'رجوع',
+    search:     'بحث',
+    filter:     'تصفية',
+    seeAll:     'عرض الكل',
+    noResults:  'لا توجد نتائج.',
+    error:      'حدث خطأ. يرجى المحاولة مرة أخرى.',
+  },
+
+  // Landing Page
+  landing: {
+    navWhy: 'لماذا CoFound',
+    navFeatures: 'الميزات',
+    navAbout: 'معلومات عنا',
+    signIn: 'تسجيل الدخول',
+    getStarted: 'ابدأ الآن',
+    heroTitle: 'حيث يلتقي المبتكرون، يبنون، ويطلقون.',
+    heroSubtitle: 'نربط رواد الأعمال والمطورين والمبدعين لبناء شركات ناشئة معاً باستخدام المساعدة المتقدمة للذكاء الاصطناعي.',
+    exploreProjects: 'استكشف المشاريع',
+    trustedBy: 'موثوق من قبل فرق مبتكرة حول العالم',
+    
+    // Why CoFound
+    whyTitle: 'لماذا CoFound',
+    challengeTitle: 'التحدي',
+    challengeDesc: 'من الصعب العثور على شركاء مؤسسين مؤهلين، التواصل مشتت بين تطبيقات متعددة، والشركات الناشئة تفتقر إلى التوجيه الهيكلي.',
+    solutionTitle: 'حل CoFound',
+    solutionDesc: 'نجمع بين تكوين الفِرَق، التعاون الآمن في الوقت الفعلي، وأدوات التحقق القوية للذكاء الاصطناعي تحت لوحة تحكم واحدة مميزة.',
+
+    // How It Works
+    howItWorksTitle: 'كيف يعمل',
+    step1Title: 'إنشاء الملف الشخصي',
+    step1Desc: 'قم ببناء ملفك الشخصي واعرض مهاراتك ورؤيتك الأساسية.',
+    step2Title: 'التطابق والتواصل',
+    step2Desc: 'تطابق ذكي مع شركاء مثاليين أو استخدم مساعدي الذكاء الاصطناعي.',
+    step3Title: 'إطلاق مساحة العمل',
+    step3Desc: 'قم بإطلاق وإدارة مشروعك في مساحة عمل موحدة وآمنة.',
+
+    // Features Grid
+    features: 'الميزات',
+    feature1Title: 'التوفيق بين الشركاء',
+    feature1Desc: 'تطابق ذكي يعتمد على المهارات التكميلية والرؤية المشتركة وتقييم الذكاء الاصطناعي للشركات الناشئة.',
+    feature2Title: 'محادثات ومراسلة متقدمة',
+    feature2Desc: 'قنوات محادثة في الوقت الفعلي، مراسلة جماعية للفرق، ومشاركة السياق المباشر المدمج في مشروعك.',
+    feature3Title: 'مساعدو الذكاء الاصطناعي',
+    feature3Desc: 'استفد من وكلاء الذكاء الاصطناعي المدمجين للمساعدة في العصف الذهني، مراجعة الكود، تخطيط الأعمال، والتوثيق التقني.',
+    feature4Title: 'مساحة عمل موحدة',
+    feature4Desc: 'مركز موحد لتكوين الفِرَق، مكالمات الفيديو، مشاركة الملفات، وإدارة المهام الرشيقة في لوحة تحكم متميزة.',
+
+    // Footer
+    footerProduct: 'المنتج',
+    footerIntegrations: 'التكاملات',
+    footerSolutions: 'الحلول',
+    footerCompany: 'الشركة',
+    footerAboutUs: 'معلومات عنا',
+    footerCareers: 'الوظائف',
+    footerContact: 'اتصل بنا',
+    footerResources: 'الموارد',
+    footerDocs: 'التوثيق',
+    footerHelp: 'مركز المساعدة',
+    footerCommunity: 'المجتمع',
+    footerCopyright: '© 2026 CoFound. جميع الحقوق محفوظة.',
+  },
+
+  // Register Page
+  register: {
+    heroTitle: 'ابنِ المستقبل، معاً.',
+    heroSubtitle: 'أنشئ حساب CoFound الخاص بك اليوم. تواصل مع شركاء مؤهلين، كوّن فرق نخبة، وحوّل المشاريع إلى شركات ناشئة على أرض الواقع.',
+  },
+}
+
+export default ar
