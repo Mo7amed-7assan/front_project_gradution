@@ -62,12 +62,12 @@ export default function AdminSettingDetail() {
   if (!item) return <div className="p-6 text-red-600">Setting not found</div>
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+    <div className="max-w-4xl mx-auto card p-6 md:p-8 rounded-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold font-mono text-sm">{key}</h1>
+        <h1 className="text-2xl font-bold font-mono text-[var(--text-primary)]">{key}</h1>
         <button
           onClick={() => setEditMode(!editMode)}
-          className="px-3 py-2 bg-blue-600 text-white rounded text-sm"
+          className="btn-primary"
         >
           {editMode ? 'Cancel' : 'Edit'}
         </button>
@@ -75,49 +75,49 @@ export default function AdminSettingDetail() {
 
       <div className="space-y-4 mb-8">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
-          <div className="mt-1 p-3 bg-gray-50 rounded">
+          <label className="form-label">Description</label>
+          <div className="mt-1 p-3 bg-[var(--bg-hover)]/30 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)]">
             {item.description || 'No description'}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Type</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
+            <label className="form-label">Type</label>
+            <div className="mt-1 p-3 bg-[var(--bg-hover)]/30 rounded-xl text-sm text-[var(--text-primary)] border border-[var(--border-color)]">
               {item.type || 'unknown'}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Public</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded text-sm">
+            <label className="form-label">Public</label>
+            <div className="mt-1 p-3 bg-[var(--bg-hover)]/30 rounded-xl text-sm text-[var(--text-primary)] border border-[var(--border-color)]">
               {item.is_public ? 'Yes' : 'No'}
             </div>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Current Value</label>
+          <label className="form-label">Current Value</label>
           {editMode ? (
             <textarea
               value={formValue}
               onChange={(e) => setFormValue(e.target.value)}
-              className="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm"
+              className="form-input mt-1 block w-full font-mono text-sm"
               rows={6}
             />
           ) : (
-            <pre className="mt-1 p-3 bg-gray-50 rounded text-xs overflow-auto break-words">
+            <pre className="mt-1 p-3 bg-[var(--bg-hover)]/30 rounded-xl text-xs overflow-auto break-words text-[var(--text-primary)] border border-[var(--border-color)]">
               {item.value}
             </pre>
           )}
         </div>
 
         {editMode && (
-          <div className="flex gap-2 pt-4 border-t">
+          <div className="flex gap-2 pt-4 border-t border-[var(--border-color)]">
             <button
               onClick={handleUpdate}
               disabled={processing}
-              className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
+              className="btn-success disabled:opacity-50"
             >
               {processing ? 'Saving...' : 'Save Changes'}
             </button>
@@ -127,7 +127,7 @@ export default function AdminSettingDetail() {
                 setEditMode(false)
                 setFormValue(String(item.value || ''))
               }}
-              className="px-4 py-2 bg-gray-600 text-white rounded"
+              className="btn-secondary"
             >
               Discard
             </button>
@@ -136,22 +136,22 @@ export default function AdminSettingDetail() {
       </div>
 
       {history.length > 0 && (
-        <div className="border-t pt-6">
-          <h2 className="text-lg font-semibold mb-4">Change History</h2>
+        <div className="border-t border-[var(--border-color)] pt-6">
+          <h2 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">Change History</h2>
           <div className="space-y-2 max-h-96 overflow-auto">
             {history.map((entry, idx) => (
-              <div key={idx} className="p-3 bg-gray-50 rounded text-sm">
-                <div className="font-medium">
+              <div key={idx} className="p-3 bg-[var(--bg-hover)]/30 border border-[var(--border-color)] rounded-xl text-sm">
+                <div className="font-semibold text-[var(--text-primary)]">
                   {entry.changed_by?.full_name || entry.changed_by?.name || entry.changed_by_id || 'Unknown'}
                 </div>
-                <div className="text-gray-600 text-xs">
+                <div className="text-[var(--text-secondary)] text-xs mt-0.5">
                   {entry.changed_at ? new Date(entry.changed_at).toLocaleString() : 'Unknown time'}
                 </div>
                 {entry.old_value !== undefined && (
                   <div className="mt-2 font-mono text-xs">
-                    <span className="text-red-600">- {entry.old_value}</span>
+                    <span className="text-red-500">- {entry.old_value}</span>
                     <br />
-                    <span className="text-green-600">+ {entry.new_value}</span>
+                    <span className="text-green-500">+ {entry.new_value}</span>
                   </div>
                 )}
               </div>
@@ -160,9 +160,9 @@ export default function AdminSettingDetail() {
         </div>
       )}
 
-      <details className="pt-4 border-t">
-        <summary className="cursor-pointer font-medium text-gray-700">Raw Data</summary>
-        <pre className="mt-3 p-3 bg-gray-50 rounded text-xs overflow-auto">
+      <details className="pt-4 border-t border-[var(--border-color)]">
+        <summary className="cursor-pointer font-bold text-[var(--text-secondary)]">Raw Data</summary>
+        <pre className="mt-3 p-3 bg-[var(--bg-hover)]/30 border border-[var(--border-color)] rounded-xl text-xs text-[var(--text-primary)] overflow-auto">
           {JSON.stringify(item, null, 2)}
         </pre>
       </details>

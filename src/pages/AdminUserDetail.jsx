@@ -8,12 +8,12 @@ import { useAuth } from '../context/AuthContext'
 const statusMap = {
   active:    { cls: 'badge-green',  label: 'Active' },
   pending:   { cls: 'badge-yellow', label: 'Pending' },
-  suspended: { cls: 'bg-orange-50 text-orange-700 border border-orange-200 badge', label: 'Suspended' },
+  suspended: { cls: 'bg-orange-500/10 text-orange-400 border border-orange-500/20 badge', label: 'Suspended' },
   banned:    { cls: 'badge-red',    label: 'Banned' },
   deleted:   { cls: 'badge-slate',  label: 'Deleted' },
 }
 const roleMap = {
-  administrator: { cls: 'bg-purple-50 text-purple-700 border border-purple-200 badge', label: 'Administrator' },
+  administrator: { cls: 'bg-purple-500/10 text-purple-400 border border-purple-500/20 badge', label: 'Administrator' },
   moderator:     { cls: 'badge-blue',   label: 'Moderator' },
   regular_user:  { cls: 'badge-slate',  label: 'Regular User' },
   guest:         { cls: 'badge-yellow', label: 'Guest' },
@@ -48,8 +48,8 @@ const formatDate = (dateStr) => {
 function InfoRow({ label, children }) {
   return (
     <div>
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-      <div className="text-sm font-semibold text-slate-800">{children}</div>
+      <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">{label}</p>
+      <div className="text-sm font-semibold text-[var(--text-primary)]">{children}</div>
     </div>
   )
 }
@@ -61,31 +61,31 @@ function CompareRow({ label, cardValue, userValue }) {
   const hasValues = cVal && uVal;
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 px-2 rounded-xl transition-colors duration-150">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-3 border-b border-[var(--border-color)]/50 last:border-0 hover:bg-[var(--bg-hover)]/20 px-2 rounded-xl transition-colors duration-150">
       {/* Extracted Document Value */}
-      <div className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 text-right shadow-sm truncate">
-        {cardValue || <span className="text-slate-300 italic font-normal">Not detected</span>}
+      <div className="bg-[var(--bg-hover)]/30 border border-[var(--border-color)] rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-primary)] text-right shadow-sm truncate">
+        {cardValue || <span className="text-[var(--text-hint)] italic font-normal">Not detected</span>}
       </div>
 
       {/* Matching Status */}
       <div className="text-center min-w-[90px] flex flex-col items-center">
-        <div className="text-[9px] font-bold tracking-wider uppercase text-slate-400 mb-1">
+        <div className="text-[9px] font-bold tracking-wider uppercase text-[var(--text-hint)] mb-1">
           {label}
         </div>
         {hasValues ? (
           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm ${
-            match ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'
+            match ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
           }`}>
             {match ? '✓ Match' : '✗ Mismatch'}
           </span>
         ) : (
-          <span className="text-slate-300 text-sm font-semibold">—</span>
+          <span className="text-[var(--text-hint)] text-sm font-semibold">—</span>
         )}
       </div>
 
       {/* User Registered Value */}
-      <div className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm truncate">
-        {userValue || <span className="text-slate-300 italic font-normal">Not provided</span>}
+      <div className="bg-[var(--bg-hover)]/30 border border-[var(--border-color)] rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-primary)] shadow-sm truncate">
+        {userValue || <span className="text-[var(--text-hint)] italic font-normal">Not provided</span>}
       </div>
     </div>
   );
@@ -102,21 +102,21 @@ function AICheckRow({ label, passed, confidence }) {
   const passedStatus = Boolean(passed);
 
   return (
-    <div className="py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 px-2 rounded-xl transition-colors duration-150">
+    <div className="py-3 border-b border-[var(--border-color)]/50 last:border-0 hover:bg-[var(--bg-hover)]/20 px-2 rounded-xl transition-colors duration-150">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold border ${
-            passedStatus ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200'
+            passedStatus ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
           }`}>
             {passedStatus ? '✓' : '✗'}
           </span>
-          <span className="text-sm font-semibold text-slate-700">{label}</span>
+          <span className="text-sm font-semibold text-[var(--text-primary)]">{label}</span>
         </div>
-        <span className={`text-xs font-bold ${passedStatus ? 'text-emerald-600' : 'text-rose-600'}`}>
+        <span className={`text-xs font-bold ${passedStatus ? 'text-emerald-400' : 'text-rose-400'}`}>
           {pct}% Match
         </span>
       </div>
-      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+      <div className="h-1.5 bg-[var(--bg-hover)] rounded-full overflow-hidden shadow-inner">
         <div
           className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${
             passedStatus ? 'from-emerald-400 to-emerald-500' : 'from-rose-400 to-rose-500'
@@ -133,7 +133,7 @@ function ImagePreviewBox({ src, label, rotation, onRotate, onZoom }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/80 aspect-[1.6] flex items-center justify-center group shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200">
+      <div className="relative rounded-2xl overflow-hidden bg-[var(--bg-hover)]/30 border border-[var(--border-color)] aspect-[1.6] flex items-center justify-center group shadow-sm hover:shadow-md transition-all duration-200">
         {src && !imgError ? (
           <img
             src={src}
@@ -143,7 +143,7 @@ function ImagePreviewBox({ src, label, rotation, onRotate, onZoom }) {
             style={{ transform: `rotate(${rotation}deg)` }}
           />
         ) : (
-          <div className="text-center text-slate-400 flex flex-col items-center p-4">
+          <div className="text-center text-[var(--text-hint)] flex flex-col items-center p-4">
             <span className="text-4xl mb-2">🪪</span>
             <span className="text-xs font-semibold">No Image Available</span>
           </div>
@@ -169,7 +169,7 @@ function ImagePreviewBox({ src, label, rotation, onRotate, onZoom }) {
           </div>
         )}
       </div>
-      <div className="text-center text-xs font-bold tracking-wider uppercase text-slate-400">
+      <div className="text-center text-xs font-bold tracking-wider uppercase text-[var(--text-hint)]">
         {label}
       </div>
     </div>
@@ -289,7 +289,7 @@ export default function AdminUserDetail() {
   }
 
   if (loading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
-  if (!item) return <div className="p-8 text-rose-600 font-bold">User not found.</div>
+  if (!item) return <div className="p-8 text-rose-500 font-bold">User not found.</div>
 
   const statusBadge = statusMap[item.account_status?.toLowerCase()] || { cls: 'badge-slate', label: item.account_status || 'Unknown' }
   const roleBadge   = roleMap[item.role?.toLowerCase()]    || { cls: 'badge-slate', label: item.role || 'Unknown' }
@@ -333,11 +333,11 @@ export default function AdminUserDetail() {
 
       <div className="flex items-center justify-between">
         <div>
-          <Link to="/admin/users" className="text-sm text-brand-primary font-bold flex items-center gap-1 mb-2 hover:underline">
+          <Link to="/admin/users" className="text-sm text-[#6C63FF] font-bold flex items-center gap-1 mb-2 hover:underline">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             Back to Users
           </Link>
-          <h1 className="page-title text-brand-secondary">User Detail</h1>
+          <h1 className="page-title text-[var(--text-primary)]">User Detail</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -356,7 +356,7 @@ export default function AdminUserDetail() {
       </div>
 
       {message && (
-        <div className={`p-4 rounded-2xl text-sm font-bold flex items-center gap-2 ${message.type === 'error' ? 'bg-rose-50 border border-rose-200 text-rose-700' : message.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-blue-50 border border-blue-200 text-blue-700'}`}>
+        <div className={`p-4 rounded-2xl text-sm font-bold flex items-center gap-2 ${message.type === 'error' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' : message.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-blue-500/10 border border-blue-500/20 text-blue-400'}`}>
           {message.text}
         </div>
       )}
@@ -364,13 +364,13 @@ export default function AdminUserDetail() {
       {/* Main User Card */}
       <div className="card p-0 overflow-hidden">
         {/* User Header */}
-        <div className="bg-gradient-to-r from-brand-primaryDark to-brand-primary p-6 flex items-center gap-5">
+        <div className="bg-gradient-to-r from-[#4F46E5] to-[#6C63FF] p-6 flex items-center gap-5">
           <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-white font-black text-3xl shadow-inner">
             {initial}
           </div>
           <div>
             <h2 className="text-2xl font-black text-white">{item.full_name || item.name || item.username || 'Unknown'}</h2>
-            <p className="text-brand-primaryLight font-medium mt-0.5">{item.email}</p>
+            <p className="text-[#EEEDFF] font-medium mt-0.5">{item.email}</p>
             <div className="flex items-center gap-2 mt-2">
               <span className={`${roleBadge.cls} text-xs`}>{roleBadge.label}</span>
               <span className={`${statusBadge.cls} text-xs`}>{statusBadge.label}</span>
@@ -394,12 +394,12 @@ export default function AdminUserDetail() {
 
           {/* Edit Form */}
           {editMode && (
-            <div className="pt-6 border-t border-slate-100 space-y-4">
-              <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Edit User</p>
+            <div className="pt-6 border-t border-[var(--border-color)] space-y-4">
+              <p className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-wider">Edit User</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Role</label>
-                  <select value={formRole} onChange={(e) => setFormRole(e.target.value)} className="form-select bg-slate-50">
+                  <select value={formRole} onChange={(e) => setFormRole(e.target.value)} className="form-select">
                     <option value="administrator">Administrator</option>
                     <option value="moderator">Moderator</option>
                     <option value="regular_user">Regular User</option>
@@ -408,7 +408,7 @@ export default function AdminUserDetail() {
                 </div>
                 <div>
                   <label className="form-label">Account Status</label>
-                  <select value={formStatus} onChange={(e) => setFormStatus(e.target.value)} className="form-select bg-slate-50">
+                  <select value={formStatus} onChange={(e) => setFormStatus(e.target.value)} className="form-select">
                     <option value="active">Active</option>
                     <option value="pending">Pending</option>
                     <option value="suspended">Suspended</option>
@@ -419,7 +419,7 @@ export default function AdminUserDetail() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={() => { setEditMode(false); setFormRole(item.role); setFormStatus(item.account_status) }} className="btn-secondary flex-1">Discard</button>
-                <button onClick={handleUpdate} disabled={processing} className="btn-primary flex-1 shadow-brand-primary/30">
+                <button onClick={handleUpdate} disabled={processing} className="btn-primary flex-1">
                   {processing ? <Spinner /> : 'Save Changes'}
                 </button>
               </div>
@@ -432,24 +432,24 @@ export default function AdminUserDetail() {
       {verificationData ? (
         <div className="space-y-6">
           {/* Card 1: Identity Profile Cross-Check */}
-          <div className="card p-6 hover:shadow-md transition-all duration-300 border border-slate-200/60 bg-white">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6">
+          <div className="card p-6">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-5 mb-6">
               <div>
-                <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+                <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   🪪 Identity Profile Cross-Check
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
                   Verify extracted metadata against user credentials
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-[1fr_auto_1fr] gap-4 mb-4">
-              <div className="text-right text-xs font-black tracking-wider uppercase text-brand-primaryDark">
+              <div className="text-right text-xs font-bold tracking-wider uppercase text-[#6C63FF]">
                 Extracted Document Value
               </div>
               <div className="min-w-[90px]" />
-              <div className="text-xs font-black tracking-wider uppercase text-sky-600">
+              <div className="text-xs font-bold tracking-wider uppercase text-sky-500">
                 Profile Registered Value
               </div>
             </div>
@@ -476,7 +476,7 @@ export default function AdminUserDetail() {
             />
 
             {/* Document metadata info row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-8 pt-6 border-t border-slate-100">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-8 pt-6 border-t border-[var(--border-color)]">
               <InfoRow label="Document Type">
                 {verificationData.document_type
                   ? verificationData.document_type.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -497,12 +497,12 @@ export default function AdminUserDetail() {
           </div>
 
           {/* Card 2: Credential Document Review (Pictures) */}
-          <div className="card p-6 hover:shadow-md transition-all duration-300 border border-slate-200/60 bg-white">
+          <div className="card p-6">
             <div className="mb-6">
-              <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+              <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                 📄 Credential Document Review
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
                 Rotate document for alignment or zoom to inspect high-definition images.
               </p>
             </div>
@@ -527,12 +527,12 @@ export default function AdminUserDetail() {
 
           {/* Card 3: Automated Agent Audit (AI verification checks) */}
           {automatedChecks ? (
-            <div className="card p-6 hover:shadow-md transition-all duration-300 border border-slate-200/60 bg-white">
+            <div className="card p-6">
               <div className="mb-6">
-                <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+                <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   🤖 Automatic Agent Audit
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
                   System evaluation scores for image comparison and biometric detection
                 </p>
               </div>
@@ -586,20 +586,20 @@ export default function AdminUserDetail() {
               </div>
             </div>
           ) : (
-            <div className="card p-8 border-dashed border-2 border-slate-200/80 bg-slate-50/50 flex flex-col items-center justify-center text-center">
+            <div className="card p-8 border-dashed border-2 border-[var(--border-color)] bg-[var(--bg-hover)]/10 flex flex-col items-center justify-center text-center">
               <span className="text-3xl mb-2">🤖</span>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">No automated checks run</p>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs">
+              <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">No automated checks run</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-xs">
                 This dossier lacks OCR and biometric computer vision reports. Manual review required.
               </p>
             </div>
           )}
         </div>
       ) : (
-        <div className="card p-8 border-dashed border-2 border-slate-200/80 bg-slate-50/50 flex flex-col items-center justify-center text-center">
+        <div className="card p-8 border-dashed border-2 border-[var(--border-color)] bg-[var(--bg-hover)]/10 flex flex-col items-center justify-center text-center">
           <span className="text-3xl mb-2">🪪</span>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">No Verification Submitted</p>
-          <p className="text-xs text-slate-400 mt-1 max-w-xs">
+          <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">No Verification Submitted</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-xs">
             This customer has not submitted any identity verification document or liveness check yet.
           </p>
         </div>
