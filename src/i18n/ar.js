@@ -120,6 +120,71 @@ const ar = {
     heroTitle: 'ابنِ المستقبل، معاً.',
     heroSubtitle: 'أنشئ حساب CoFound الخاص بك اليوم. تواصل مع شركاء مؤهلين، كوّن فرق نخبة، وحوّل المشاريع إلى شركات ناشئة على أرض الواقع.',
   },
+
+  // Project Form (Create & Edit)
+  projectForm: {
+    createTitle: 'إنشاء مشروع',
+    editTitle: 'تعديل المشروع',
+    createSubtitle: 'حدد تفاصيل فكرة مشروعك الناشئ، الأدوار المطلوبة، والجدول الزمني.',
+    editSubtitle: 'تحديث تفاصيل مشروعك الناشئ، المتطلبات، والتواريخ النهائية.',
+    steps: {
+      basicInfo: 'المعلومات الأساسية',
+      rolesSkills: 'الأدوار والمهارات',
+      timeline: 'الجدول الزمني'
+    },
+    labels: {
+      projectTitle: 'العنوان',
+      category: 'التصنيف',
+      status: 'حالة المشروع',
+      visibility: 'الظهور',
+      shortDescription: 'وصف قصير',
+      fullDescription: 'الوصف الكامل',
+      goals: 'أهداف المشروع',
+      goalsPlaceholder: 'صف أهداف المشروع والأثر المتوقع...',
+      roles: 'الأدوار المطلوبة',
+      roleTitle: 'المسمى الوظيفي للدور',
+      positionsNeeded: 'الشواغر المطلوبة',
+      description: 'الوصف',
+      skillRequirements: 'المهارات المطلوبة',
+      skillName: 'اسم المهارة',
+      proficiency: 'مستوى الإتقان',
+      required: 'مطلوب',
+      minTeamSize: 'الحد الأدنى لحجم الفريق',
+      maxTeamSize: 'الحد الأقصى لحجم الفريق',
+      acceptingApplications: 'قبول طلبات الانضمام',
+      startDate: 'تاريخ البدء',
+      targetCompletionDate: 'تاريخ الانتهاء المستهدف',
+      applicationDeadline: 'الموعد النهائي للتقديم',
+      reviewTitle: 'مراجعة وتأكيد',
+      reviewText: 'يرجى التحقق من تصنيف المشروع، الأهداف، حجم الفريق، والتواريخ النهائية قبل النشر.',
+      reviewTextEdit: 'تأكيد التغييرات على الجدول الزمني للمشروع وإعدادات الملكية قبل الحفظ.'
+    },
+    statuses: {
+      planning: 'تخطيط',
+      active: 'نشط'
+    },
+    visibilities: {
+      public: 'عام',
+      private: 'خاص',
+      unlisted: 'غير مدرج'
+    },
+    proficiencyNames: {
+      beginner: 'مبتدئ',
+      intermediate: 'متوسط',
+      expert: 'خبير'
+    },
+    buttons: {
+      addRole: '+ إضافة دور',
+      addSkill: '+ إضافة مهارة',
+      remove: 'حذف',
+      back: 'رجوع',
+      continue: 'متابعة',
+      creating: 'جاري الإنشاء...',
+      createProject: 'إنشاء المشروع',
+      saving: 'جاري الحفظ...',
+      saveChanges: 'حفظ التغييرات'
+    }
+  }
 }
 
 export default ar
