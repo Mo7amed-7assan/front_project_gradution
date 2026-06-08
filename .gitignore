@@ -23,5 +23,11 @@ yarn-error.log*
 *.tmp
 *~
 
-
 node_modules
+
+# Sensitive / large files — do not commit
+co-found-28b0b-default-rtdb-export.json
+src/services/firebase.js
+CoFound_Presentation.pdf
+CoFound-Documentation.docx
+scratch/

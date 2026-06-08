@@ -73,7 +73,7 @@ function ChatPlaceholder({ hasConversation }) {
       <p className="text-sm font-semibold text-brand-secondary">
         {hasConversation ? 'It\'s quiet here... too quiet.' : 'Select a connection'}
       </p>
-      <p className="text-xs text-slate-500 mt-1 max-w-xs">
+      <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-xs">
         {hasConversation ? 'Break the ice! Send a message or share an idea below.' : 'Choose someone from your connections list to start chatting.'}
       </p>
     </div>
@@ -509,10 +509,10 @@ export default function RealtimeChatPanel({
   }
 
   return (
-    <section className="card flex h-full flex-col overflow-hidden bg-white shadow-xl shadow-brand-primary/5 border-brand-primaryLight" style={{ minHeight: '36rem' }}>
+    <section className="card flex h-full flex-col overflow-hidden bg-[var(--bg-surface)] shadow-xl shadow-brand-primary/5 border-brand-primaryLight" style={{ minHeight: '36rem' }}>
       {/* Header */}
       {!hideHeader && (
-        <div className="px-6 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-md shrink-0 z-10 sticky top-0">
+        <div className="px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-surface)]/80 backdrop-blur-md shrink-0 z-10 sticky top-0">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
                <div className="w-10 h-10 rounded-xl bg-brand-primaryLight flex items-center justify-center shrink-0">
@@ -526,7 +526,7 @@ export default function RealtimeChatPanel({
                   </h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
-                    <p className="text-xs text-slate-500 truncate">
+                    <p className="text-xs text-[var(--text-secondary)] truncate">
                       {selectedConversationId ? 'Connected & Secured' : 'Select a conversation'}
                     </p>
                   </div>
@@ -537,7 +537,7 @@ export default function RealtimeChatPanel({
               <select
                 value={selectedConversationId || ''}
                 onChange={(e) => onSelectConversation?.(e.target.value)}
-                className="form-select text-xs py-2 w-48 bg-slate-50 border-none focus:ring-1 focus:ring-brand-primary"
+                className="form-select text-xs py-2 w-48 bg-[var(--bg-input)] border-none focus:ring-1 focus:ring-brand-primary"
               >
                 {conversations.map(c => (
                   <option key={getConversationId(c)} value={getConversationId(c)}>{getConversationLabel(c)}</option>
@@ -598,7 +598,7 @@ export default function RealtimeChatPanel({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 scrollbar-thin relative">
+      <div className="flex-1 overflow-y-auto p-6 bg-[var(--bg-page)] scrollbar-thin relative">
         {!selectedConversationId ? (
           <ChatPlaceholder hasConversation={false} />
         ) : messages.length === 0 ? (
@@ -633,7 +633,7 @@ export default function RealtimeChatPanel({
                   
                   <div className={`max-w-[75%] sm:max-w-[65%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
                     {(!isMine && prevMine !== isMine) && (
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">
+                      <span className="text-[10px] font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1 ml-1">
                         {message.senderName || 'User'}
                       </span>
                     )}
@@ -641,7 +641,7 @@ export default function RealtimeChatPanel({
                     <div className={`px-4 py-3 text-sm shadow-sm relative group ${
                       isMine
                         ? 'bg-brand-primary text-white rounded-2xl rounded-br-sm'
-                        : 'bg-white text-slate-700 border border-slate-100 rounded-2xl rounded-bl-sm'
+                        : 'bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-2xl rounded-bl-sm'
                     }`}>
                       <p className="whitespace-pre-wrap break-words leading-relaxed">{message.text}</p>
                       {message.fileData && message.fileType?.startsWith('image/') && (
@@ -654,7 +654,7 @@ export default function RealtimeChatPanel({
                           href={message.fileData}
                           download={message.fileName || 'attachment'}
                           className={`mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-colors ${
-                            isMine ? 'bg-white text-brand-primary hover:bg-slate-100' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            isMine ? 'bg-[var(--bg-surface)] text-brand-primary hover:bg-[var(--bg-hover)]' : 'bg-[var(--bg-hover)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
                           }`}
                         >
                           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
@@ -667,8 +667,8 @@ export default function RealtimeChatPanel({
                       {callStatusLabel && (
                         <span className={`mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold ${
                           isMine
-                            ? 'bg-white/15 text-white'
-                            : 'bg-slate-100 text-slate-600'
+                            ? 'bg-[var(--bg-surface)]/15 text-white'
+                            : 'bg-[var(--bg-hover)] text-[var(--text-secondary)]'
                         }`}>
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                           {callStatusLabel}
@@ -681,7 +681,7 @@ export default function RealtimeChatPanel({
                           disabled={joiningCallId === message.callId}
                           className={`mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
                             isMine
-                              ? 'bg-white text-brand-primary hover:bg-slate-100'
+                              ? 'bg-[var(--bg-surface)] text-brand-primary hover:bg-[var(--bg-hover)]'
                               : 'bg-brand-primary text-white hover:bg-brand-primaryDark'
                           }`}
                         >
@@ -696,7 +696,7 @@ export default function RealtimeChatPanel({
                           rel="noreferrer"
                           className={`mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-colors ${
                             isMine
-                              ? 'bg-white text-brand-primary hover:bg-slate-100'
+                              ? 'bg-[var(--bg-surface)] text-brand-primary hover:bg-[var(--bg-hover)]'
                               : 'bg-brand-primary text-white hover:bg-brand-primaryDark'
                           }`}
                         >
@@ -707,12 +707,12 @@ export default function RealtimeChatPanel({
                       
                       {/* Message Actions (Hover) */}
                       <div className={`absolute top-1/2 -translate-y-1/2 ${isMine ? '-left-12' : '-right-12'} opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1`}>
-                         <button className="p-1 rounded bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-brand-primary transition-colors">
+                         <button className="p-1 rounded bg-[var(--bg-surface)] shadow-sm border border-[var(--border-color)] text-[var(--text-hint)] hover:text-brand-primary transition-colors">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                          </button>
                       </div>
                     </div>
-                    <span className={`text-[9px] font-medium text-slate-400 mt-1.5 ${isMine ? 'mr-1' : 'ml-1'}`}>
+                    <span className={`text-[9px] font-medium text-[var(--text-hint)] mt-1.5 ${isMine ? 'mr-1' : 'ml-1'}`}>
                       {formatMessageTime(message.createdAt)}
                     </span>
                   </div>
@@ -725,8 +725,8 @@ export default function RealtimeChatPanel({
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="sticky bottom-0 z-10 p-4 border-t border-slate-100 bg-white shrink-0">
-        <div className="flex flex-col gap-2 p-1 rounded-2xl border border-slate-200 bg-slate-50 focus-within:ring-2 focus-within:ring-brand-primary/20 focus-within:border-brand-primary/50 transition-all">
+      <form onSubmit={handleSend} className="sticky bottom-0 z-10 p-4 border-t border-[var(--border-color)] bg-[var(--bg-surface)] shrink-0">
+        <div className="flex flex-col gap-2 p-1 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-input)] focus-within:ring-2 focus-within:ring-brand-primary/20 focus-within:border-brand-primary/50 transition-all">
           <input
             ref={fileInputRef}
             type="file"
@@ -734,7 +734,7 @@ export default function RealtimeChatPanel({
             className="hidden"
           />
           {showEmojiPicker && (
-            <div className="mx-2 mt-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
+            <div className="mx-2 mt-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-3 shadow-lg">
               <div className="grid grid-cols-9 gap-1">
                 {EMOJIS.map((emoji) => (
                   <button
@@ -757,17 +757,17 @@ export default function RealtimeChatPanel({
             onKeyDown={handleKeyDown}
             disabled={!selectedConversationId || sending}
             placeholder={selectedConversationId ? 'Message...' : 'Select a conversation first'}
-            className="w-full bg-transparent resize-none px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none min-h-[44px] max-h-32 leading-relaxed"
+            className="w-full bg-transparent resize-none px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-hint)] focus:outline-none min-h-[44px] max-h-32 leading-relaxed"
             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px' }}
           />
           
           {/* Quick Actions Bar */}
           <div className="flex items-center justify-between px-2 pb-2">
              <div className="flex items-center gap-1">
-                <button type="button" onClick={handleAttach} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
+                <button type="button" onClick={handleAttach} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-[var(--text-hint)] hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
                 </button>
-                <button type="button" onClick={handleEmoji} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
+                <button type="button" onClick={handleEmoji} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-[var(--text-hint)] hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </button>
                 <button
@@ -777,13 +777,13 @@ export default function RealtimeChatPanel({
                   className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${
                     recording
                       ? 'text-rose-600 bg-rose-50 hover:bg-rose-100'
-                      : 'text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50'
+                      : 'text-[var(--text-hint)] hover:text-brand-primary hover:bg-brand-primaryLight/50'
                   }`}
                   title={recording ? 'Stop recording' : 'Record voice note'}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.5a5 5 0 005-5V7a5 5 0 00-10 0v6.5a5 5 0 005 5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19 11v2.5a7 7 0 01-14 0V11M12 20v2m-3 0h6" /></svg>
                 </button>
-                <button type="button" onClick={handleCode} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-slate-400 hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
+                <button type="button" onClick={handleCode} disabled={!selectedConversationId} className="p-1.5 rounded-lg text-[var(--text-hint)] hover:text-brand-primary hover:bg-brand-primaryLight/50 transition-colors disabled:opacity-50">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
                 </button>
                 {recording && (

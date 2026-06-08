@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import RealtimeChatPanel from '../../components/RealtimeChatPanel'
 
 function CallStatusBadge({ status }) {
-  const map = { active: 'bg-green-100 text-green-700', scheduled: 'bg-yellow-100 text-yellow-700', cancelled: 'bg-slate-100 text-slate-600', canceled: 'bg-slate-100 text-slate-600', ended: 'bg-slate-100 text-slate-600' }
+  const map = { active: 'bg-green-100 text-green-700', scheduled: 'bg-yellow-100 text-yellow-700', cancelled: 'bg-[var(--bg-hover)] text-[var(--text-secondary)]', canceled: 'bg-[var(--bg-hover)] text-[var(--text-secondary)]', ended: 'bg-[var(--bg-hover)] text-[var(--text-secondary)]' }
   return <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${map[status] || 'bg-indigo-100 text-indigo-700'}`}>{status}</span>
 }
 
 function PersonAvatar({ name, avatar }) {
   const letter = (name || 'U').charAt(0).toUpperCase()
-  if (avatar) return <img src={avatar} alt={name} className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0" onError={(e) => { e.target.style.display = 'none' }} />
+  if (avatar) return <img src={avatar} alt={name} className="w-10 h-10 rounded-full object-cover border border-[var(--border-color)] shrink-0" onError={(e) => { e.target.style.display = 'none' }} />
   return (
     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-semibold text-sm shrink-0 border border-indigo-200">
       {letter}
@@ -180,21 +180,21 @@ export default function MessagingUI({
   )
 
   return (
-    <div className="flex bg-white overflow-hidden h-[calc(100vh-4rem)]">
+    <div className="flex bg-[var(--bg-surface)] overflow-hidden h-[calc(100vh-4rem)]">
       
       {/* Sidebar */}
-      <div className="w-80 flex-shrink-0 border-r border-slate-200 flex flex-col bg-slate-50/50 relative z-10">
-        <div className="p-5 border-b border-slate-200 bg-white shadow-sm shrink-0">
-          <div className="flex gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200/60">
+      <div className="w-80 flex-shrink-0 border-r border-[var(--border-color)] flex flex-col bg-[var(--bg-page)] relative z-10">
+        <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-surface)] shadow-sm shrink-0">
+          <div className="flex gap-2 bg-[var(--bg-hover)] p-1.5 rounded-xl border border-[var(--border-color)]/60">
              <button 
                onClick={() => setSidebarTab('connections')} 
-               className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'connections' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+               className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'connections' ? 'bg-[var(--bg-surface)] shadow-sm text-indigo-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
              >
                Chats
              </button>
              <button 
                onClick={() => setSidebarTab('calls')} 
-               className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'calls' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+               className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-all ${sidebarTab === 'calls' ? 'bg-[var(--bg-surface)] shadow-sm text-indigo-600' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
              >
                Calls
              </button>
@@ -216,7 +216,7 @@ export default function MessagingUI({
                   </div>
                 ) : connectedPeople.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-sm font-medium text-slate-500">No connections yet.</p>
+                    <p className="text-sm font-medium text-[var(--text-secondary)]">No connections yet.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -227,12 +227,12 @@ export default function MessagingUI({
                           key={item.connection?.id || item.id}
                           onClick={() => onSelectPerson(item)}
                           disabled={preparingConversation}
-                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${active ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-white border border-transparent hover:shadow-sm'}`}
+                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all ${active ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-[var(--bg-surface)] border border-transparent hover:shadow-sm'}`}
                         >
                            <PersonAvatar name={item.name} avatar={item.avatar} />
                            <div className="flex-1 min-w-0 text-left">
-                             <p className={`font-bold text-sm truncate ${active ? 'text-indigo-900' : 'text-slate-900'}`}>{item.name}</p>
-                             <p className={`text-[11px] font-medium truncate ${active ? 'text-indigo-600' : 'text-slate-400'}`}>Start chatting...</p>
+                             <p className={`font-bold text-sm truncate ${active ? 'text-indigo-900' : 'text-[var(--text-primary)]'}`}>{item.name}</p>
+                             <p className={`text-[11px] font-medium truncate ${active ? 'text-indigo-600' : 'text-[var(--text-hint)]'}`}>Start chatting...</p>
                            </div>
                            {active && <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0 shadow-sm"/>}
                         </button>
@@ -240,14 +240,14 @@ export default function MessagingUI({
                     })}
                   </div>
                 )}
-                <div className="pt-4 border-t border-slate-200">
-                  <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-wide text-slate-500 font-bold">
+                <div className="pt-4 border-t border-[var(--border-color)]">
+                  <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-wide text-[var(--text-secondary)] font-bold">
                     <span>Project Chats</span>
                   </div>
                   {loading ? (
-                    <div className="text-sm text-slate-400">Loading projects...</div>
+                    <div className="text-sm text-[var(--text-hint)]">Loading projects...</div>
                   ) : projects.length === 0 ? (
-                    <div className="text-sm text-slate-400">No project chats available.</div>
+                    <div className="text-sm text-[var(--text-hint)]">No project chats available.</div>
                   ) : (
                     <div className="space-y-2">
                       {projects.map((project) => {
@@ -259,15 +259,15 @@ export default function MessagingUI({
                             key={projectId}
                             onClick={() => onSelectProject(project)}
                             disabled={preparingConversation}
-                            className={`w-full text-left p-3 rounded-2xl transition-all ${active ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-white border border-transparent hover:shadow-sm'}`}
+                            className={`w-full text-left p-3 rounded-2xl transition-all ${active ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-[var(--bg-surface)] border border-transparent hover:shadow-sm'}`}
                           >
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 border border-indigo-200">
                                 {projectName?.charAt(0).toUpperCase() || 'P'}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className={`font-bold text-sm truncate ${active ? 'text-indigo-900' : 'text-slate-900'}`}>{projectName}</p>
-                                <p className="text-[11px] font-medium text-slate-400 truncate">Project group chat</p>
+                                <p className={`font-bold text-sm truncate ${active ? 'text-indigo-900' : 'text-[var(--text-primary)]'}`}>{projectName}</p>
+                                <p className="text-[11px] font-medium text-[var(--text-hint)] truncate">Project group chat</p>
                               </div>
                               {active && <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0 shadow-sm"/>}
                             </div>
@@ -286,18 +286,18 @@ export default function MessagingUI({
                   </div>
                 ) : calls.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-sm font-medium text-slate-500">No recent calls.</p>
+                    <p className="text-sm font-medium text-[var(--text-secondary)]">No recent calls.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {calls.map((call) => {
                       const status = `${call.status || 'scheduled'}`.toLowerCase()
                       return (
-                        <div key={call.id} className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all">
+                        <div key={call.id} className="rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-md transition-all">
                            <div className="flex items-start justify-between gap-2 mb-3">
                              <div className="min-w-0">
-                               <p className="font-bold text-slate-900 text-sm truncate">{getCallLabel(call)}</p>
-                               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{call.call_type || 'call'}</p>
+                               <p className="font-bold text-[var(--text-primary)] text-sm truncate">{getCallLabel(call)}</p>
+                               <p className="text-[10px] text-[var(--text-hint)] font-bold uppercase tracking-wider mt-1">{call.call_type || 'call'}</p>
                              </div>
                              <CallStatusBadge status={status} />
                            </div>
@@ -316,7 +316,7 @@ export default function MessagingUI({
                                 <button onClick={() => onEndCall(call)} className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs px-3 py-1.5 flex-1 justify-center rounded-lg transition-colors border border-rose-200">End</button>
                               )}
                               {status === 'scheduled' && (
-                                <button onClick={() => onCancelCall(call)} className="bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs px-3 py-1.5 flex-1 justify-center rounded-lg transition-colors border border-slate-200">Cancel</button>
+                                <button onClick={() => onCancelCall(call)} className="bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] font-bold text-xs px-3 py-1.5 flex-1 justify-center rounded-lg transition-colors border border-[var(--border-color)]">Cancel</button>
                               )}
                            </div>
                         </div>
@@ -330,11 +330,11 @@ export default function MessagingUI({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
+      <div className="flex-1 flex flex-col bg-[var(--bg-surface)] overflow-hidden relative">
          {sidebarTab === 'connections' && (selectedPerson || selectedProject) ? (
            <>
               {/* Header */}
-              <div className="sticky top-0 z-20 h-[76px] border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white/80 backdrop-blur-md">
+              <div className="sticky top-0 z-20 h-[76px] border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-md">
                  <button
                    type="button"
                    onClick={handleHeaderClick}
@@ -342,7 +342,7 @@ export default function MessagingUI({
                  >
                     <PersonAvatar name={selectedProject ? getProjectName(selectedProject) : selectedPerson.name} avatar={selectedPerson?.avatar} />
                     <div>
-                       <h3 className="font-bold text-slate-900 text-lg leading-none mb-1.5 hover:text-indigo-600 transition-colors">
+                       <h3 className="font-bold text-[var(--text-primary)] text-lg leading-none mb-1.5 hover:text-indigo-600 transition-colors">
                          {selectedProject ? getProjectName(selectedProject) : selectedPerson.name}
                        </h3>
                        <p className="text-xs font-bold flex items-center gap-1.5">
@@ -368,10 +368,10 @@ export default function MessagingUI({
                       </svg>
                     </button>
                     {showCallOptions && (
-                      <div className="absolute right-0 top-full mt-2 w-[280px] rounded-3xl border border-slate-200 bg-white shadow-2xl p-4 z-50">
+                      <div className="absolute right-0 top-full mt-2 w-[280px] rounded-3xl border border-[var(--border-color)] bg-[var(--bg-surface)] shadow-2xl p-4 z-50">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="font-bold text-slate-900">Video Call</span>
-                          <button type="button" onClick={() => setShowCallOptions(false)} className="text-slate-400 hover:text-slate-600 transition-colors">✕</button>
+                          <span className="font-bold text-[var(--text-primary)]">Video Call</span>
+                          <button type="button" onClick={() => setShowCallOptions(false)} className="text-[var(--text-hint)] hover:text-[var(--text-secondary)] transition-colors">✕</button>
                         </div>
                         <button
                           type="button"
@@ -381,13 +381,13 @@ export default function MessagingUI({
                         >
                           {starting ? 'Starting...' : 'Call now'}
                         </button>
-                        <div className="border-t border-slate-200 pt-3">
-                          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-semibold mb-2">Schedule</p>
+                        <div className="border-t border-[var(--border-color)] pt-3">
+                          <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)] font-semibold mb-2">Schedule</p>
                           <input
                             type="datetime-local"
                             value={scheduleTime}
                             onChange={(e) => setScheduleTime(e.target.value)}
-                            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                            className="w-full rounded-2xl border border-[var(--border-color)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary)]"
                           />
                           <button
                             type="button"
@@ -405,7 +405,7 @@ export default function MessagingUI({
               </div>
 
               {/* Tab Content */}
-              <div className="flex-1 overflow-hidden relative bg-slate-50">
+              <div className="flex-1 overflow-hidden relative bg-[var(--bg-input)]">
                  {true ? (
                     <div className="absolute inset-0 flex flex-col [&>section]:border-none [&>section]:shadow-none [&>section]:h-full [&>section]:bg-transparent">
                        <RealtimeChatPanel
@@ -430,9 +430,9 @@ export default function MessagingUI({
                         />
                     </div>
                  ) : (
-                    <div className="absolute inset-0 p-6 flex flex-col bg-slate-100">
+                    <div className="absolute inset-0 p-6 flex flex-col bg-[var(--bg-hover)]">
                        {callFrameUrl ? (
-                         <div ref={videoContainerRef} className={`group rounded-3xl overflow-hidden bg-slate-900 shadow-2xl relative border border-slate-300 flex flex-col transition-all duration-300 ${isCallExpanded ? 'w-full h-full' : 'flex-1'} ${fullScreenContainerClass}`}>
+                         <div ref={videoContainerRef} className={`group rounded-3xl overflow-hidden bg-slate-900 shadow-2xl relative border border-[var(--border-color)] flex flex-col transition-all duration-300 ${isCallExpanded ? 'w-full h-full' : 'flex-1'} ${fullScreenContainerClass}`}>
                            <iframe
                               title="Video call"
                               src={callFrameUrl}
@@ -459,8 +459,8 @@ export default function MessagingUI({
                             <div className="w-28 h-28 rounded-[2rem] bg-indigo-100 flex items-center justify-center mb-8 shadow-inner border border-white">
                                <svg className="w-14 h-14 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.277A1 1 0 0121 8.677v6.646a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                             </div>
-                            <h2 className="text-3xl font-bold text-slate-900 mb-3 tracking-tight">Ready to connect?</h2>
-                            <p className="text-slate-500 max-w-md mx-auto mb-10 text-base leading-relaxed">Start a high-definition video call with <strong className="text-slate-700">{selectedPerson.name}</strong> instantly. Face-to-face collaboration is just one click away.</p>
+                            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-3 tracking-tight">Ready to connect?</h2>
+                            <p className="text-[var(--text-secondary)] max-w-md mx-auto mb-10 text-base leading-relaxed">Start a high-definition video call with <strong className="text-[var(--text-primary)]">{selectedPerson.name}</strong> instantly. Face-to-face collaboration is just one click away.</p>
                             <button 
                               onClick={() => { onStartCall(); setActiveRightTab('video') }}
                               disabled={starting || !selectedConversationId}
@@ -477,9 +477,9 @@ export default function MessagingUI({
            </>
          ) : sidebarTab === 'calls' && callFrameUrl ? (
            // Call-only view — joined from calls tab without selecting a person
-           <div className="flex-1 flex flex-col overflow-hidden relative bg-slate-100">
-             <div className="h-[76px] border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white/80 backdrop-blur-md z-20">
-               <h3 className="font-bold text-slate-900 text-lg">
+           <div className="flex-1 flex flex-col overflow-hidden relative bg-[var(--bg-hover)]">
+             <div className="h-[76px] border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-md z-20">
+               <h3 className="font-bold text-[var(--text-primary)] text-lg">
                  {activeCall ? getCallLabel(activeCall) : 'Active Call'}
                </h3>
                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1">Live</span>
@@ -506,14 +506,14 @@ export default function MessagingUI({
              </div>
            </div>
          ) : (
-           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50">
-             <div className="w-24 h-24 bg-white rounded-[2rem] shadow-sm flex items-center justify-center mb-6 border border-slate-100">
+           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-page)]">
+             <div className="w-24 h-24 bg-[var(--bg-surface)] rounded-[2rem] shadow-sm flex items-center justify-center mb-6 border border-[var(--border-color)]">
                <svg className="w-12 h-12 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
              </div>
-             <h2 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">
+             <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-3 tracking-tight">
                {sidebarTab === 'calls' ? 'No Active Call' : 'Your Messages'}
              </h2>
-             <p className="text-slate-500 max-w-sm text-base">
+             <p className="text-[var(--text-secondary)] max-w-sm text-base">
                {sidebarTab === 'calls' ? 'Start or join a call from the calls list.' : 'Select a connection from the left sidebar to start chatting.'}
              </p>
            </div>
@@ -523,27 +523,27 @@ export default function MessagingUI({
 
       {selectedCallDetail && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="bg-[var(--bg-surface)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Call Details</h3>
-                <p className="text-sm text-slate-500 mt-0.5">{getCallLabel(selectedCallDetail)}</p>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Call Details</h3>
+                <p className="text-sm text-[var(--text-secondary)] mt-0.5">{getCallLabel(selectedCallDetail)}</p>
               </div>
-              <button onClick={onCloseCallDetail} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+              <button onClick={onCloseCallDetail} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-hint)] hover:text-[var(--text-secondary)] transition-all">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <div className="p-5 space-y-3">
               {callDetailRows.map(([label, value]) => (
-                <div key={label} className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{label}</span>
-                  <span className="text-sm font-semibold text-slate-800 text-right break-all">{value}</span>
+                <div key={label} className="flex items-start justify-between gap-4 border-b border-[var(--border-color)] pb-3 last:border-0 last:pb-0">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-hint)]">{label}</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)] text-right break-all">{value}</span>
                 </div>
               ))}
               {selectedCallDetail.room_url && (
-                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Room URL</p>
-                  <p className="text-xs font-mono text-slate-700 break-all">{selectedCallDetail.room_url}</p>
+                <div className="rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] p-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-hint)] mb-1">Room URL</p>
+                  <p className="text-xs font-mono text-[var(--text-primary)] break-all">{selectedCallDetail.room_url}</p>
                 </div>
               )}
             </div>

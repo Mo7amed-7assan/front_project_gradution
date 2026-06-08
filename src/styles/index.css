@@ -1,7 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════
+   THEME CSS VARIABLES — mapped strictly from colors.js
+   Default = Dark Theme
+   ═══════════════════════════════════════════════════════ */
+:root {
+  /* Brand (always the same) */
+  --color-primary:        #6C63FF;
+  --color-primary-dark:   #4F46E5;
+  --color-primary-light:  #EEEDFF;
+  --color-accent:         #00D4AA;
+  --color-accent-dark:    #00A884;
+  --color-secondary:      #1A1A3E;
+  --color-secondary-light:#2A2A4E;
+  --color-secondary-dark: #0B0B2E;
+  --color-tertiary:       #EF4444;
+
+  /* Semantic */
+  --color-success:        #22C55E;
+  --color-warning:        #F59E0B;
+  --color-error:          #EF4444;
+  --color-info:           #3B82F6;
+
+  /* Dark Theme (default) — from backgroundDark, surfaceDark, etc. */
+  --bg-page:              #0F0F1A;
+  --bg-surface:           #1A1A2E;
+  --bg-card:              #1E1E35;
+  --bg-input:             #0F0F1A;
+  --bg-hover:             #2A2A4E;
+  --border-color:         #2D2D4E;
+  --divider:              #2D2D4E;
+  --text-primary:         #F1F1F5;
+  --text-secondary:       #9CA3AF;
+  --text-hint:            #6B7280;
+  --nav-bg:               #1E1E35;
+  --shadow-card:          rgba(0,0,0,0.3);
+  --scrollbar-thumb:      rgba(100,100,120,0.4);
+}
+
+/* Light Theme — activated by [data-theme="light"] on <html> */
+[data-theme="light"] {
+  --bg-page:              #F8F9FE;
+  --bg-surface:           #FFFFFF;
+  --bg-card:              #FFFFFF;
+  --bg-input:             #FFFFFF;
+  --bg-hover:             #F1F1F5;
+  --border-color:         #E8EAED;
+  --divider:              #E8EAED;
+  --text-primary:         #1A1A2E;
+  --text-secondary:       #6B7280;
+  --text-hint:            #9CA3AF;
+  --nav-bg:               #FFFFFF;
+  --shadow-card:          rgba(0,0,0,0.08);
+  --scrollbar-thumb:      rgba(100,100,120,0.2);
+}
+
+/* RTL Arabic font override */
+[dir="rtl"] {
+  font-family: 'Cairo', 'Inter', system-ui, sans-serif;
+}
 
 @layer base {
   * {
@@ -13,27 +73,35 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    @apply bg-[#0F0F1A] text-slate-200;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-700/50 rounded-full;
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-600/80;
+    background: var(--scrollbar-thumb);
+    opacity: 0.8;
   }
 }
 
 @layer components {
   /* ── Cards ── */
   .card {
-    @apply bg-[#1E1E35] rounded-2xl border border-[#2D2D4E] shadow-lg shadow-black/20;
+    background-color: var(--bg-card);
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 24px var(--shadow-card);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
   .card-hover {
     @apply card transition-all duration-300 hover:border-[#6C63FF]/40 hover:shadow-[0_0_15px_rgba(108,99,255,0.1)];
@@ -44,7 +112,13 @@
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#6C63FF] text-white text-sm font-semibold shadow-[0_0_15px_rgba(108,99,255,0.4)] hover:bg-[#4F46E5] hover:shadow-[0_0_20px_rgba(108,99,255,0.6)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-transparent text-slate-300 text-sm font-semibold border border-[#2D2D4E] hover:bg-[#2A2A4E] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-transparent text-sm font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
   }
   .btn-glow-cyan {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-transparent text-[#00D4AA] text-sm font-bold border border-[#00D4AA]/50 shadow-[0_0_10px_rgba(0,212,170,0.2)] hover:bg-[#00D4AA]/10 hover:border-[#00D4AA] hover:shadow-[0_0_15px_rgba(0,212,170,0.4)] transition-all duration-300;
@@ -53,7 +127,12 @@
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#EF4444] text-white text-sm font-semibold shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:bg-[#DC2626] transition-all duration-300 disabled:opacity-50;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-slate-400 text-sm font-medium hover:bg-[#2A2A4E] hover:text-slate-200 transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
   }
   .btn-success {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#10B981] text-white text-sm font-semibold shadow-sm hover:bg-[#059669] transition-all duration-300 disabled:opacity-50;
@@ -61,10 +140,17 @@
 
   /* ── Form inputs ── */
   .form-input {
-    @apply block w-full rounded-xl border border-[#2D2D4E] bg-[#0F0F1A] px-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 shadow-inner transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/50 focus:border-[#00D4AA]/50;
+    @apply block w-full rounded-xl px-4 py-2.5 text-sm shadow-inner transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#00D4AA]/50 focus:border-[#00D4AA]/50;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+  .form-input::placeholder {
+    color: var(--text-hint);
   }
   .form-label {
-    @apply block text-sm font-semibold text-slate-300 mb-1.5;
+    @apply block text-sm font-semibold mb-1.5;
+    color: var(--text-secondary);
   }
   .form-select {
     @apply form-input appearance-none cursor-pointer;
@@ -87,15 +173,19 @@
     @apply mb-8;
   }
   .page-title {
-    @apply text-2xl font-bold text-white tracking-tight;
+    @apply text-2xl font-bold tracking-tight;
+    color: var(--text-primary);
   }
   .page-subtitle {
-    @apply text-sm text-slate-400 mt-1;
+    @apply text-sm mt-1;
+    color: var(--text-secondary);
   }
 
   /* ── Skeleton ── */
   .skeleton {
-    @apply bg-[#2A2A4E]/50 animate-pulse rounded-lg;
+    @apply animate-pulse rounded-lg;
+    background-color: var(--bg-hover);
+    opacity: 0.6;
   }
 
   /* ── Toggle Switch ── */
