@@ -58,6 +58,12 @@ export function getAuthUser(responseData)
     return responseData?.data?.user || responseData?.user || responseData?.data || null
 }
 
+export async function resendVerificationEmail()
+{
+    const res = await api.post('/auth/email/resend')
+    return getResponseData(res)
+}
+
 export default {
     authLogin,
     authRegister,
@@ -65,6 +71,7 @@ export default {
     authEmailVerify,
     authPasswordForgot,
     authPasswordReset,
+    resendVerificationEmail,
     getAccessToken,
     getAuthUser
 }
