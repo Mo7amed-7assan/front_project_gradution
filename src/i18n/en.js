@@ -120,6 +120,29 @@ const en = {
     heroTitle: 'Build the future, together.',
     heroSubtitle: 'Create your CoFound account today. Connect with qualified partners, form elite teams, and transform projects into real-world startups.',
   },
+
+  // Stage 1 — Unverified Email Gate
+  verifyEmail: {
+    title:          'Verify Your Email',
+    subtitle:       'We sent a confirmation link to your inbox.',
+    instruction:    "Click the link in the email to activate your account. If you don't see it, check your spam folder.",
+    resendBtn:      'Resend Verification Email',
+    resendCooldown: (s) => `Resend in ${s}s`,
+    resendSuccess:  'A new verification email has been sent!',
+    resendError:    'Failed to resend. Please try again.',
+    logoutBtn:      'Sign Out',
+    checkEmail:     'Check Your Inbox',
+    noEmail:        "Didn't receive an email?",
+  },
+
+  // Stage 2 — Guest Identity Verification Gate
+  verifyIdentity: {
+    title:       'Identity Verification',
+    subtitle:    'One last step before you unlock the full platform.',
+    instruction: 'Upload a clear photo of the front and back of your national ID. Our team will review and activate your account.',
+    pending:     'Your verification is under review. We\'ll notify you once approved.',
+    approved:    'Verification approved! Redirecting...',
+  },
 }
 
 export default en
