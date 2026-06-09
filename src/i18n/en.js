@@ -143,6 +143,71 @@ const en = {
     pending:     'Your verification is under review. We\'ll notify you once approved.',
     approved:    'Verification approved! Redirecting...',
   },
+
+  // Project Form (Create & Edit)
+  projectForm: {
+    createTitle: 'Create Project',
+    editTitle: 'Edit Project',
+    createSubtitle: 'Define your startup idea, roles needed, and timeline.',
+    editSubtitle: 'Update your startup details, requirements, and deadlines.',
+    steps: {
+      basicInfo: 'Basic Info',
+      rolesSkills: 'Roles & Skills',
+      timeline: 'Timeline'
+    },
+    labels: {
+      projectTitle: 'Title',
+      category: 'Category',
+      status: 'Project Status',
+      visibility: 'Visibility',
+      shortDescription: 'Short Description',
+      fullDescription: 'Full Description',
+      goals: 'Project Goals',
+      goalsPlaceholder: 'Describe the project goals and expected impact...',
+      roles: 'Roles',
+      roleTitle: 'Role Title',
+      positionsNeeded: 'Positions Needed',
+      description: 'Description',
+      skillRequirements: 'Skill Requirements',
+      skillName: 'Skill Name',
+      proficiency: 'Proficiency',
+      required: 'Required',
+      minTeamSize: 'Min Team Size',
+      maxTeamSize: 'Max Team Size',
+      acceptingApplications: 'Accepting applications',
+      startDate: 'Start Date',
+      targetCompletionDate: 'Target Completion Date',
+      applicationDeadline: 'Application Deadline',
+      reviewTitle: 'Review',
+      reviewText: 'Verify project category, goals, team expectations, and deadlines before publishing.',
+      reviewTextEdit: 'Confirm changes to your project timeline and ownership settings before saving.'
+    },
+    statuses: {
+      planning: 'Planning',
+      active: 'Active'
+    },
+    visibilities: {
+      public: 'Public',
+      private: 'Private',
+      unlisted: 'Unlisted'
+    },
+    proficiencyNames: {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      expert: 'Expert'
+    },
+    buttons: {
+      addRole: '+ Add Role',
+      addSkill: '+ Add Skill',
+      remove: 'Remove',
+      back: 'Back',
+      continue: 'Continue',
+      creating: 'Creating...',
+      createProject: 'Create Project',
+      saving: 'Saving...',
+      saveChanges: 'Save Changes'
+    }
+  }
 }
 
 export default en

@@ -534,35 +534,35 @@ export default function ProjectDetails() {
   if (!project) return <div className="p-8">Project not found.</div>
 
   return (
-    <div className="max-w-6xl mx-auto bg-white p-6 rounded shadow">
+    <div className="max-w-6xl mx-auto card p-6 md:p-8 rounded-2xl">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-semibold">{project.title || project.name}</h1>
-          <p className="text-gray-600 mt-2">{project.short_description || project.description || project.summary}</p>
+          <h1 className="text-3xl font-extrabold text-[var(--text-primary)]">{project.title || project.name}</h1>
+          <p className="text-[var(--text-secondary)] mt-2 leading-relaxed">{project.short_description || project.description || project.summary}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {isOwner() && (
             <>
-              <Link to={`/projects/${id}/edit`} className="bg-yellow-600 text-white px-4 py-2 rounded">Edit Project</Link>
-              <button onClick={handleDelete} className="bg-red-600 text-white px-4 py-2 rounded">Delete Project</button>
+              <Link to={`/projects/${id}/edit`} className="btn-secondary !text-yellow-500 border-yellow-500/30 hover:!bg-yellow-500/10 px-4 py-2">Edit Project</Link>
+              <button onClick={handleDelete} className="btn-danger px-4 py-2">Delete Project</button>
             </>
           )}
           {!isOwner() && !currentMember && !hasApplied() && isAcceptingApplications && (
-            <button onClick={openApply} disabled={applying} className="bg-blue-600 text-white px-4 py-2 rounded">Apply</button>
+            <button onClick={openApply} disabled={applying} className="btn-primary px-4 py-2">Apply</button>
           )}
           {(isOwner() || currentMember) && (
-            <button onClick={() => navigate(`/messages?project=${id}`)} className="bg-indigo-600 text-white px-4 py-2 rounded">Open Project Chat</button>
+            <button onClick={() => navigate(`/messages?project=${id}`)} className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-[0_0_15px_rgba(79,70,229,0.4)] transition-all duration-300">Open Project Chat</button>
           )}
           {!isOwner() && currentMember && (
-            <button onClick={handleLeaveTeam} className="bg-red-600 text-white px-4 py-2 rounded">Leave Project</button>
+            <button onClick={handleLeaveTeam} className="btn-danger px-4 py-2">Leave Project</button>
           )}
           {!isOwner() && currentApplicationStatus && currentApplicationStatus !== 'accepted' && (
-            <span className="px-4 py-2 rounded bg-gray-100 text-gray-700 capitalize">Application {currentApplicationStatus}</span>
+            <span className="px-4 py-2 rounded-xl bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-color)] capitalize">Application {currentApplicationStatus}</span>
           )}
           {!isOwner() && (
             <Link
               to={`/reports/submit?projectId=${id}`}
-              className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-sm font-bold border border-rose-200 transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-sm font-bold border border-rose-500/20 transition-colors flex items-center gap-1.5"
             >
               🚩 Report
             </Link>
@@ -570,13 +570,13 @@ export default function ProjectDetails() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-[var(--border-color)] pb-4">
         {tabs.map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded ${activeTab === tab ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${activeTab === tab ? 'bg-[#6C63FF] text-white shadow-[0_0_15px_rgba(108,99,255,0.3)]' : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]/80'}`}
           >
             {tab}
           </button>
@@ -586,28 +586,28 @@ export default function ProjectDetails() {
       {activeTab === 'Overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-lg border border-gray-200 p-4">
-              <h3 className="font-semibold mb-2">Status</h3>
-              <p>{project.status || 'Unknown'}</p>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
+              <h3 className="font-bold text-[var(--text-primary)] mb-2">Status</h3>
+              <p className="text-[var(--text-secondary)]">{project.status || 'Unknown'}</p>
             </div>
-            <div className="rounded-lg border border-gray-200 p-4">
-              <h3 className="font-semibold mb-2">Visibility</h3>
-              <p>{project.visibility || 'Public'}</p>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
+              <h3 className="font-bold text-[var(--text-primary)] mb-2">Visibility</h3>
+              <p className="text-[var(--text-secondary)]">{project.visibility || 'Public'}</p>
             </div>
-            <div className="rounded-lg border border-gray-200 p-4">
-              <h3 className="font-semibold mb-2">Team Size</h3>
-              <p>{project.team_size_min || '?'} – {project.team_size_max || '?'}</p>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
+              <h3 className="font-bold text-[var(--text-primary)] mb-2">Team Size</h3>
+              <p className="text-[var(--text-secondary)]">{project.team_size_min || '?'} – {project.team_size_max || '?'}</p>
             </div>
           </div>
 
-          <div className="rounded-lg border border-gray-200 p-4">
-            <h3 className="font-semibold mb-3">Full Description</h3>
-            <p className="text-gray-700 whitespace-pre-line">{project.full_description || project.description || 'No description provided.'}</p>
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
+            <h3 className="font-bold text-[var(--text-primary)] mb-3">Full Description</h3>
+            <p className="text-[var(--text-secondary)] whitespace-pre-line leading-relaxed">{project.full_description || project.description || 'No description provided.'}</p>
           </div>
 
-          <div className="rounded-lg border border-gray-200 p-4">
-            <h3 className="font-semibold mb-3">Goals</h3>
-            <p className="text-gray-700 whitespace-pre-line">{project.goals || 'No goals specified.'}</p>
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
+            <h3 className="font-bold text-[var(--text-primary)] mb-3">Goals</h3>
+            <p className="text-[var(--text-secondary)] whitespace-pre-line leading-relaxed">{project.goals || 'No goals specified.'}</p>
           </div>
         </div>
       )}
@@ -615,31 +615,31 @@ export default function ProjectDetails() {
       {activeTab === 'Roadmap' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">Roadmap</h2>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Roadmap</h2>
             {isOwner() && (
-              <button onClick={() => openMilestoneModal()} className="bg-green-600 text-white px-4 py-2 rounded">Create Milestone</button>
+              <button onClick={() => openMilestoneModal()} className="btn-success text-sm py-2 px-4 shadow-[0_0_10px_rgba(16,185,129,0.2)] hover:shadow-[0_0_15px_rgba(16,185,129,0.4)]">Create Milestone</button>
             )}
           </div>
 
           {milestones.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 p-6 text-gray-500">No milestones added yet.</div>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/10 p-8 text-center text-[var(--text-secondary)]">No milestones added yet.</div>
           ) : (
             <div className="space-y-4">
               {milestones.map((milestone) => (
-                <div key={milestone.id} className="rounded-lg border border-gray-200 p-4">
+                <div key={milestone.id} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                     <div>
-                      <h3 className="text-lg font-semibold">{milestone.title}</h3>
-                      <p className="text-gray-600 mt-1">Due: {milestone.due_date?.split('T')[0] || milestone.due || 'No due date'}</p>
+                      <h3 className="text-lg font-bold text-[var(--text-primary)]">{milestone.title}</h3>
+                      <p className="text-[var(--text-secondary)] text-sm mt-1">Due: {milestone.due_date?.split('T')[0] || milestone.due || 'No due date'}</p>
                     </div>
                     {isOwner() && (
                       <div className="flex gap-2">
-                        <button onClick={() => openMilestoneModal(milestone)} className="px-3 py-2 bg-yellow-500 text-white rounded">Edit</button>
-                        <button onClick={() => handleDeleteMilestone(milestone.id)} className="px-3 py-2 bg-red-600 text-white rounded">Delete</button>
+                        <button onClick={() => openMilestoneModal(milestone)} className="btn-secondary !text-yellow-500 border-yellow-500/30 hover:!bg-yellow-500/10 px-3 py-1.5">Edit</button>
+                        <button onClick={() => handleDeleteMilestone(milestone.id)} className="btn-danger !py-1.5 !px-3">Delete</button>
                       </div>
                     )}
                   </div>
-                  <p className="text-gray-700 mt-3 whitespace-pre-line">{milestone.description || 'No description added.'}</p>
+                  <p className="text-[var(--text-primary)] mt-3 whitespace-pre-line leading-relaxed">{milestone.description || 'No description added.'}</p>
                 </div>
               ))}
             </div>
@@ -650,12 +650,12 @@ export default function ProjectDetails() {
       {activeTab === 'Team' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">Team</h2>
-            <p className="text-sm text-gray-500">{team.length} member{team.length === 1 ? '' : 's'}</p>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Team</h2>
+            <p className="text-sm text-[var(--text-secondary)]">{team.length} member{team.length === 1 ? '' : 's'}</p>
           </div>
 
           {team.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 p-6 text-gray-500">No team members yet.</div>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/10 p-8 text-center text-[var(--text-secondary)]">No team members yet.</div>
           ) : (
             <div className="space-y-3">
               {team.map((member) => {
@@ -664,25 +664,25 @@ export default function ProjectDetails() {
                 const memberRole = resolveRoleValue(member)
                 const memberPermissions = resolvePermissionValue(member)
                 return (
-                  <div key={memberId || member.id} className="rounded-lg border border-gray-200 p-4 flex flex-col md:flex-row md:justify-between gap-4">
+                  <div key={memberId || member.id} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5 flex flex-col md:flex-row md:justify-between gap-4">
                     <div>
-                      <p className="font-semibold">{memberName}</p>
-                      <p className="text-gray-600">Role: {memberRole || 'Member'}</p>
-                      <p className="text-gray-600">Permissions: {memberPermissions || 'Standard'}</p>
-                      {isOwner() && normalizeId(memberId) === currentUserId && <span className="text-xs inline-block mt-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800">Owner</span>}
+                      <p className="font-bold text-[var(--text-primary)]">{memberName}</p>
+                      <p className="text-[var(--text-secondary)] text-sm mt-1">Role: {memberRole || 'Member'}</p>
+                      <p className="text-[var(--text-secondary)] text-sm">Permissions: {memberPermissions || 'Standard'}</p>
+                      {isOwner() && normalizeId(memberId) === currentUserId && <span className="text-xs inline-block mt-2 px-2.5 py-0.5 rounded-full border bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Owner</span>}
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       {isOwner() && normalizeId(memberId) !== currentUserId && (
                         <>
-                          <button onClick={() => openTeamEditModal(member)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
-                          <button onClick={() => handleRemoveMember(member)} className="px-3 py-2 bg-red-600 text-white rounded">Remove</button>
+                          <button onClick={() => openTeamEditModal(member)} className="btn-primary !py-1.5 !px-3">Edit</button>
+                          <button onClick={() => handleRemoveMember(member)} className="btn-danger !py-1.5 !px-3">Remove</button>
                         </>
                       )}
                       {!isOwner() && normalizeId(memberId) === currentUserId && (
-                        <button onClick={handleLeaveTeam} className="px-3 py-2 bg-red-600 text-white rounded">Leave Project</button>
+                        <button onClick={handleLeaveTeam} className="btn-danger !py-1.5 !px-3">Leave Project</button>
                       )}
-                      {normalizeId(memberId) !== currentUserId && user && user.role !== 'guest' && (
-                        <button onClick={() => openRateModal(member)} className="px-3 py-2 bg-indigo-600 text-white rounded">Rate Member</button>
+                      {normalizeId(memberId) !== currentUserId && toggleTheme && user && user.role !== 'guest' && (
+                        <button onClick={() => openRateModal(member)} className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-all duration-300">Rate Member</button>
                       )}
                     </div>
                   </div>
@@ -696,34 +696,34 @@ export default function ProjectDetails() {
       {activeTab === 'Applications' && isOwner() && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-semibold">Incoming Applications</h2>
-            <p className="text-sm text-gray-500">{applications.length} application{applications.length === 1 ? '' : 's'}</p>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Incoming Applications</h2>
+            <p className="text-sm text-[var(--text-secondary)]">{applications.length} application{applications.length === 1 ? '' : 's'}</p>
           </div>
 
           {loadingApps ? (
-            <div className="flex justify-center p-6"><div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
+            <div className="flex justify-center p-6"><div className="w-6 h-6 border-4 border-[#6C63FF] border-t-transparent rounded-full animate-spin"></div></div>
           ) : applications.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 p-6 text-gray-500">No applications received yet.</div>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/10 p-8 text-center text-[var(--text-secondary)]">No applications received yet.</div>
           ) : (
             <div className="space-y-3">
               {applications.map((app) => (
-                <div key={app.id} className="rounded-lg border border-gray-200 p-4">
+                <div key={app.id} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/20 p-5">
                   <div className="flex flex-col md:flex-row md:justify-between gap-4">
                     <div>
-                      <p className="font-semibold">{app.applicant?.full_name || app.user?.full_name || app.applicant?.username || app.user?.username || 'Unknown applicant'}</p>
-                      <p className="text-gray-600">Applied for: {app.role_name || app.proposed_role || 'General'}</p>
-                      <p className="text-gray-600 text-sm mt-1">Status: <span className={`font-medium ${
-                        app.status === 'accepted' ? 'text-green-600' :
-                        app.status === 'rejected' ? 'text-red-600' :
-                        'text-yellow-600'
+                      <p className="font-bold text-[var(--text-primary)]">{app.applicant?.full_name || app.user?.full_name || app.applicant?.username || app.user?.username || 'Unknown applicant'}</p>
+                      <p className="text-[var(--text-secondary)] text-sm">Applied for: {app.role_name || app.proposed_role || 'General'}</p>
+                      <p className="text-[var(--text-secondary)] text-sm mt-1">Status: <span className={`font-semibold ${
+                        app.status === 'accepted' ? 'text-green-500' :
+                        app.status === 'rejected' ? 'text-red-500' :
+                        'text-yellow-500'
                       }`}>{app.status || 'pending'}</span></p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => openApplicationDetail(app)} className="px-3 py-2 bg-blue-600 text-white rounded">View Details</button>
+                      <button onClick={() => openApplicationDetail(app)} className="btn-primary !py-1.5 !px-3">View Details</button>
                       {app.status === 'pending' && (
                         <>
-                          <button onClick={() => reviewApplicationAction(app.id, 'accepted')} disabled={reviewing} className="px-3 py-2 bg-green-600 text-white rounded disabled:opacity-50">Accept</button>
-                          <button onClick={() => reviewApplicationAction(app.id, 'rejected')} disabled={reviewing} className="px-3 py-2 bg-red-600 text-white rounded disabled:opacity-50">Reject</button>
+                          <button onClick={() => reviewApplicationAction(app.id, 'accepted')} disabled={reviewing} className="btn-success !py-1.5 !px-3 disabled:opacity-50">Accept</button>
+                          <button onClick={() => reviewApplicationAction(app.id, 'rejected')} disabled={reviewing} className="btn-danger !py-1.5 !px-3 disabled:opacity-50">Reject</button>
                         </>
                       )}
                     </div>
@@ -736,7 +736,7 @@ export default function ProjectDetails() {
       )}
 
       {activeTab === 'Applications' && !isOwner() && (
-        <div className="rounded-lg border border-gray-200 p-6 text-gray-500 text-center">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/10 p-8 text-center text-[var(--text-secondary)]">
           Only project owners can view applications.
         </div>
       )}
