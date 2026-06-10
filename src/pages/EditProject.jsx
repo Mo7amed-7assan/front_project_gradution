@@ -131,7 +131,7 @@ export default function EditProject() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12 card max-w-5xl mx-auto rounded-2xl">
+      <div className="flex items-center justify-center p-4 md:p-8 card max-w-5xl mx-auto rounded-2xl">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-[#6C63FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <span className="text-sm text-[var(--text-secondary)]">{t('common.loading')}</span>
@@ -349,7 +349,7 @@ export default function EditProject() {
                       />
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-4 border-t border-[var(--border-color)]/50 pt-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2 mt-4 border-t border-[var(--border-color)]/50 pt-3">
                     <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] cursor-pointer">
                       <input
                         type="checkbox"

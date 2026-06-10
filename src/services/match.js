@@ -1,14 +1,8 @@
 import api from './api'
 
-const getData = (res) => {
-    if (Array.isArray(res?.data?.data?.data)) return res.data.data.data
-    if (Array.isArray(res?.data?.data)) return res.data.data
-    return res?.data?.data ?? res?.data ?? res
-}
-
 export async function getMatches(params = {}) {
-    const res = await api.get('/matches', { params })
-    return getData(res)
+    // Returns full axios response: { data: { data: [...matches], meta: {...}, links: {...} } }
+    return await api.get('/matches', { params })
 }
 
 export async function saveMatch(id, saved = true) {

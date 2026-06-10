@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getMatches, markMatchAsViewed, saveMatch, submitMatchFeedback } from '../services/match'
 import Spinner from './Spinner'
+import { useAuth } from '../context/AuthContext'
 
 const FEEDBACK_TYPES = [
   { value: 'relevant', label: 'Relevant' },
@@ -11,13 +12,13 @@ const FEEDBACK_TYPES = [
 ]
 
 const extractMatchList = (value) => {
-  if (Array.isArray(value)) return value
-  if (Array.isArray(value?.data?.data?.data)) return value.data.data.data
+  // API: axios response -> { data: { data: [...], meta, links } }
+  // res.data.data is the matches array
   if (Array.isArray(value?.data?.data)) return value.data.data
-  if (Array.isArray(value?.data?.matches)) return value.data.matches
+  // Fallback paths
+  if (Array.isArray(value?.data?.data?.data)) return value.data.data.data
   if (Array.isArray(value?.data)) return value.data
-  if (Array.isArray(value?.matches)) return value.matches
-  if (Array.isArray(value?.items)) return value.items
+  if (Array.isArray(value)) return value
   return []
 }
 
@@ -29,17 +30,24 @@ const getMatchScore = (match) => {
 const hasFeedback = (match) =>
   !!(match.feedback || match.feedback_type || match.user_feedback || match.action_taken)
 
-function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
+function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback, isGuest }) {
+  // API spec: matched_project (when match_type=project), matched_user (when match_type=collaborator)
   const target = kind === 'project'
-    ? match.project || match.matched_project || match.target_project
-    : match.user || match.matched_user || match.target_user
+    ? match.matched_project
+    : match.matched_user
   const [feedbackType, setFeedbackType] = useState(match.feedback_type || match.feedback || 'relevant')
   const [feedbackNote, setFeedbackNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const feedbackSent = hasFeedback(match)
   const score = getMatchScore(match)
-  const skills = match.match_reasons?.shared_skills || match.shared_skills || match.skills || []
-  const isSaved = match.is_saved || match.saved
+  // API match_reasons keys:
+  // collaborator: skill_overlap | project: skill_coverage
+  const skills = (
+    match.match_reasons?.skill_overlap ||
+    match.match_reasons?.skill_coverage ||
+    []
+  )
+  const isSaved = match.saved
 
   const submitFeedback = async () => {
     if (feedbackSent) {
@@ -61,25 +69,21 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
     return (
       <div
         onMouseEnter={() => onViewed(match)}
-        className={`card bg-[var(--bg-surface)] p-0 overflow-hidden border ${match.is_viewed || match.viewed ? 'border-[var(--border-color)]' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
+        className={`card bg-[var(--bg-surface)] p-0 overflow-hidden border ${match.viewed ? 'border-[var(--border-color)]' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
       >
         <div className="p-5">
-          {/* Post Header */}
+          {/* Post Header — MatchedProject has: title, slug, short_description, category, status, is_accepting_applications */}
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
-                {target?.owner?.profile_picture_url || target?.owner?.avatar ? (
-                  <img src={target.owner.profile_picture_url || target.owner.avatar} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="font-bold text-indigo-600 text-lg">{(target?.owner?.full_name || target?.owner?.username || 'U')[0]}</span>
-                )}
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shrink-0">
+                <span className="font-black text-white text-lg">{(target?.title || 'P')[0].toUpperCase()}</span>
               </div>
               <div>
                 <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                  {target?.owner?.full_name || target?.owner?.username || 'Unknown User'}
+                  {target?.category || 'Project'}
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)]">
-                  {target?.created_at ? new Date(target.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'} • Suggested Project
+                  {target?.status || 'Active'} • {target?.is_accepting_applications ? 'Accepting applications' : 'Not accepting'}
                 </p>
               </div>
             </div>
@@ -100,7 +104,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
           {/* Post Content */}
           <div className="space-y-3">
             <h4 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
-              <Link to={`/projects/${target?.id}`} className="hover:text-indigo-600 transition-colors">
+              <Link to={`/projects/${target?.slug || target?.id}`} className="hover:text-indigo-600 transition-colors">
                 {target?.title || target?.name}
               </Link>
             </h4>
@@ -156,12 +160,14 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
         {/* Footer Actions */}
         <div className="px-5 py-3 flex items-center justify-between border-t border-[var(--border-color)] bg-slate-50/50">
           <div className="flex gap-3">
-            <Link to={`/projects/${target?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-              Apply
-            </Link>
+            {!isGuest && (
+              <Link to={`/projects/${target?.slug || target?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                Apply
+              </Link>
+            )}
           </div>
-          <Link to={`/projects/${target?.id}`} className="btn-secondary text-xs px-4 py-2 shadow-sm">
+          <Link to={`/projects/${target?.slug || target?.id}`} className="btn-secondary text-xs px-4 py-2 shadow-sm">
             View Details
           </Link>
         </div>
@@ -172,7 +178,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
   return (
     <div
       onMouseEnter={() => onViewed(match)}
-      className={`bg-[var(--bg-surface)] rounded-lg border p-4 shadow-sm ${match.is_viewed || match.viewed ? 'border-[var(--border-color)]' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
+      className={`bg-[var(--bg-surface)] rounded-lg border p-4 shadow-sm ${match.viewed ? 'border-[var(--border-color)]' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -187,16 +193,34 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
         </button>
       </div>
 
-      <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-        <Link
-          to={kind === 'project' ? `/projects/${target.id}` : `/users/${target.id}`}
-          className="hover:text-indigo-600"
-        >
-          {target.title || target.name || target.full_name || target.username || 'Suggestion'}
-        </Link>
-      </h3>
+      {/* MatchedUser fields: id, username, full_name, profile_picture_url, bio, location, identity_verified, identity_verification_level */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-indigo-100 flex items-center justify-center">
+          {target.profile_picture_url ? (
+            <img src={target.profile_picture_url} className="w-full h-full object-cover" alt={target.full_name} />
+          ) : (
+            <span className="font-bold text-indigo-600 text-lg">{(target.full_name || target.username || 'U')[0].toUpperCase()}</span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-bold text-[var(--text-primary)] truncate">
+            <Link to={`/users/${target.id}`} className="hover:text-indigo-600">
+              {target.full_name || target.username || 'Suggestion'}
+            </Link>
+          </h3>
+          <p className="text-xs text-[var(--text-secondary)]">
+            @{target.username}{target.location ? ` · ${target.location}` : ''}
+          </p>
+          {target.identity_verified && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full mt-0.5">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+              Verified
+            </span>
+          )}
+        </div>
+      </div>
       <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">
-        {target.short_description || target.description || target.summary || target.bio || 'No description available.'}
+        {target.bio || 'No bio available.'}
       </p>
 
       {skills.length > 0 && (
@@ -249,6 +273,8 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
 }
 
 export default function SuggestedMatches({ kind }) {
+  const { user } = useAuth()
+  const isGuest = user?.role === 'guest'
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -260,8 +286,9 @@ export default function SuggestedMatches({ kind }) {
       const data = await getMatches({ match_type: kind })
       const list = extractMatchList(data)
       const filtered = list.filter((match) => {
-        const project = match.project || match.matched_project || match.target_project
-        const user = match.user || match.matched_user || match.target_user
+          // API: matched_project (project match) / matched_user (collaborator match)
+        const project = match.matched_project
+        const user = match.matched_user
         return kind === 'project' ? !!project : !!user
       })
       setMatches(filtered)
@@ -277,7 +304,7 @@ export default function SuggestedMatches({ kind }) {
   }, [kind])
 
   const handleViewed = async (match) => {
-    if (match.is_viewed || match.viewed) return
+    if (match.viewed) return
     try {
       await markMatchAsViewed(match.id)
       setMatches((prev) => prev.map((item) => item.id === match.id ? { ...item, is_viewed: true, viewed: true } : item))
@@ -287,7 +314,7 @@ export default function SuggestedMatches({ kind }) {
   }
 
   const handleSave = async (match) => {
-    const nextSaved = !(match.is_saved || match.saved)
+    const nextSaved = !match.saved
     try {
       await saveMatch(match.id, nextSaved)
       setMatches((prev) => prev.map((item) => item.id === match.id ? { ...item, is_saved: nextSaved, saved: nextSaved } : item))
@@ -334,6 +361,7 @@ export default function SuggestedMatches({ kind }) {
               onViewed={handleViewed}
               onSave={handleSave}
               onFeedback={handleFeedback}
+              isGuest={isGuest}
             />
           ))}
         </div>

@@ -23,6 +23,7 @@ export default function ProjectsUI({
   children,
 }) {
   const observer = useRef()
+  const isGuest = user?.role === 'guest'
   const lastProjectElementRef = useCallback(node => {
     if (loading || loadingMore) return
     if (observer.current) observer.current.disconnect()
@@ -58,7 +59,7 @@ export default function ProjectsUI({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-[var(--border-color)] gap-6 overflow-x-auto no-scrollbar">
+        {!isGuest && <div className="flex border-b border-[var(--border-color)] gap-6 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
@@ -119,7 +120,7 @@ export default function ProjectsUI({
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6C63FF] rounded-full"/>
             )}
           </button>
-        </div>
+        </div>}
 
         {/* Filters Panel — only visible on All Projects tab */}
         {showFilters && activeTab === 'projects' && (
@@ -288,7 +289,7 @@ export default function ProjectsUI({
                     {/* Post Footer Actions */}
                     <div className="px-5 py-3 flex items-center justify-between border-t border-[var(--border-color)]">
                       <div className="flex gap-3">
-                        {(!relation.isOwner && !relation.isMember) && (
+                        {!isGuest && isAccepting && (!relation.isOwner && !relation.isMember) && (
                           <Link to={`/projects/${p?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             Apply

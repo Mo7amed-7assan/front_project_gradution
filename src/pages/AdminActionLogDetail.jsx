@@ -53,7 +53,7 @@ export default function AdminActionLogDetail() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <Link to="/admin/action-logs" className="text-sm text-brand-primary font-bold flex items-center gap-1 mb-2 hover:underline">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -63,7 +63,7 @@ export default function AdminActionLogDetail() {
         </div>
       </div>
 
-      <div className="card p-6">
+      <div className="card p-4 md:p-6 w-full">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[var(--border-color)]">
           <div className="w-12 h-12 rounded-2xl bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-center text-2xl shrink-0">
             {badge.icon}

@@ -265,7 +265,7 @@ export default function AdminRestrictionDetail() {
         
         {/* Card 1: Primary Restriction Details (بيانات العقوبة الأساسية) */}
         <div className="lg:col-span-2 card p-6 space-y-6 border-t-4 border-t-indigo-500">
-          <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)] ">
+          <div className="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-[var(--border-color)] ">
             <div className="flex items-center gap-3">
               <span className="text-2xl">{typeData.icon}</span>
               <div>
@@ -357,13 +357,13 @@ export default function AdminRestrictionDetail() {
             </div>
 
             <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
                 <span className="text-[var(--text-hint)] font-bold">{dict.role}:</span>
                 <span className="font-semibold text-[var(--text-primary)] dark:text-slate-300 bg-[var(--bg-hover)] dark:bg-slate-900/50 px-2 py-0.5 rounded border border-[var(--border-color)] ">
                   {mappedRole[locale] || mappedRole.en}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between flex-wrap gap-2 text-xs">
                 <span className="text-[var(--text-hint)] font-bold">{dict.accountStatus}:</span>
                 <span className={`px-2 py-0.5 rounded border text-[10px] font-semibold ${mappedStatus.color}`}>
                   {mappedStatus[locale] || mappedStatus.en}
@@ -399,7 +399,7 @@ export default function AdminRestrictionDetail() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-50 dark:border-slate-900">
+            <div className="flex items-center justify-between flex-wrap gap-2 text-xs pt-2 border-t border-slate-50 dark:border-slate-900">
               <span className="text-[var(--text-hint)] font-bold">{dict.adminRole}:</span>
               <span className="font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2.5 py-0.5 rounded-full border border-rose-100 dark:border-rose-900/30">
                 {item.restricted_by?.role || 'Administrator'}

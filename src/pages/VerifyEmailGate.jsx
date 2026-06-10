@@ -30,7 +30,7 @@ function GlowOrbs() {
 }
 function TopBar({ isDark, toggleTheme }) {
   return (
-    <header className="absolute top-0 inset-x-0 flex items-center justify-between px-6 py-4 z-10">
+    <header className="absolute top-0 inset-x-0 flex items-center justify-between flex-wrap gap-2 px-6 py-4 z-10">
       <div className="flex items-center gap-2 select-none">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #6C63FF 0%, #00D4AA 100%)' }}>CF</div>
         <span className="font-bold text-[var(--text-primary)] tracking-tight">CoFound</span>
@@ -63,15 +63,12 @@ function TokenVerifier({ token }) {
       try {
         const res = await emailVerify(token)
         if (cancelled) return
-        // Some backends return a new token after verification
         const newToken = res?.data?.access_token || res?.access_token
         if (newToken) Cookies.set('cf_token', newToken, { secure: true, sameSite: 'lax' })
-        // Refresh user state — authStage will now be 'guest'
         await fetchMe()
         if (cancelled) return
         setPhase('success')
-        // Small delay so user sees the success state, then navigate
-        setTimeout(() => { if (!cancelled) navigate('/verify-identity', { replace: true }) }, 1800)
+        setTimeout(() => { if (!cancelled) navigate('/home', { replace: true }) }, 1800)
       } catch (err) {
         if (cancelled) return
         setErrMsg(err?.response?.data?.message || 'Verification failed. The link may have expired.')
@@ -92,7 +89,7 @@ function TokenVerifier({ token }) {
       <GridBackground /><GlowOrbs />
       <TopBar isDark={isDark} toggleTheme={toggleTheme} />
       <main className="relative z-10 w-full max-w-md mx-auto px-4">
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] shadow-2xl p-10 text-center" style={{ backdropFilter: 'blur(20px)', background: card }}>
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] shadow-2xl p-4 sm:p-10 text-center w-full" style={{ backdropFilter: 'blur(20px)', background: card }}>
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[2px] rounded-t-2xl" style={{ background: 'linear-gradient(90deg, #6C63FF, #00D4AA)' }} />
 
           {phase === 'verifying' && (
@@ -139,7 +136,7 @@ function TokenVerifier({ token }) {
 
 // ─── GATE MODE: "check your inbox" UI for unverified logged-in users ────────
 function EmailCheckGate() {
-  const { user, logout, resendVerification, authStage, loading } = useAuth()
+  const { user, resendVerification, authStage, loading } = useAuth()
   const { t, isRTL } = useI18n()
   const { isDark, toggleTheme } = useTheme()
 
@@ -150,7 +147,7 @@ function EmailCheckGate() {
 
   // Redirect if not in the right stage
   if (!loading && authStage === 'unauthenticated') return <Navigate to="/login" replace />
-  if (!loading && authStage === 'guest')           return <Navigate to="/verify-identity" replace />
+  if (!loading && authStage === 'guest')           return <Navigate to="/home" replace />
   if (!loading && authStage === 'verified')        return <Navigate to="/home" replace />
 
   useEffect(() => {
@@ -184,7 +181,7 @@ function EmailCheckGate() {
       <TopBar isDark={isDark} toggleTheme={toggleTheme} />
 
       <main className="relative z-10 w-full max-w-md mx-auto px-4 py-8">
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] shadow-2xl p-8 sm:p-10" style={{ backdropFilter: 'blur(20px)', background: card }}>
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] shadow-2xl p-4 sm:p-10 w-full" style={{ backdropFilter: 'blur(20px)', background: card }}>
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[2px] rounded-t-2xl" style={{ background: 'linear-gradient(90deg, #6C63FF, #00D4AA)' }} />
 
           {/* Icon */}
@@ -240,14 +237,20 @@ function EmailCheckGate() {
 
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-[var(--border)]" />
-            <span className="text-xs text-[var(--text-secondary)]">{t('verifyEmail.noEmail')}</span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              {isRTL ? 'لديك حساب بالفعل؟' : 'Already have an account?'}
+            </span>
             <div className="flex-1 h-px bg-[var(--border)]" />
           </div>
 
-          <button id="veg-logout-btn" onClick={logout}
-            className="w-full py-2.5 px-6 rounded-xl text-sm font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[#6C63FF] transition-all duration-200 cursor-pointer">
-            {t('verifyEmail.logoutBtn')}
-          </button>
+          {/* Sign In button — replaces the old Sign Out / logout button */}
+          <a id="veg-signin-btn" href="/login"
+            className="w-full py-2.5 px-6 rounded-xl text-sm font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[#6C63FF] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+            </svg>
+            {isRTL ? 'تسجيل الدخول' : 'Sign In'}
+          </a>
         </div>
         <p className="text-center text-xs text-[var(--text-secondary)] mt-5 opacity-70">
           {isRTL ? 'تأكد من فحص مجلد الرسائل المزعجة وأحيانًا يتأخر الوصول بضع دقائق.' : 'Emails may take a few minutes. Check your spam folder if needed.'}

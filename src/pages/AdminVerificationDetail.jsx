@@ -126,7 +126,7 @@ function AICheckRow({ label, passed, confidence }) {
 
   return (
     <div className="py-3 border-b border-[var(--border-color)]  last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 px-2 rounded-xl transition-colors duration-150">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
         <div className="flex items-center gap-2">
           <span 
             className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold border"
@@ -596,7 +596,7 @@ export default function AdminVerificationDetail() {
             
             {/* Bento Card 1: Identity Comparison */}
             <div className="card p-6 md:p-8 hover:shadow-md transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-[var(--border-color)]  pb-5 mb-6">
+              <div className="flex items-center justify-between flex-wrap gap-2 border-b border-[var(--border-color)]  pb-5 mb-6">
                 <div>
                   <h2 className="text-base font-black text-[var(--text-primary)]  flex items-center gap-2">
                     🪪 Identity Profile Cross-Check
@@ -829,7 +829,7 @@ export default function AdminVerificationDetail() {
                   </p>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-left mt-6 pt-4 border-t border-[var(--border-color)] dark:border-slate-850">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mt-6 pt-4 border-t border-[var(--border-color)] dark:border-slate-850">
                   <InfoRow label="Profile ID">
                     <span className="font-mono text-[10px] break-all truncate block max-w-[120px]">
                       {data.user?.id || data.user_id}
@@ -925,7 +925,7 @@ export default function AdminVerificationDetail() {
 
                 {/* Action Notes */}
                 <div className="mb-5">
-                  <label className="form-label text-xs uppercase tracking-wider text-[var(--text-hint)] dark:text-slate-500 font-bold flex items-center justify-between">
+                  <label className="form-label text-xs uppercase tracking-wider text-[var(--text-hint)] dark:text-slate-500 font-bold flex items-center justify-between flex-wrap gap-2">
                     <span>Decision notes / reason</span>
                     {(decision === 'reject' || decision === 'request_more_info') && (
                       <span className="text-rose-500 text-[10px] lowercase font-normal">(required)</span>

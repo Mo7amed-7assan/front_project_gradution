@@ -60,7 +60,7 @@ export default function ProfileUI({
   return (
     <div className="space-y-6">
       {/* Header Profile Cover */}
-      <div className="relative rounded-3xl overflow-hidden bg-brand-primaryDark h-48 sm:h-64 flex items-end p-6 md:p-8 shadow-xl shadow-brand-primary/10">
+      <div className="relative rounded-3xl overflow-hidden bg-brand-primaryDark h-48 sm:h-64 flex items-end p-4 md:p-8 shadow-xl shadow-brand-primary/10">
         <div className="absolute inset-0 bg-gradient-to-t from-brand-secondaryDark/90 to-transparent z-0"></div>
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-end gap-6 w-full">
            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-[var(--bg-surface)] shrink-0">
@@ -120,7 +120,7 @@ export default function ProfileUI({
         {activeTab === 'about' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
-              <div className="card p-6 md:p-8">
+              <div className="card p-4 md:p-8">
                 <h2 className="text-xl font-bold text-brand-secondary mb-4 flex items-center gap-2">
                    <svg className="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                    About Me
@@ -131,7 +131,7 @@ export default function ProfileUI({
               </div>
             </div>
             <div className="space-y-6">
-              <div className="card p-6">
+              <div className="card p-4 md:p-6">
                 <h2 className="text-lg font-bold text-brand-secondary mb-4 flex items-center gap-2">
                   <svg className="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                   Links & Social
@@ -165,7 +165,7 @@ export default function ProfileUI({
         )}
 
         {activeTab === 'skills' && (
-          <div className="card p-6 md:p-8">
+          <div className="card p-4 md:p-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-brand-secondary">My Capabilities</h2>
@@ -232,7 +232,7 @@ export default function ProfileUI({
         )}
 
         {activeTab === 'portfolio' && (
-          <div className="card p-6 md:p-8">
+          <div className="card p-4 md:p-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-brand-secondary">My Portfolio</h2>
@@ -286,7 +286,7 @@ export default function ProfileUI({
                       <p className="text-sm text-[var(--text-secondary)] line-clamp-3 leading-relaxed mb-4">{item.description || 'No description provided.'}</p>
                     </div>
                     
-                    <div className="mt-4 pt-4 border-t border-[var(--border-color)] flex items-center justify-between">
+                    <div className="mt-4 pt-4 border-t border-[var(--border-color)] flex items-center justify-between flex-wrap gap-2">
                        <div className="flex items-center gap-1.5 overflow-hidden pr-2">
                          {item.skills?.slice(0, 3).map((skill, idx) => (
                            <span key={idx} className="px-2 py-1 bg-[var(--bg-hover)] rounded-lg text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap">{skill}</span>
@@ -309,7 +309,7 @@ export default function ProfileUI({
 
         {activeTab === 'settings' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="card p-6 md:p-8">
+            <div className="card p-4 md:p-8">
               <h2 className="text-xl font-bold text-brand-secondary mb-6">Profile Details</h2>
               {profileSuccess && <div className="mb-4 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium">{profileSuccess}</div>}
               {profileSavingError && <div className="mb-4 px-4 py-3 bg-rose-50 text-rose-700 rounded-xl text-sm font-medium">{profileSavingError}</div>}
@@ -350,7 +350,7 @@ export default function ProfileUI({
               </form>
             </div>
 
-            <div className="card p-6 md:p-8 h-fit">
+            <div className="card p-4 md:p-8 h-fit">
               <h2 className="text-xl font-bold text-brand-secondary mb-6">Security</h2>
               {passwordSuccess && <div className="mb-4 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium">{passwordSuccess}</div>}
               {passwordError && <div className="mb-4 px-4 py-3 bg-rose-50 text-rose-700 rounded-xl text-sm font-medium">{passwordError}</div>}
@@ -382,7 +382,7 @@ export default function ProfileUI({
       {/* MODALS */}
       {skillModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="w-full max-w-lg bg-[var(--bg-surface)] rounded-3xl shadow-2xl p-6 sm:p-8 transform transition-all">
+          <div className="w-full max-w-lg bg-[var(--bg-surface)] rounded-3xl shadow-2xl p-4 sm:p-8 transform transition-all">
             <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">{editingSkill ? 'Edit Skill' : 'Add New Skill'}</h2>
             {skillError && <div className="mb-4 text-sm font-semibold text-rose-600 bg-rose-50 p-3 rounded-xl">{skillError}</div>}
             
@@ -391,7 +391,7 @@ export default function ProfileUI({
                 <label className="form-label">Skill Name</label>
                 <input disabled={Boolean(editingSkill)} value={skillForm.skill_name} onChange={handleSkillChange('skill_name')} className="form-input disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-hint)]" placeholder="e.g. React Native" required />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Proficiency (1-5)</label>
                   <select value={skillForm.proficiency_level} onChange={handleSkillChange('proficiency_level')} className="form-select" required>
@@ -416,7 +416,7 @@ export default function ProfileUI({
 
       {portfolioModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="w-full max-w-2xl bg-[var(--bg-surface)] rounded-3xl shadow-2xl p-6 sm:p-8 transform transition-all my-8">
+          <div className="w-full max-w-2xl bg-[var(--bg-surface)] rounded-3xl shadow-2xl p-4 sm:p-8 transform transition-all my-8">
             <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">{editingPortfolio ? 'Edit Portfolio Item' : 'Add Portfolio Item'}</h2>
             {portfolioActionError && <div className="mb-4 text-sm font-semibold text-rose-600 bg-rose-50 p-3 rounded-xl">{portfolioActionError}</div>}
             

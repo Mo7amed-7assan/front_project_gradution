@@ -353,7 +353,7 @@ export default function CreateProject() {
                       />
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-4 border-t border-[var(--border-color)]/50 pt-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2 mt-4 border-t border-[var(--border-color)]/50 pt-3">
                     <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)] cursor-pointer">
                       <input
                         type="checkbox"

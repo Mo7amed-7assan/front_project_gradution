@@ -13,6 +13,7 @@ import {
   getAuthUser,
 } from '../services/auth'
 import { trackUserPresence } from '../services/realtimeChat'
+import { normalizeProfileMedia } from '../utils/media'
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null)
@@ -22,7 +23,7 @@ const normalizeUser = (value) => {
   const user = value?.user || value
   if (!user) return null
   const id = user.id || user.user_id || user.data?.id
-  return { ...user, id }
+  return normalizeProfileMedia({ ...user, id })
 }
 
 /**
@@ -52,13 +53,14 @@ export function AuthProvider({ children }) {
   // Derived stage — never wipes the token, just recomputes on user change
   const authStage = useMemo(() => getAuthStage(user), [user])
 
-  // ── fetchMe: hydrate user from the backend ─────────────────────────────────
+  // ── fetchMe: hydrate user from the backend on app mount / reload ───────────
   const fetchMe = async () => {
     const token = Cookies.get('cf_token')
     if (!token) {
       setLoading(false)
       return
     }
+    const isGuestSession = Cookies.get('cf_guest') === '1'
     try {
       // Try /auth/me first (returns role + email_verified_at fields); fall back to /profile
       let res
@@ -67,14 +69,26 @@ export function AuthProvider({ children }) {
       } catch {
         res = await api.get('/profile')
       }
-      const u =
+      let u =
         res?.data?.data?.user ||
         res?.data?.data ||
         res?.data?.user ||
         res?.data
+
+      // If the backend doesn't return role:'guest' but we know it's a guest session,
+      // re-inject the guest markers so getAuthStage returns 'guest' correctly.
+      if (isGuestSession && u) {
+        u = {
+          ...u,
+          role: u.role || 'guest',
+          email_verified_at: u.email_verified_at || new Date().toISOString(),
+        }
+      }
+
       setUser(normalizeUser(u))
     } catch (err) {
       Cookies.remove('cf_token')
+      Cookies.remove('cf_guest')
       setUser(null)
     } finally {
       setLoading(false)
@@ -98,6 +112,7 @@ export function AuthProvider({ children }) {
     const token = getAccessToken(res)
     const userObj = getAuthUser(res)
     if (!token) throw new Error('No token returned from API')
+    Cookies.remove('cf_guest') // clear any previous guest flag
     Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
     setUser(normalizeUser(userObj))
     return res
@@ -107,6 +122,7 @@ export function AuthProvider({ children }) {
     const res = await authRegister(payload)
     const token = getAccessToken(res)
     const userObj = getAuthUser(res)
+    Cookies.remove('cf_guest')
     if (token) Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
     setUser(normalizeUser(userObj))
     return res
@@ -115,9 +131,31 @@ export function AuthProvider({ children }) {
   const guest = async () => {
     const res = await authGuest()
     const token = getAccessToken(res)
-    const userObj = getAuthUser(res)
+    let userObj = getAuthUser(res)
     if (!token) throw new Error('No token returned from API')
+
+    // The backend may return a guest user without role/email_verified_at.
+    // We force-inject them here so getAuthStage correctly returns 'guest'.
+    if (userObj) {
+      userObj = {
+        ...userObj,
+        role: userObj.role || 'guest',
+        // Guests are treated as "email verified" so stage is 'guest' not 'unverified'
+        email_verified_at: userObj.email_verified_at || new Date().toISOString(),
+      }
+    } else {
+      // Fallback: create a minimal guest user object
+      userObj = {
+        role: 'guest',
+        email_verified_at: new Date().toISOString(),
+        full_name: 'Guest',
+        username: 'guest',
+      }
+    }
+
     Cookies.set('cf_token', token, { secure: true, sameSite: 'lax' })
+    // Persist a flag so fetchMe can restore guest role after a page reload
+    Cookies.set('cf_guest', '1', { secure: true, sameSite: 'lax' })
     setUser(normalizeUser(userObj))
     return res
   }
@@ -148,6 +186,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     Cookies.remove('cf_token')
+    Cookies.remove('cf_guest')
     setUser(null)
     try { window.location.href = '/login' } catch (e) {}
   }
