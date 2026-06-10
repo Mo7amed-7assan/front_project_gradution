@@ -10,9 +10,9 @@ function Toggle({ checked, onChange }) {
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:ring-offset-2 ${checked ? 'bg-brand-primary' : 'bg-slate-200 hover:bg-slate-300'}`}
+      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:ring-offset-2 ${checked ? 'bg-brand-primary' : 'bg-[var(--bg-hover)] hover:bg-slate-300'}`}
     >
-      <span className={`inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+      <span className={`inline-block h-5 w-5 rounded-full bg-[var(--bg-surface)] shadow-md transition-transform duration-300 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </button>
   )
 }
@@ -34,21 +34,21 @@ function NotificationItem({ n, onMarkAsRead, onConnectionResponse, respondingTo,
 
   return (
     <li className={`p-5 md:p-6 rounded-2xl border transition-all duration-300 group ${
-      read ? 'bg-white border-slate-100 hover:border-slate-200 shadow-sm' : 'bg-gradient-to-r from-brand-primaryLight/30 to-slate-50 border-brand-primaryLight shadow-md shadow-brand-primary/5 hover:border-brand-primary/30'
+      read ? 'bg-[var(--bg-surface)] border-[var(--border-color)] hover:border-slate-200 shadow-sm' : 'bg-gradient-to-r from-brand-primaryLight/30 to-slate-50 border-brand-primaryLight shadow-md shadow-brand-primary/5 hover:border-brand-primary/30'
     }`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-center gap-3 flex-wrap">
             {!read && <span className="w-2.5 h-2.5 rounded-full bg-brand-primary shrink-0 animate-pulse shadow-sm shadow-brand-primary/50"/>}
             <span className={badgeClass}>{label}</span>
-            <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
+            <span className="text-xs font-medium text-[var(--text-hint)] flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               {n.created_at ? new Date(n.created_at).toLocaleString() : ''}
             </span>
           </div>
 
           {n.type === 'new_application' && projectId ? (
-            <p className="text-base text-slate-800 leading-relaxed">
+            <p className="text-base text-[var(--text-primary)] leading-relaxed">
               You have a new application waiting for review.{' '}
               <Link to={`/projects/${projectId}/applications`} className="text-brand-primary hover:text-brand-primaryDark hover:underline font-bold transition-colors">
                 View Applications →
@@ -56,8 +56,8 @@ function NotificationItem({ n, onMarkAsRead, onConnectionResponse, respondingTo,
             </p>
           ) : n.type === 'connection_request' ? (
             <div className="space-y-3">
-              <p className="text-base text-slate-800 leading-relaxed">
-                <span className="font-bold text-slate-900">{n.data?.requester?.full_name || 'Someone'}</span> would like to connect with you.
+              <p className="text-base text-[var(--text-primary)] leading-relaxed">
+                <span className="font-bold text-[var(--text-primary)]">{n.data?.requester?.full_name || 'Someone'}</span> would like to connect with you.
               </p>
               <div className="flex flex-wrap gap-2 pt-1">
                 <button
@@ -77,11 +77,11 @@ function NotificationItem({ n, onMarkAsRead, onConnectionResponse, respondingTo,
               </div>
             </div>
           ) : (
-            <p className="text-base font-bold text-slate-900">{n.title || n.subject || label}</p>
+            <p className="text-base font-bold text-[var(--text-primary)]">{n.title || n.subject || label}</p>
           )}
 
           {(n.message || n.body) && (
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 text-sm text-slate-600 italic">
+            <div className="bg-[var(--bg-hover)] rounded-xl p-4 border border-[var(--border-color)] text-sm text-[var(--text-secondary)] italic">
               {n.message || n.body}
             </div>
           )}
@@ -90,7 +90,7 @@ function NotificationItem({ n, onMarkAsRead, onConnectionResponse, respondingTo,
         {!read && (
           <button
             onClick={() => onMarkAsRead(n.id)}
-            className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-brand-primary hover:border-brand-primary transition-colors shrink-0 group/btn shadow-sm"
+            className="w-8 h-8 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-hint)] hover:text-brand-primary hover:border-brand-primary transition-colors shrink-0 group/btn shadow-sm"
             title="Mark as read"
           >
             <svg className="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -171,10 +171,10 @@ export default function NotificationsUI({
       {/* Preferences panel */}
       {showPrefs && (
         <div className="card p-6 border-brand-primaryLight shadow-md shadow-brand-primary/5 animate-in slide-in-from-top-4 fade-in duration-300">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[var(--border-color)]">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Notification Preferences</h2>
-              <p className="text-sm text-slate-500 font-medium">Control how and when you receive notifications.</p>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">Notification Preferences</h2>
+              <p className="text-sm text-[var(--text-secondary)] font-medium">Control how and when you receive notifications.</p>
             </div>
             <div className="flex gap-2 shrink-0">
               <button onClick={fetchPreferences} disabled={loadingPreferences || savingPreferences} className="btn-secondary py-2 px-4 text-sm">
@@ -204,23 +204,23 @@ export default function NotificationsUI({
             <div className="space-y-8">
               {/* Toggles */}
               <div>
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Delivery Methods</h3>
+                <h3 className="text-sm font-bold text-[var(--text-hint)] uppercase tracking-wider mb-3">Delivery Methods</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     { field: 'platform_notifications', label: 'In-App Alerts', desc: 'Alerts while you use Co-Found', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /> },
                     { field: 'email_notifications',    label: 'Email Updates', desc: 'Summaries sent to your inbox', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /> },
                     { field: 'push_notifications',     label: 'Push Notifications', desc: 'Browser notifications', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /> },
                   ].map(({ field, label, desc, icon }) => (
-                    <div key={field} className="flex flex-col p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:border-brand-primary/30 transition-colors group">
+                    <div key={field} className="flex flex-col p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)] hover:border-brand-primary/30 transition-colors group">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--bg-surface)] shadow-sm flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
                           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{icon}</svg>
                         </div>
                         <Toggle checked={!!preferences[field]} onChange={(v) => updatePreferenceField(field, v)} />
                       </div>
                       <div>
-                        <p className="text-base font-bold text-slate-800">{label}</p>
-                        <p className="text-xs font-medium text-slate-500 mt-0.5">{desc}</p>
+                        <p className="text-base font-bold text-[var(--text-primary)]">{label}</p>
+                        <p className="text-xs font-medium text-[var(--text-secondary)] mt-0.5">{desc}</p>
                       </div>
                     </div>
                   ))}
@@ -229,11 +229,11 @@ export default function NotificationsUI({
 
               {/* Other fields */}
               <div>
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Quiet Hours & Digest</h3>
+                <h3 className="text-sm font-bold text-[var(--text-hint)] uppercase tracking-wider mb-3">Quiet Hours & Digest</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                   <div className="lg:col-span-1">
                     <label className="form-label">Digest Frequency</label>
-                    <select value={preferences.notification_digest || 'immediate'} onChange={e => updatePreferenceField('notification_digest', e.target.value)} className="form-select bg-slate-50 font-medium">
+                    <select value={preferences.notification_digest || 'immediate'} onChange={e => updatePreferenceField('notification_digest', e.target.value)} className="form-select bg-[var(--bg-hover)] font-medium">
                       <option value="immediate">Immediate</option>
                       <option value="hourly">Hourly</option>
                       <option value="daily">Daily</option>
@@ -243,15 +243,15 @@ export default function NotificationsUI({
                   </div>
                   <div className="lg:col-span-1">
                     <label className="form-label">Timezone</label>
-                    <input type="text" value={preferences.quiet_hours_timezone || ''} onChange={e => updatePreferenceField('quiet_hours_timezone', e.target.value)} placeholder="e.g. Africa/Cairo" className="form-input bg-slate-50 font-medium"/>
+                    <input type="text" value={preferences.quiet_hours_timezone || ''} onChange={e => updatePreferenceField('quiet_hours_timezone', e.target.value)} placeholder="e.g. Africa/Cairo" className="form-input bg-[var(--bg-hover)] font-medium"/>
                   </div>
                   <div className="lg:col-span-1">
                     <label className="form-label">Quiet Hours Start</label>
-                    <input type="time" value={preferences.quiet_hours_start || ''} onChange={e => updatePreferenceField('quiet_hours_start', e.target.value)} className="form-input bg-slate-50 font-medium"/>
+                    <input type="time" value={preferences.quiet_hours_start || ''} onChange={e => updatePreferenceField('quiet_hours_start', e.target.value)} className="form-input bg-[var(--bg-hover)] font-medium"/>
                   </div>
                   <div className="lg:col-span-1">
                     <label className="form-label">Quiet Hours End</label>
-                    <input type="time" value={preferences.quiet_hours_end || ''} onChange={e => updatePreferenceField('quiet_hours_end', e.target.value)} className="form-input bg-slate-50 font-medium"/>
+                    <input type="time" value={preferences.quiet_hours_end || ''} onChange={e => updatePreferenceField('quiet_hours_end', e.target.value)} className="form-input bg-[var(--bg-hover)] font-medium"/>
                   </div>
                 </div>
               </div>
@@ -262,12 +262,12 @@ export default function NotificationsUI({
 
       {/* Notification list */}
       {notifications.length === 0 ? (
-        <div className="card text-center py-16 px-4 border-2 border-dashed border-slate-200 mt-6">
+        <div className="card text-center py-16 px-4 border-2 border-dashed border-[var(--border-color)] mt-6">
           <div className="w-20 h-20 bg-brand-primaryLight rounded-3xl flex items-center justify-center mx-auto mb-5 rotate-3 hover:rotate-0 transition-transform shadow-sm">
              <svg className="w-10 h-10 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
           </div>
-          <h3 className="text-xl font-bold text-slate-900 mb-2">You're all caught up!</h3>
-          <p className="text-slate-500 mb-6 max-w-sm mx-auto">No new notifications. We'll let you know when something important happens.</p>
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">You're all caught up!</h3>
+          <p className="text-[var(--text-secondary)] mb-6 max-w-sm mx-auto">No new notifications. We'll let you know when something important happens.</p>
         </div>
       ) : (
         <ul className="space-y-4 pt-2">

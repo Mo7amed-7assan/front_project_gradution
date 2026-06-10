@@ -58,8 +58,8 @@ const statusClass = (status) => {
   if (value === 'accepted') return 'bg-green-100 text-green-800'
   if (value === 'pending') return 'bg-yellow-100 text-yellow-800'
   if (value === 'rejected') return 'bg-red-100 text-red-800'
-  if (value === 'blocked') return 'bg-gray-200 text-gray-800'
-  return 'bg-gray-100 text-gray-700'
+  if (value === 'blocked') return 'bg-gray-200 text-[var(--text-primary)]'
+  return 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
 }
 
 export default function Connections() {

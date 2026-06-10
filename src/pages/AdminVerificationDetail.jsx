@@ -54,11 +54,11 @@ const formatDate = (dateStr) => {
 function InfoRow({ label, value, children }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500">
+      <span className="text-[10px] font-bold tracking-wider uppercase text-[var(--text-hint)] dark:text-slate-500">
         {label}
       </span>
-      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-        {children || value || <span className="text-slate-300 dark:text-slate-700 italic">N/A</span>}
+      <span className="text-sm font-semibold text-[var(--text-primary)] ">
+        {children || value || <span className="text-[var(--text-hint)] dark:text-slate-700 italic">N/A</span>}
       </span>
     </div>
   );
@@ -82,15 +82,15 @@ function CompareRow({ label, cardValue, userValue }) {
   };
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 px-2 rounded-xl transition-colors duration-150">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-3 border-b border-[var(--border-color)]  last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 px-2 rounded-xl transition-colors duration-150">
       {/* Extracted Document Value */}
-      <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-350 text-right shadow-sm truncate">
-        {cardValue || <span className="text-slate-400 dark:text-slate-600 italic font-normal">Not detected</span>}
+      <div className="bg-[var(--bg-hover)] dark:bg-slate-900/50 border border-[var(--border-color)]  rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-primary)] dark:text-slate-350 text-right shadow-sm truncate">
+        {cardValue || <span className="text-[var(--text-hint)] dark:text-slate-600 italic font-normal">Not detected</span>}
       </div>
 
       {/* Matching Status */}
       <div className="text-center min-w-[90px] flex flex-col items-center">
-        <div className="text-[9px] font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500 mb-1">
+        <div className="text-[9px] font-bold tracking-wider uppercase text-[var(--text-hint)] dark:text-slate-500 mb-1">
           {label}
         </div>
         {hasValues ? (
@@ -101,13 +101,13 @@ function CompareRow({ label, cardValue, userValue }) {
             {match ? '✓ Match' : '✗ Mismatch'}
           </span>
         ) : (
-          <span className="text-slate-300 dark:text-slate-600 text-sm font-semibold">—</span>
+          <span className="text-[var(--text-hint)] dark:text-slate-600 text-sm font-semibold">—</span>
         )}
       </div>
 
       {/* User Registered Value */}
-      <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-350 shadow-sm truncate">
-        {userValue || <span className="text-slate-400 dark:text-slate-600 italic font-normal">Not provided</span>}
+      <div className="bg-[var(--bg-hover)] dark:bg-slate-900/50 border border-[var(--border-color)]  rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-primary)] dark:text-slate-350 shadow-sm truncate">
+        {userValue || <span className="text-[var(--text-hint)] dark:text-slate-600 italic font-normal">Not provided</span>}
       </div>
     </div>
   );
@@ -125,7 +125,7 @@ function AICheckRow({ label, passed, confidence }) {
   const checkColor = passedStatus ? successColor : errorColor;
 
   return (
-    <div className="py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 px-2 rounded-xl transition-colors duration-150">
+    <div className="py-3 border-b border-[var(--border-color)]  last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 px-2 rounded-xl transition-colors duration-150">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span 
@@ -138,7 +138,7 @@ function AICheckRow({ label, passed, confidence }) {
           >
             {passedStatus ? '✓' : '✗'}
           </span>
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-350">{label}</span>
+          <span className="text-sm font-semibold text-[var(--text-primary)] dark:text-slate-350">{label}</span>
         </div>
         <span 
           className="text-xs font-bold"
@@ -147,7 +147,7 @@ function AICheckRow({ label, passed, confidence }) {
           {pct}% Match
         </span>
       </div>
-      <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+      <div className="h-1.5 bg-[var(--bg-hover)]  rounded-full overflow-hidden shadow-inner">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ 
@@ -165,7 +165,7 @@ function ImagePreviewBox({ src, label, rotation, onRotate, onZoom }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 aspect-[1.6] flex items-center justify-center group shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200">
+      <div className="relative rounded-2xl overflow-hidden bg-[var(--bg-hover)]  border border-slate-200/80  aspect-[1.6] flex items-center justify-center group shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200">
         {src && !imgError ? (
           <img
             src={src}
@@ -175,7 +175,7 @@ function ImagePreviewBox({ src, label, rotation, onRotate, onZoom }) {
             style={{ transform: `rotate(${rotation}deg)` }}
           />
         ) : (
-          <div className="text-center text-slate-400 dark:text-slate-600 flex flex-col items-center p-4">
+          <div className="text-center text-[var(--text-hint)] dark:text-slate-600 flex flex-col items-center p-4">
             <span className="text-4xl mb-2">🪪</span>
             <span className="text-xs font-semibold">No Image Available</span>
           </div>
@@ -204,7 +204,7 @@ function ImagePreviewBox({ src, label, rotation, onRotate, onZoom }) {
           </div>
         )}
       </div>
-      <div className="text-center text-xs font-bold tracking-wider uppercase text-slate-400 dark:text-slate-500">
+      <div className="text-center text-xs font-bold tracking-wider uppercase text-[var(--text-hint)] dark:text-slate-500">
         {label}
       </div>
     </div>
@@ -243,15 +243,15 @@ function ZoomModal({ src, onClose }) {
 function ConfirmDialog({ message, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 z-[9998] bg-slate-950/60 flex items-center justify-center p-6 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col items-center transform scale-100 transition-transform">
+      <div className="bg-[var(--bg-surface)]  rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-[var(--border-color)]  flex flex-col items-center transform scale-100 transition-transform">
         <div className="text-4xl mb-4">⚠️</div>
-        <p className="text-center text-sm font-semibold text-slate-800 dark:text-slate-200 mb-6 leading-relaxed">
+        <p className="text-center text-sm font-semibold text-[var(--text-primary)]  mb-6 leading-relaxed">
           {message}
         </p>
         <div className="flex gap-3 w-full">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all shadow-sm active:scale-95"
+            className="flex-1 py-3 rounded-xl border border-[var(--border-color)]  bg-[var(--bg-hover)]  hover:bg-slate-100 dark:hover:bg-slate-700 text-[var(--text-secondary)] dark:text-slate-400 font-bold text-sm transition-all shadow-sm active:scale-95"
           >
             Cancel
           </button>
@@ -468,7 +468,7 @@ export default function AdminVerificationDetail() {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <Spinner />
-        <p className="text-sm font-semibold text-slate-400 dark:text-slate-650 animate-pulse">Loading identity verification detail...</p>
+        <p className="text-sm font-semibold text-[var(--text-hint)] dark:text-slate-650 animate-pulse">Loading identity verification detail...</p>
       </div>
     );
   }
@@ -540,7 +540,7 @@ export default function AdminVerificationDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
         
         {/* ── TOP HEADER BAR ── */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-6 border-b border-slate-200/60 dark:border-slate-800 mb-8">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 py-6 border-b border-slate-200/60  mb-8">
           <div>
             <Link
               to="/admin/verifications"
@@ -552,7 +552,7 @@ export default function AdminVerificationDetail() {
               Back to Verification Log
             </Link>
             <div className="flex items-center gap-3">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]  tracking-tight">
                 Verification Review
               </h1>
             </div>
@@ -596,12 +596,12 @@ export default function AdminVerificationDetail() {
             
             {/* Bento Card 1: Identity Comparison */}
             <div className="card p-6 md:p-8 hover:shadow-md transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)]  pb-5 mb-6">
                 <div>
-                  <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+                  <h2 className="text-base font-black text-[var(--text-primary)]  flex items-center gap-2">
                     🪪 Identity Profile Cross-Check
                   </h2>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  <p className="text-xs text-[var(--text-hint)] dark:text-slate-500 mt-1">
                     Verify extracted metadata against user credentials
                   </p>
                 </div>
@@ -645,7 +645,7 @@ export default function AdminVerificationDetail() {
               />
 
               {/* Meta information details */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-8 pt-6 border-t border-[var(--border-color)] ">
                 <InfoRow label="Document Type">
                   {data.document_type
                     ? data.document_type.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -668,10 +668,10 @@ export default function AdminVerificationDetail() {
             {/* Bento Card 2: Document Previews */}
             <div className="card p-6 md:p-8 hover:shadow-md transition-all duration-300">
               <div className="mb-6">
-                <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+                <h2 className="text-base font-black text-[var(--text-primary)]  flex items-center gap-2">
                   📄 Credential Document Review
                 </h2>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                <p className="text-xs text-[var(--text-hint)] dark:text-slate-500 mt-1">
                   Rotate document for alignment or zoom to inspect high-definition holograms and signatures.
                   Hover to view actions.
                 </p>
@@ -699,10 +699,10 @@ export default function AdminVerificationDetail() {
             {automatedChecks ? (
               <div className="card p-6 md:p-8 hover:shadow-md transition-all duration-300">
                 <div className="mb-6">
-                  <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+                  <h2 className="text-base font-black text-[var(--text-primary)]  flex items-center gap-2">
                     🤖 Automatic Agent Audit
                   </h2>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  <p className="text-xs text-[var(--text-hint)] dark:text-slate-500 mt-1">
                     System evaluation scores for image comparison and biometric detection
                   </p>
                 </div>
@@ -760,8 +760,8 @@ export default function AdminVerificationDetail() {
             ) : (
               <div className="card p-8 border-dashed border-2 border-[var(--border-color)] bg-slate-50/30 dark:bg-slate-900/10 flex flex-col items-center justify-center text-center">
                 <span className="text-3xl mb-2">🤖</span>
-                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">No automated checks run</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs">
+                <p className="text-xs font-bold text-[var(--text-hint)] dark:text-slate-500 uppercase tracking-wider">No automated checks run</p>
+                <p className="text-xs text-[var(--text-hint)] dark:text-slate-500 mt-1 max-w-xs">
                   This dossier lacks OCR and biometric computer vision reports. Manual review required.
                 </p>
               </div>
@@ -804,7 +804,7 @@ export default function AdminVerificationDetail() {
                   />
                 </div>
 
-                <h3 className="text-base font-black text-slate-800 dark:text-white flex items-center justify-center gap-1.5">
+                <h3 className="text-base font-black text-[var(--text-primary)]  flex items-center justify-center gap-1.5">
                   {userName}
                   {status === 'approved' && (
                     <span className="text-sky-500 text-sm" title="Verified Customer">
@@ -813,23 +813,23 @@ export default function AdminVerificationDetail() {
                   )}
                 </h3>
                 
-                <p className="text-xs text-slate-400 dark:text-slate-500">
+                <p className="text-xs text-[var(--text-hint)] dark:text-slate-500">
                   @{data.user?.username || 'no-username'}
                 </p>
                 
                 {data.user?.email && (
-                  <p className="text-xs text-slate-300 dark:text-slate-500 mt-1 select-all">
+                  <p className="text-xs text-[var(--text-hint)] dark:text-slate-500 mt-1 select-all">
                     {data.user.email}
                   </p>
                 )}
 
                 {data.user?.bio && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed border-t border-slate-50 dark:border-slate-900 pt-3">
+                  <p className="text-xs text-[var(--text-secondary)] dark:text-slate-400 mt-3 leading-relaxed border-t border-slate-50 dark:border-slate-900 pt-3">
                     "{data.user.bio}"
                   </p>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-left mt-6 pt-4 border-t border-slate-100 dark:border-slate-850">
+                <div className="grid grid-cols-2 gap-4 text-left mt-6 pt-4 border-t border-[var(--border-color)] dark:border-slate-850">
                   <InfoRow label="Profile ID">
                     <span className="font-mono text-[10px] break-all truncate block max-w-[120px]">
                       {data.user?.id || data.user_id}
@@ -844,21 +844,21 @@ export default function AdminVerificationDetail() {
                 {(data.user?.linkedin_url || data.user?.github_url || data.user?.website_url) && (
                   <div className="flex justify-center gap-3.5 mt-5 border-t border-slate-50 dark:border-slate-900 pt-4">
                     {data.user?.linkedin_url && (
-                      <a href={data.user.linkedin_url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-blue-600 transition-colors">
+                      <a href={data.user.linkedin_url} target="_blank" rel="noreferrer" className="text-[var(--text-hint)] hover:text-blue-600 transition-colors">
                         <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                         </svg>
                       </a>
                     )}
                     {data.user?.github_url && (
-                      <a href={data.user.github_url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                      <a href={data.user.github_url} target="_blank" rel="noreferrer" className="text-[var(--text-hint)] hover:text-slate-900 dark:hover:text-white transition-colors">
                         <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
                         </svg>
                       </a>
                     )}
                     {data.user?.website_url && (
-                      <a href={data.user.website_url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-brand-primaryDark transition-colors">
+                      <a href={data.user.website_url} target="_blank" rel="noreferrer" className="text-[var(--text-hint)] hover:text-brand-primaryDark transition-colors">
                         <svg className="w-5 h-5 fill-none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
@@ -869,7 +869,7 @@ export default function AdminVerificationDetail() {
 
                 <Link
                   to={`/admin/users/${data.user?.id || data.user_id}`}
-                  className="mt-6 w-full inline-flex items-center justify-center py-2 bg-slate-50 dark:bg-slate-900 hover:bg-brand-primaryLight border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:text-brand-primaryDark text-xs font-bold rounded-xl transition-all duration-150 active:scale-95 animate-transition"
+                  className="mt-6 w-full inline-flex items-center justify-center py-2 bg-[var(--bg-hover)]  hover:bg-brand-primaryLight border border-[var(--border-color)]  text-[var(--text-primary)] dark:text-slate-350 hover:text-brand-primaryDark text-xs font-bold rounded-xl transition-all duration-150 active:scale-95 animate-transition"
                 >
                   View Complete Profile →
                 </Link>
@@ -880,7 +880,7 @@ export default function AdminVerificationDetail() {
             <div className="lg:sticky lg:top-6 flex flex-col gap-6">
               
               <div className="card p-6 border-brand-primary/25 shadow-md ring-1 ring-brand-primary/5">
-                <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-850 pb-3">
+                <h3 className="text-sm font-black text-[var(--text-primary)]  uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-[var(--border-color)] dark:border-slate-850 pb-3">
                   ⚖️ Adjudication Review
                 </h3>
 
@@ -925,7 +925,7 @@ export default function AdminVerificationDetail() {
 
                 {/* Action Notes */}
                 <div className="mb-5">
-                  <label className="form-label text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold flex items-center justify-between">
+                  <label className="form-label text-xs uppercase tracking-wider text-[var(--text-hint)] dark:text-slate-500 font-bold flex items-center justify-between">
                     <span>Decision notes / reason</span>
                     {(decision === 'reject' || decision === 'request_more_info') && (
                       <span className="text-rose-500 text-[10px] lowercase font-normal">(required)</span>
@@ -941,7 +941,7 @@ export default function AdminVerificationDetail() {
                       }
                     }}
                     className={`form-input mt-1.5 focus:ring-brand-primary min-h-[90px] ${
-                      validationErrors.notes ? 'border-rose-300 ring-2 ring-rose-100' : 'border-slate-200 dark:border-slate-800'
+                      validationErrors.notes ? 'border-rose-300 ring-2 ring-rose-100' : 'border-[var(--border-color)] '
                     }`}
                     rows={4}
                     placeholder={

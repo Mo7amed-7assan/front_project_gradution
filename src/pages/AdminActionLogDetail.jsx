@@ -17,8 +17,8 @@ const getActionBadge = (action) => {
 function InfoRow({ label, children, copyable = false }) {
   return (
     <div>
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-      <div className={`text-sm font-semibold text-slate-800 ${copyable ? 'font-mono bg-slate-50 px-2 py-1 rounded inline-block border border-slate-100' : ''}`}>
+      <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">{label}</p>
+      <div className={`text-sm font-semibold text-[var(--text-primary)] ${copyable ? 'font-mono bg-[var(--bg-hover)] px-2 py-1 rounded inline-block border border-[var(--border-color)]' : ''}`}>
         {children}
       </div>
     </div>
@@ -64,18 +64,18 @@ export default function AdminActionLogDetail() {
       </div>
 
       <div className="card p-6">
-        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl shrink-0">
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[var(--border-color)]">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-center text-2xl shrink-0">
             {badge.icon}
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-slate-900 capitalize">
+              <h2 className="text-xl font-bold text-[var(--text-primary)] capitalize">
                 {item.action_type || item.action || 'Unknown Action'}
               </h2>
               <span className={`${badge.cls} text-xs uppercase tracking-wider`}>Logged Action</span>
             </div>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
               Performed by:{' '}
               <span className="font-semibold text-brand-primary">
                 {item.admin_user?.full_name || item.admin_user?.name || item.performed_by_id || 'Unknown'}
@@ -91,8 +91,8 @@ export default function AdminActionLogDetail() {
             </InfoRow>
             
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Reason</p>
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 whitespace-pre-wrap">
+              <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Description / Reason</p>
+              <div className="p-4 bg-[var(--bg-hover)] rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] whitespace-pre-wrap">
                 {item.description || item.reason || 'No description provided.'}
               </div>
             </div>
@@ -117,9 +117,9 @@ export default function AdminActionLogDetail() {
 
         {item.changes && (
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Changes payload</p>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 overflow-x-auto">
-              <pre className="text-xs text-slate-600 font-mono">
+            <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Changes payload</p>
+            <div className="p-4 bg-[var(--bg-hover)] rounded-xl border border-[var(--border-color)] overflow-x-auto">
+              <pre className="text-xs text-[var(--text-secondary)] font-mono">
                 {typeof item.changes === 'string' ? item.changes : JSON.stringify(item.changes, null, 2)}
               </pre>
             </div>
@@ -128,10 +128,10 @@ export default function AdminActionLogDetail() {
       </div>
 
       <details className="mt-6">
-        <summary className="cursor-pointer text-xs font-bold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors inline-block ml-1">
+        <summary className="cursor-pointer text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider hover:text-slate-600 transition-colors inline-block ml-1">
           Raw JSON Data
         </summary>
-        <pre className="mt-3 p-4 bg-slate-50 rounded-xl text-xs overflow-auto border border-slate-100 text-slate-600 font-mono">
+        <pre className="mt-3 p-4 bg-[var(--bg-hover)] rounded-xl text-xs overflow-auto border border-[var(--border-color)] text-[var(--text-secondary)] font-mono">
           {JSON.stringify(item, null, 2)}
         </pre>
       </details>

@@ -48,7 +48,7 @@ export default function ProjectsUI({
                 onClick={() => setShowFilters(!showFilters)}
                 className="btn-secondary text-sm font-semibold"
               >
-                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[var(--text-secondary)]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
                 </svg>
                 {showFilters ? 'Hide Filters' : 'Filters'}
@@ -58,12 +58,12 @@ export default function ProjectsUI({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-[#2D2D4E] gap-6 overflow-x-auto no-scrollbar">
+        <div className="flex border-b border-[var(--border-color)] gap-6 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
             className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
-              activeTab === 'projects' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+              activeTab === 'projects' ? 'text-[#6C63FF]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             All Projects
@@ -75,7 +75,7 @@ export default function ProjectsUI({
             type="button"
             onClick={() => setActiveTab('suggestions')}
             className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
-              activeTab === 'suggestions' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+              activeTab === 'suggestions' ? 'text-[#6C63FF]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             Suggested Projects
@@ -87,7 +87,7 @@ export default function ProjectsUI({
             type="button"
             onClick={() => setActiveTab('my-projects')}
             className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
-              activeTab === 'my-projects' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+              activeTab === 'my-projects' ? 'text-[#6C63FF]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             My Projects
@@ -99,7 +99,7 @@ export default function ProjectsUI({
             type="button"
             onClick={() => setActiveTab('applications')}
             className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
-              activeTab === 'applications' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+              activeTab === 'applications' ? 'text-[#6C63FF]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             My Applications
@@ -111,7 +111,7 @@ export default function ProjectsUI({
             type="button"
             onClick={() => setActiveTab('invitations')}
             className={`py-3 text-sm font-semibold relative transition-colors whitespace-nowrap ${
-              activeTab === 'invitations' ? 'text-[#6C63FF]' : 'text-slate-500 hover:text-slate-400'
+              activeTab === 'invitations' ? 'text-[#6C63FF]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             Invitations
@@ -216,13 +216,13 @@ export default function ProjectsUI({
               Array.from({ length: perPage }).map((_, i) => <SkeletonCard key={i} />)
             ) : projects.length === 0 ? (
               <div className="card py-16 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-[#2D2D4E] flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--bg-hover)] flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-[var(--text-hint)]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
                   </svg>
                 </div>
-                <h3 className="text-base font-semibold text-white mb-1">No projects found</h3>
-                <p className="text-sm text-slate-400">Try adjusting your filters or keywords.</p>
+                <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">No projects found</h3>
+                <p className="text-sm text-[var(--text-hint)]">Try adjusting your filters or keywords.</p>
               </div>
             ) : (
               projects.map((p, index) => {
@@ -235,7 +235,7 @@ export default function ProjectsUI({
                       {/* Post Header */}
                       <div className="flex items-start justify-between gap-3 mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-[#2D2D4E] flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-[var(--bg-hover)] flex items-center justify-center overflow-hidden shrink-0">
                             {p?.owner?.profile_picture_url || p?.owner?.avatar ? (
                               <img src={p.owner.profile_picture_url || p.owner.avatar} className="w-full h-full object-cover" />
                             ) : (
@@ -243,10 +243,10 @@ export default function ProjectsUI({
                             )}
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-white">
+                            <h3 className="text-sm font-bold text-[var(--text-primary)]">
                               {p?.owner?.full_name || p?.owner?.username || 'Unknown User'}
                             </h3>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-[var(--text-hint)]">
                               {p?.created_at ? new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'} • Project Post
                             </p>
                           </div>
@@ -265,12 +265,12 @@ export default function ProjectsUI({
 
                       {/* Post Content */}
                       <div className="space-y-3">
-                        <h4 className="text-xl font-bold text-white leading-tight">
+                        <h4 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
                           <Link to={`/projects/${p?.id}`} className="hover:text-[#6C63FF] transition-colors">
                             {p?.title || p?.name}
                           </Link>
                         </h4>
-                        <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm text-[var(--text-hint)] leading-relaxed whitespace-pre-wrap">
                           {p?.description || p?.short_description || 'No description provided.'}
                         </p>
                       </div>
@@ -286,7 +286,7 @@ export default function ProjectsUI({
                     </div>
 
                     {/* Post Footer Actions */}
-                    <div className="px-5 py-3 flex items-center justify-between border-t border-[#2D2D4E]">
+                    <div className="px-5 py-3 flex items-center justify-between border-t border-[var(--border-color)]">
                       <div className="flex gap-3">
                         {(!relation.isOwner && !relation.isMember) && (
                           <Link to={`/projects/${p?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">

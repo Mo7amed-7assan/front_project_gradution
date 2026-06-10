@@ -33,8 +33,8 @@ export default function EmailVerify() {
   }, [auth, navigate, token])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded shadow text-center">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-hover)]">
+      <div className="w-full max-w-md bg-[var(--bg-surface)] p-8 rounded shadow text-center">
         <h1 className="text-2xl font-semibold mb-4">Email Verification</h1>
         {error ? (
           <>
@@ -42,7 +42,7 @@ export default function EmailVerify() {
             <Link to="/login" className="text-blue-600 hover:underline">Back to sign in</Link>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-3 text-gray-600">
+          <div className="flex flex-col items-center gap-3 text-[var(--text-secondary)]">
             <Spinner />
             <p className="text-sm">Verifying your email...</p>
           </div>

@@ -43,12 +43,12 @@ export default function AdminModerationUI({ items, loading, filterAction, setFil
       </div>
 
       {items.length === 0 ? (
-        <div className="card text-center py-16 border-2 border-dashed border-slate-200">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-            <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        <div className="card text-center py-16 border-2 border-dashed border-[var(--border-color)]">
+          <div className="w-16 h-16 bg-[var(--bg-hover)] rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--border-color)]">
+            <svg className="w-8 h-8 text-[var(--text-hint)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           </div>
-          <h3 className="font-bold text-slate-800 text-lg mb-1">No moderation actions</h3>
-          <p className="text-slate-500 text-sm">No actions match the selected filter.</p>
+          <h3 className="font-bold text-[var(--text-primary)] text-lg mb-1">No moderation actions</h3>
+          <p className="text-[var(--text-secondary)] text-sm">No actions match the selected filter.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -57,34 +57,34 @@ export default function AdminModerationUI({ items, loading, filterAction, setFil
             return (
               <div key={it.id} className="card p-5 hover:border-brand-primary/30 transition-colors group">
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-lg shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-center text-lg shrink-0">
                     {badge.icon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <p className="font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
+                      <p className="font-bold text-[var(--text-primary)] group-hover:text-brand-primary transition-colors">
                         {it.reason || it.action_type || 'Moderation Action'}
                       </p>
                       <span className={`${badge.cls} text-xs`}>{it.action_type || it.action || 'unknown'}</span>
                     </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--text-secondary)]">
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                        Target: <span className="font-semibold text-slate-700">{it.target_user?.full_name || it.target_user?.name || it.target_user_id || 'Unknown'}</span>
+                        <svg className="w-3.5 h-3.5 text-[var(--text-hint)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        Target: <span className="font-semibold text-[var(--text-primary)]">{it.target_user?.full_name || it.target_user?.name || it.target_user_id || 'Unknown'}</span>
                       </span>
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                        Moderator: <span className="font-semibold text-slate-700">{it.moderator?.full_name || it.moderator?.name || it.moderator_id || 'Unknown'}</span>
+                        <svg className="w-3.5 h-3.5 text-[var(--text-hint)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        Moderator: <span className="font-semibold text-[var(--text-primary)]">{it.moderator?.full_name || it.moderator?.name || it.moderator_id || 'Unknown'}</span>
                       </span>
                       {(it.created_at || it.logged_at) && (
-                        <span className="flex items-center gap-1 text-slate-400">
+                        <span className="flex items-center gap-1 text-[var(--text-hint)]">
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                           {new Date(it.created_at || it.logged_at).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                     {it.description && (
-                      <p className="text-sm text-slate-600 mt-2 bg-slate-50 p-3 rounded-xl border border-slate-100 whitespace-pre-wrap">
+                      <p className="text-sm text-[var(--text-secondary)] mt-2 bg-[var(--bg-hover)] p-3 rounded-xl border border-[var(--border-color)] whitespace-pre-wrap">
                         {it.description}
                       </p>
                     )}

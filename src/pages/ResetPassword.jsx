@@ -51,14 +51,14 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded shadow">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-hover)]">
+      <div className="w-full max-w-md bg-[var(--bg-surface)] p-8 rounded shadow">
         <h1 className="text-2xl font-semibold mb-6">Reset Password</h1>
         {message && <div className="mb-4 text-sm text-green-600">{message}</div>}
         {error && <div className="mb-4 text-sm text-red-600">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Reset Token</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)]">Reset Token</label>
             <input
               type="text"
               required
@@ -69,7 +69,7 @@ export default function ResetPassword() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">New Password</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)]">New Password</label>
             <div className="relative mt-1">
               <input
                 type={showPassword ? "text" : "password"}
@@ -82,7 +82,7 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-blue-600 focus:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-[var(--text-hint)] hover:text-blue-600 focus:outline-none"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -94,7 +94,7 @@ export default function ResetPassword() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)]">Confirm Password</label>
             <div className="relative mt-1">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -107,7 +107,7 @@ export default function ResetPassword() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-blue-600 focus:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-[var(--text-hint)] hover:text-blue-600 focus:outline-none"
                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
               >
                 {showConfirmPassword ? (
@@ -128,7 +128,7 @@ export default function ResetPassword() {
             </button>
           </div>
         </form>
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="mt-4 text-sm text-[var(--text-secondary)]">
           Remembered your password? <Link to="/login" className="text-blue-600 hover:underline">Sign in</Link>
         </div>
       </div>

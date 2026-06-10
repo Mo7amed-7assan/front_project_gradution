@@ -743,7 +743,7 @@ export default function ProjectDetails() {
 
       {showApplyModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow max-w-lg w-full p-6">
+          <div className="bg-[var(--bg-surface)] rounded shadow max-w-lg w-full p-6">
             <h3 className="text-lg font-semibold mb-3">Apply to project</h3>
             <div className="space-y-4">
               {loadingRoles ? (
@@ -752,7 +752,7 @@ export default function ProjectDetails() {
                 </div>
               ) : projectRoles.length > 0 ? (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Select Role</label>
+                  <label className="block text-sm font-medium text-[var(--text-primary)]">Select Role</label>
                   <select 
                     value={projectRoleId || ''} 
                     onChange={(e) => {
@@ -783,7 +783,7 @@ export default function ProjectDetails() {
 
               {!projectRoleId && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Proposed Role *</label>
+                  <label className="block text-sm font-medium text-[var(--text-primary)]">Proposed Role *</label>
                   <input
                     value={proposedRole}
                     onChange={(e) => setProposedRole(e.target.value)}
@@ -794,7 +794,7 @@ export default function ProjectDetails() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Availability *</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Availability *</label>
                 <select 
                   value={availability} 
                   onChange={(e) => setAvailability(e.target.value)} 
@@ -808,12 +808,12 @@ export default function ProjectDetails() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Cover Message</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Cover Message</label>
                 <textarea value={applicationMessage} onChange={(e) => setApplicationMessage(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2" rows={3} placeholder="Tell the project owner why you're a great fit for this role." />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Skills</label>
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <input 
@@ -847,7 +847,7 @@ export default function ProjectDetails() {
                     <div className="mt-2 space-y-1">
                       {selectedSkills.map((skill) => (
                         <div key={skill.skill_name} className="flex items-center justify-between bg-blue-50 p-2 rounded text-sm">
-                          <span>{skill.skill_name} <span className="text-gray-600">({skill.proficiency_claimed}/5)</span></span>
+                          <span>{skill.skill_name} <span className="text-[var(--text-secondary)]">({skill.proficiency_claimed}/5)</span></span>
                           <button 
                             type="button"
                             onClick={() => removeSkillFromApplication(skill.skill_name)} 
@@ -873,22 +873,22 @@ export default function ProjectDetails() {
 
       {milestoneModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded shadow max-w-xl w-full p-6">
+          <div className="bg-[var(--bg-surface)] rounded shadow max-w-xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">{editingMilestone ? 'Edit Milestone' : 'Create Milestone'}</h3>
-              <button onClick={closeMilestoneModal} className="text-gray-500 hover:text-gray-700">Close</button>
+              <button onClick={closeMilestoneModal} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Title</label>
                 <input value={milestoneForm.title} onChange={(e) => setMilestoneForm((prev) => ({ ...prev, title: e.target.value }))} className="mt-1 block w-full border rounded px-3 py-2" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Description</label>
                 <textarea value={milestoneForm.description} onChange={(e) => setMilestoneForm((prev) => ({ ...prev, description: e.target.value }))} className="mt-1 block w-full border rounded px-3 py-2" rows={4} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Due Date</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Due Date</label>
                 <input type="date" value={milestoneForm.due_date} onChange={(e) => setMilestoneForm((prev) => ({ ...prev, due_date: e.target.value }))} className="mt-1 block w-full border rounded px-3 py-2" />
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -902,18 +902,18 @@ export default function ProjectDetails() {
 
       {teamEditModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded shadow max-w-lg w-full p-6">
+          <div className="bg-[var(--bg-surface)] rounded shadow max-w-lg w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Edit Member</h3>
-              <button onClick={closeTeamEditModal} className="text-gray-500 hover:text-gray-700">Close</button>
+              <button onClick={closeTeamEditModal} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="mt-1 text-gray-700">{resolveUserName(teamEditMember)}</p>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Name</label>
+                <p className="mt-1 text-[var(--text-primary)]">{resolveUserName(teamEditMember)}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Role</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Role</label>
                 <select value={teamEditRole} onChange={(e) => setTeamEditRole(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2">
                   <option value="">No role change</option>
                   {projectRoles.map((role) => (
@@ -922,7 +922,7 @@ export default function ProjectDetails() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Permissions</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Permissions</label>
                 <select value={teamEditPermission} onChange={(e) => setTeamEditPermission(e.target.value)} className="mt-1 block w-full border rounded px-3 py-2">
                   <option value="">No permission change</option>
                   <option value="owner">Owner</option>
@@ -941,29 +941,29 @@ export default function ProjectDetails() {
 
       {applicationDetailModalOpen && selectedApplication && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded shadow max-w-2xl w-full p-6">
+          <div className="bg-[var(--bg-surface)] rounded shadow max-w-2xl w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Application Details</h3>
-              <button onClick={closeApplicationDetailModal} className="text-gray-500 hover:text-gray-700">Close</button>
+              <button onClick={closeApplicationDetailModal} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Applicant</label>
-                  <p className="mt-1 text-gray-700">{selectedApplication.applicant?.full_name || selectedApplication.user?.full_name || selectedApplication.applicant?.username || selectedApplication.user?.username || 'Unknown'}</p>
+                  <label className="block text-sm font-medium text-[var(--text-primary)]">Applicant</label>
+                  <p className="mt-1 text-[var(--text-primary)]">{selectedApplication.applicant?.full_name || selectedApplication.user?.full_name || selectedApplication.applicant?.username || selectedApplication.user?.username || 'Unknown'}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Applied For</label>
-                  <p className="mt-1 text-gray-700">{selectedApplication.role_name || selectedApplication.proposed_role || 'General'}</p>
+                  <label className="block text-sm font-medium text-[var(--text-primary)]">Applied For</label>
+                  <p className="mt-1 text-[var(--text-primary)]">{selectedApplication.role_name || selectedApplication.proposed_role || 'General'}</p>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Cover Message</label>
-                <p className="mt-1 text-gray-700 whitespace-pre-line">{selectedApplication.cover_message || 'No message provided.'}</p>
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Cover Message</label>
+                <p className="mt-1 text-[var(--text-primary)] whitespace-pre-line">{selectedApplication.cover_message || 'No message provided.'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <p className="mt-1 text-gray-700">
+                <label className="block text-sm font-medium text-[var(--text-primary)]">Status</label>
+                <p className="mt-1 text-[var(--text-primary)]">
                   <span className={`font-medium ${
                     selectedApplication.status === 'accepted' ? 'text-green-600' :
                     selectedApplication.status === 'rejected' ? 'text-red-600' :
@@ -973,8 +973,8 @@ export default function ProjectDetails() {
               </div>
               {selectedApplication.feedback && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Feedback</label>
-                  <p className="mt-1 text-gray-700 whitespace-pre-line">{selectedApplication.feedback}</p>
+                  <label className="block text-sm font-medium text-[var(--text-primary)]">Feedback</label>
+                  <p className="mt-1 text-[var(--text-primary)] whitespace-pre-line">{selectedApplication.feedback}</p>
                 </div>
               )}
               <div className="flex justify-end gap-2 pt-2">
@@ -993,16 +993,16 @@ export default function ProjectDetails() {
 
       {rateModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded shadow max-w-lg w-full p-6">
+          <div className="bg-[var(--bg-surface)] rounded shadow max-w-lg w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Rate {resolveUserName(rateMember)}</h3>
-              <button onClick={() => setRateModalOpen(false)} className="text-gray-500 hover:text-gray-700">Close</button>
+              <button onClick={() => setRateModalOpen(false)} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {RATING_FIELDS.map((field) => (
                   <div key={field.key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label} (1-5)</label>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">{field.label} (1-5)</label>
                     <input
                       type="number"
                       min="1"
@@ -1015,7 +1015,7 @@ export default function ProjectDetails() {
                 ))}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Feedback</label>
                 <textarea
                   value={ratingComment}
                   onChange={(e) => setRatingComment(e.target.value)}
@@ -1025,7 +1025,7 @@ export default function ProjectDetails() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Visibility</label>
                 <select
                   value={ratingVisibility}
                   onChange={(e) => setRatingVisibility(e.target.value)}
@@ -1037,7 +1037,7 @@ export default function ProjectDetails() {
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button onClick={() => setRateModalOpen(false)} className="px-3 py-2 rounded border text-gray-600">Cancel</button>
+                <button onClick={() => setRateModalOpen(false)} className="px-3 py-2 rounded border text-[var(--text-secondary)]">Cancel</button>
                 <button onClick={handleRateSubmit} disabled={submittingRating} className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50">
                   {submittingRating ? 'Submitting...' : 'Submit Rating'}
                 </button>

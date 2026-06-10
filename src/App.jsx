@@ -34,6 +34,10 @@ const Conversation         = lazy(() => import('./pages/Conversation'))
 const MyReports            = lazy(() => import('./pages/MyReports'))
 const SubmitReport         = lazy(() => import('./pages/SubmitReport'))
 const ReportDetail         = lazy(() => import('./pages/ReportDetail'))
+const Matches              = lazy(() => import('./pages/Matches'))
+const Terms                = lazy(() => import('./pages/Terms'))
+const Privacy              = lazy(() => import('./pages/Privacy'))
+const Support              = lazy(() => import('./pages/Support'))
 
 // Admin — grouped into their own lazy chunks
 const AdminVerifications      = lazy(() => import('./pages/AdminVerifications'))
@@ -100,8 +104,8 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900 text-red-500 p-8">
-          <div className="bg-slate-800 p-6 rounded-xl border border-red-900 max-w-2xl w-full">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] text-red-500 p-8">
+          <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-red-900 max-w-2xl w-full">
             <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
             <pre className="text-xs whitespace-pre-wrap">{this.state.error?.toString()}</pre>
           </div>
@@ -172,6 +176,10 @@ export default function App() {
           {/* Misc */}
           <Route path="/verification"   element={<ProtectedRoute><Layout><IdentityVerification /></Layout></ProtectedRoute>} />
           <Route path="/notifications"  element={<ProtectedRoute><Layout><Notifications /></Layout></ProtectedRoute>} />
+          <Route path="/matches"        element={<ProtectedRoute><Layout><Matches /></Layout></ProtectedRoute>} />
+          <Route path="/terms"          element={<Terms />} />
+          <Route path="/privacy"        element={<Privacy />} />
+          <Route path="/support"        element={<Support />} />
 
           {/* Reports */}
           <Route path="/reports"         element={<ProtectedRoute><Layout><MyReports /></Layout></ProtectedRoute>} />

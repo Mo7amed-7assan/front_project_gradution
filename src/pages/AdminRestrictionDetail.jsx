@@ -27,7 +27,7 @@ const accountStatusMap = {
   pending: { ar: 'قيد الانتظار', en: 'Pending', color: 'border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:border-amber-900/50 dark:text-amber-400' },
   suspended: { ar: 'معطل مؤقتاً', en: 'Suspended', color: 'border-orange-200 bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:border-orange-900/50 dark:text-orange-400' },
   banned: { ar: 'محظور', en: 'Banned', color: 'border-red-200 bg-red-50 text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400 font-bold' },
-  deleted: { ar: 'محذوف', en: 'Deleted', color: 'border-slate-200 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:border-slate-800 dark:text-slate-400' },
+  deleted: { ar: 'محذوف', en: 'Deleted', color: 'border-[var(--border-color)] bg-[var(--bg-hover)] text-[var(--text-primary)] dark:bg-slate-900/30  dark:text-slate-400' },
 }
 
 const translations = {
@@ -106,10 +106,10 @@ function InfoRow({ labelAr, labelEn, children }) {
   const label = locale === 'ar' ? labelAr : labelEn
   return (
     <div className="flex flex-col gap-1">
-      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+      <div className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider">
         {label}
       </div>
-      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{children}</div>
+      <div className="text-sm font-semibold text-[var(--text-primary)] ">{children}</div>
     </div>
   )
 }
@@ -190,7 +190,7 @@ export default function AdminRestrictionDetail() {
       return { label: dict.lifted, color: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:text-emerald-400' }
     }
     if (item.is_expired || (item.expires_at && new Date(item.expires_at) < new Date())) {
-      return { label: dict.expired, color: 'border-slate-200 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:border-slate-800 dark:text-slate-400' }
+      return { label: dict.expired, color: 'border-[var(--border-color)] bg-[var(--bg-hover)] text-[var(--text-primary)] dark:bg-slate-900/30  dark:text-slate-400' }
     }
     if (item.is_permanent) {
       return { label: dict.permanent, color: 'border-rose-300 bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:border-rose-900/50 dark:text-rose-400 font-extrabold' }
@@ -198,7 +198,7 @@ export default function AdminRestrictionDetail() {
     if (item.is_active || item.status?.toLowerCase() === 'active') {
       return { label: dict.active, color: 'border-red-200 bg-red-50 text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:text-red-400' }
     }
-    return { label: dict.expired, color: 'border-slate-200 bg-slate-50 text-slate-700 dark:bg-slate-900/30 dark:border-slate-800 dark:text-slate-400' }
+    return { label: dict.expired, color: 'border-[var(--border-color)] bg-[var(--bg-hover)] text-[var(--text-primary)] dark:bg-slate-900/30  dark:text-slate-400' }
   }
 
   const statusInfo = getRestrictionStatus()
@@ -224,12 +224,12 @@ export default function AdminRestrictionDetail() {
   const mappedRole = rolesMap[userRole] || { ar: userRole, en: userRole }
 
   const userStatus = targetUser?.account_status || 'active'
-  const mappedStatus = accountStatusMap[userStatus] || { ar: userStatus, en: userStatus, color: 'border-slate-200 bg-slate-50 text-slate-700' }
+  const mappedStatus = accountStatusMap[userStatus] || { ar: userStatus, en: userStatus, color: 'border-[var(--border-color)] bg-[var(--bg-hover)] text-[var(--text-primary)]' }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border-color)]  pb-4">
         <div>
           <Link to="/admin/restrictions" className="text-sm text-brand-primary font-bold flex items-center gap-1 mb-2 hover:underline">
             <span className={isRTL ? 'rotate-180 inline-block' : ''}>
@@ -237,7 +237,7 @@ export default function AdminRestrictionDetail() {
             </span>
             {dict.backToRestrictions}
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white family-cairo">{dict.restrictionDetail}</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]  family-cairo">{dict.restrictionDetail}</h1>
         </div>
         <div className="flex items-center gap-3">
           {isActive && (
@@ -265,11 +265,11 @@ export default function AdminRestrictionDetail() {
         
         {/* Card 1: Primary Restriction Details (بيانات العقوبة الأساسية) */}
         <div className="lg:col-span-2 card p-6 space-y-6 border-t-4 border-t-indigo-500">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)] ">
             <div className="flex items-center gap-3">
               <span className="text-2xl">{typeData.icon}</span>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white family-cairo">{dict.primaryData}</h3>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]  family-cairo">{dict.primaryData}</h3>
               </div>
             </div>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.color} family-cairo`}>
@@ -293,13 +293,13 @@ export default function AdminRestrictionDetail() {
             </InfoRow>
 
             <InfoRow labelAr="تاريخ البدء" labelEn="Starts At">
-              <span className="font-mono text-slate-700 dark:text-slate-300">
+              <span className="font-mono text-[var(--text-primary)] dark:text-slate-300">
                 {formatDate(item.starts_at || item.created_at || item.restricted_at)}
               </span>
             </InfoRow>
 
             <InfoRow labelAr="تاريخ الانتهاء" labelEn="Expires At">
-              <span className="font-mono text-slate-700 dark:text-slate-300">
+              <span className="font-mono text-[var(--text-primary)] dark:text-slate-300">
                 {item.is_permanent ? (
                   <span className="text-rose-600 font-bold">{dict.permanent}</span>
                 ) : (
@@ -319,11 +319,11 @@ export default function AdminRestrictionDetail() {
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="pt-4 border-t border-[var(--border-color)] ">
+            <div className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">
               {dict.reason}
             </div>
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans text-sm leading-relaxed">
+            <div className="p-4 bg-[var(--bg-hover)] dark:bg-slate-900/50 rounded-xl border border-[var(--border-color)]  text-[var(--text-primary)] dark:text-slate-300 whitespace-pre-wrap font-sans text-sm leading-relaxed">
               {item.reason || dict.noReason}
             </div>
           </div>
@@ -334,8 +334,8 @@ export default function AdminRestrictionDetail() {
           
           {/* Card 2: Restricted User Data (بيانات المستخدم المعاقب) */}
           <div className="card p-6 space-y-4 border-t-4 border-t-amber-500">
-            <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-md font-bold text-slate-900 dark:text-white family-cairo">{dict.restrictedUser}</h3>
+            <div className="pb-3 border-b border-[var(--border-color)] ">
+              <h3 className="text-md font-bold text-[var(--text-primary)]  family-cairo">{dict.restrictedUser}</h3>
             </div>
 
             <div className="flex items-center gap-3">
@@ -343,7 +343,7 @@ export default function AdminRestrictionDetail() {
                 <img 
                   src={profilePicture} 
                   alt={displayName} 
-                  className="w-12 h-12 rounded-full object-cover border-2 border-slate-100 dark:border-slate-800" 
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[var(--border-color)] " 
                 />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
@@ -351,20 +351,20 @@ export default function AdminRestrictionDetail() {
                 </div>
               )}
               <div className="min-w-0">
-                <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{displayName}</p>
-                <p className="text-xs text-slate-400 font-mono truncate" dir="ltr">@{displayUsername}</p>
+                <p className="font-bold text-[var(--text-primary)]  text-sm truncate">{displayName}</p>
+                <p className="text-xs text-[var(--text-hint)] font-mono truncate" dir="ltr">@{displayUsername}</p>
               </div>
             </div>
 
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-bold">{dict.role}:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/50 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-800">
+                <span className="text-[var(--text-hint)] font-bold">{dict.role}:</span>
+                <span className="font-semibold text-[var(--text-primary)] dark:text-slate-300 bg-[var(--bg-hover)] dark:bg-slate-900/50 px-2 py-0.5 rounded border border-[var(--border-color)] ">
                   {mappedRole[locale] || mappedRole.en}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-bold">{dict.accountStatus}:</span>
+                <span className="text-[var(--text-hint)] font-bold">{dict.accountStatus}:</span>
                 <span className={`px-2 py-0.5 rounded border text-[10px] font-semibold ${mappedStatus.color}`}>
                   {mappedStatus[locale] || mappedStatus.en}
                 </span>
@@ -383,8 +383,8 @@ export default function AdminRestrictionDetail() {
 
           {/* Card 3: Restricted By Admin (بيانات المسؤول الذي أصدر العقوبة) */}
           <div className="card p-6 space-y-4 border-t-4 border-t-rose-500">
-            <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-md font-bold text-slate-900 dark:text-white family-cairo font-semibold">{dict.issuerTitle}</h3>
+            <div className="pb-3 border-b border-[var(--border-color)] ">
+              <h3 className="text-md font-bold text-[var(--text-primary)]  family-cairo font-semibold">{dict.issuerTitle}</h3>
             </div>
 
             <div className="flex items-center gap-3">
@@ -392,15 +392,15 @@ export default function AdminRestrictionDetail() {
                 🛡️
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-slate-900 dark:text-white text-sm truncate" dir="ltr">
+                <p className="font-bold text-[var(--text-primary)]  text-sm truncate" dir="ltr">
                   @{item.restricted_by?.username || 'Unknown'}
                 </p>
-                <p className="text-[10px] text-slate-400 font-sans">{dict.username}</p>
+                <p className="text-[10px] text-[var(--text-hint)] font-sans">{dict.username}</p>
               </div>
             </div>
 
             <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-50 dark:border-slate-900">
-              <span className="text-slate-400 font-bold">{dict.adminRole}:</span>
+              <span className="text-[var(--text-hint)] font-bold">{dict.adminRole}:</span>
               <span className="font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2.5 py-0.5 rounded-full border border-rose-100 dark:border-rose-900/30">
                 {item.restricted_by?.role || 'Administrator'}
               </span>

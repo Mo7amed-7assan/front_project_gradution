@@ -35,7 +35,7 @@ export default function AdminSettings() {
     if (t === 'boolean') return 'bg-purple-100 text-purple-700'
     if (t === 'integer' || t === 'number') return 'bg-green-100 text-green-700'
     if (t === 'json') return 'bg-pink-100 text-pink-700'
-    return 'bg-gray-100 text-gray-700'
+    return 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
   }
 
   if (loading) return <div className="min-h-[12rem] flex items-center justify-center"><Spinner /></div>

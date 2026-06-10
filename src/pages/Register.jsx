@@ -159,7 +159,7 @@ export default function Register(){
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-1 w-4 h-4 rounded border-[var(--border-color)] text-indigo-600 focus:ring-indigo-500 bg-[var(--bg-input)] cursor-pointer shrink-0" />
                 <span className="text-sm font-medium text-[var(--text-secondary)] leading-tight">
-                  I agree to the CoFound <a href="#" className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors">Terms of Service</a> and <a href="#" className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors">Privacy Policy</a>.
+                  I agree to the CoFound <Link to="/terms" className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors">Terms of Service</Link> and <Link to="/privacy" className="text-indigo-500 hover:text-indigo-400 font-bold transition-colors">Privacy Policy</Link>.
                 </span>
               </label>
             </div>

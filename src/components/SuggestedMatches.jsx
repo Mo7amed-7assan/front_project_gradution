@@ -22,7 +22,7 @@ const extractMatchList = (value) => {
 }
 
 const getMatchScore = (match) => {
-  const raw = match.match_score ?? match.score ?? 0
+  const raw = match.compatibility_score ?? match.match_score ?? match.score ?? 0
   return Math.round(Number(raw) * (Number(raw) <= 1 ? 100 : 1))
 }
 
@@ -38,7 +38,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
   const [submitting, setSubmitting] = useState(false)
   const feedbackSent = hasFeedback(match)
   const score = getMatchScore(match)
-  const skills = match.shared_skills || match.skills || []
+  const skills = match.match_reasons?.shared_skills || match.shared_skills || match.skills || []
   const isSaved = match.is_saved || match.saved
 
   const submitFeedback = async () => {
@@ -61,7 +61,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
     return (
       <div
         onMouseEnter={() => onViewed(match)}
-        className={`card bg-white p-0 overflow-hidden border ${match.is_viewed || match.viewed ? 'border-slate-200' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
+        className={`card bg-[var(--bg-surface)] p-0 overflow-hidden border ${match.is_viewed || match.viewed ? 'border-[var(--border-color)]' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
       >
         <div className="p-5">
           {/* Post Header */}
@@ -75,10 +75,10 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
                 )}
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   {target?.owner?.full_name || target?.owner?.username || 'Unknown User'}
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-secondary)]">
                   {target?.created_at ? new Date(target.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'} • Suggested Project
                 </p>
               </div>
@@ -90,7 +90,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
               <button
                 type="button"
                 onClick={() => onSave(match)}
-                className={`text-xs font-bold ${isSaved ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-600'}`}
+                className={`text-xs font-bold ${isSaved ? 'text-indigo-600' : 'text-[var(--text-hint)] hover:text-indigo-600'}`}
               >
                 {isSaved ? 'Saved' : 'Save'}
               </button>
@@ -99,12 +99,12 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
 
           {/* Post Content */}
           <div className="space-y-3">
-            <h4 className="text-xl font-bold text-slate-900 leading-tight">
+            <h4 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
               <Link to={`/projects/${target?.id}`} className="hover:text-indigo-600 transition-colors">
                 {target?.title || target?.name}
               </Link>
             </h4>
-            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
               {target?.description || target?.short_description || 'No description provided.'}
             </p>
           </div>
@@ -121,14 +121,14 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
           )}
 
           {/* Feedback */}
-          <div className="mt-4 pt-4 border-t border-slate-100">
+          <div className="mt-4 pt-4 border-t border-[var(--border-color)]">
             {feedbackSent ? (
               <div className="text-xs font-semibold text-emerald-600 bg-emerald-50 rounded-lg p-2.5">
                 Feedback sent: {match.feedback_type || match.feedback || 'submitted'}
               </div>
             ) : (
-              <div className="space-y-2.5 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide">Improve Suggestions</label>
+              <div className="space-y-2.5 bg-[var(--bg-hover)] p-3 rounded-xl border border-[var(--border-color)]">
+                <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide">Improve Suggestions</label>
                 <div className="flex gap-2">
                   <select
                     value={feedbackType}
@@ -154,7 +154,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="px-5 py-3 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+        <div className="px-5 py-3 flex items-center justify-between border-t border-[var(--border-color)] bg-slate-50/50">
           <div className="flex gap-3">
             <Link to={`/projects/${target?.id}?apply=true`} className="btn-primary text-xs px-4 py-2 shadow-sm font-bold flex items-center gap-1.5">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -172,7 +172,7 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
   return (
     <div
       onMouseEnter={() => onViewed(match)}
-      className={`bg-white rounded-lg border p-4 shadow-sm ${match.is_viewed || match.viewed ? 'border-gray-200' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
+      className={`bg-[var(--bg-surface)] rounded-lg border p-4 shadow-sm ${match.is_viewed || match.viewed ? 'border-[var(--border-color)]' : 'border-indigo-300 ring-1 ring-indigo-100'}`}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -181,13 +181,13 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
         <button
           type="button"
           onClick={() => onSave(match)}
-          className={`text-sm font-semibold ${isSaved ? 'text-indigo-700' : 'text-gray-500 hover:text-indigo-700'}`}
+          className={`text-sm font-semibold ${isSaved ? 'text-indigo-700' : 'text-[var(--text-secondary)] hover:text-indigo-700'}`}
         >
           {isSaved ? 'Saved' : 'Save'}
         </button>
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900">
+      <h3 className="text-lg font-semibold text-[var(--text-primary)]">
         <Link
           to={kind === 'project' ? `/projects/${target.id}` : `/users/${target.id}`}
           className="hover:text-indigo-600"
@@ -195,28 +195,28 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
           {target.title || target.name || target.full_name || target.username || 'Suggestion'}
         </Link>
       </h3>
-      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+      <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">
         {target.short_description || target.description || target.summary || target.bio || 'No description available.'}
       </p>
 
       {skills.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-3">
           {skills.slice(0, 5).map((skill, index) => (
-            <span key={`${skill}-${index}`} className="text-xs bg-gray-100 px-2 py-1 rounded">
+            <span key={`${skill}-${index}`} className="text-xs bg-[var(--bg-hover)] px-2 py-1 rounded">
               {skill.skill_name || skill.name || String(skill)}
             </span>
           ))}
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-gray-100">
+      <div className="mt-4 pt-4 border-t border-[var(--border-color)]">
         {feedbackSent ? (
           <div className="text-sm text-green-700 bg-green-50 border border-green-100 rounded p-2">
             Feedback sent: {match.feedback_type || match.feedback || 'submitted'}
           </div>
         ) : (
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-gray-500">Feedback</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)]">Feedback</label>
             <select
               value={feedbackType}
               onChange={(e) => setFeedbackType(e.target.value)}
@@ -257,7 +257,7 @@ export default function SuggestedMatches({ kind }) {
     setLoading(true)
     setError(null)
     try {
-      const data = await getMatches()
+      const data = await getMatches({ match_type: kind })
       const list = extractMatchList(data)
       const filtered = list.filter((match) => {
         const project = match.project || match.matched_project || match.target_project
@@ -320,7 +320,7 @@ export default function SuggestedMatches({ kind }) {
   return (
     <div>
       {matches.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-100">
+        <div className="text-center py-16 text-[var(--text-hint)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)]">
           <p className="text-lg font-medium">No suggestions yet</p>
           <p className="text-sm mt-1">Complete your profile to get better suggestions.</p>
         </div>

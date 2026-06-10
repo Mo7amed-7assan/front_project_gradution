@@ -44,10 +44,10 @@ export default function AdminRestrictionsUI({ items, loading, filterType, setFil
       </div>
 
       {items.length === 0 ? (
-        <div className="card text-center py-16 border-2 border-dashed border-slate-200">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 text-2xl">🔓</div>
-          <h3 className="font-bold text-slate-800 text-lg mb-1">No restrictions found</h3>
-          <p className="text-slate-500 text-sm">No user restrictions match the selected filter.</p>
+        <div className="card text-center py-16 border-2 border-dashed border-[var(--border-color)]">
+          <div className="w-16 h-16 bg-[var(--bg-hover)] rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--border-color)] text-2xl">🔓</div>
+          <h3 className="font-bold text-[var(--text-primary)] text-lg mb-1">No restrictions found</h3>
+          <p className="text-[var(--text-secondary)] text-sm">No user restrictions match the selected filter.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -58,15 +58,15 @@ export default function AdminRestrictionsUI({ items, loading, filterType, setFil
               <Link key={it.id} to={`/admin/restrictions/${it.id}`} className="block">
                 <div className="card p-5 hover:border-brand-primary/30 hover:shadow-md transition-all group cursor-pointer">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-lg shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-center text-lg shrink-0">
                       {type.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
+                      <p className="font-bold text-[var(--text-primary)] group-hover:text-brand-primary transition-colors">
                         {it.target_user?.full_name || it.target_user?.name || it.target_user_id || 'Unknown User'}
                       </p>
-                      <p className="text-sm text-slate-500 mt-0.5">{it.reason || 'No reason provided'}</p>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-slate-400">
+                      <p className="text-sm text-[var(--text-secondary)] mt-0.5">{it.reason || 'No reason provided'}</p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-[var(--text-hint)]">
                         {(it.created_at || it.restricted_at) && (
                           <span>Since: {new Date(it.created_at || it.restricted_at).toLocaleDateString()}</span>
                         )}

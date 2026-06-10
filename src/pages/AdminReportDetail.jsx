@@ -16,8 +16,8 @@ const statusMap = {
 function InfoRow({ label, children }) {
   return (
     <div>
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-      <div className="text-sm font-semibold text-slate-800">{children}</div>
+      <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">{label}</p>
+      <div className="text-sm font-semibold text-[var(--text-primary)]">{children}</div>
     </div>
   )
 }
@@ -117,7 +117,7 @@ export default function AdminReportDetail() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div className="card p-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-4">{data.title || data.subject || 'Report'}</h2>
+            <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">{data.title || data.subject || 'Report'}</h2>
             
             <div className="grid grid-cols-2 gap-6 mb-6">
               <InfoRow label="Reported By">
@@ -126,7 +126,7 @@ export default function AdminReportDetail() {
                     {data.reporter.full_name || data.reporter.name || data.reporter.username || data.reporter_id}
                   </Link>
                 ) : (
-                  <span className="text-slate-500 font-semibold">{data.reporter_id || 'Unknown'}</span>
+                  <span className="text-[var(--text-secondary)] font-semibold">{data.reporter_id || 'Unknown'}</span>
                 )}
               </InfoRow>
               <InfoRow label="Reported User / Target">
@@ -143,7 +143,7 @@ export default function AdminReportDetail() {
                     </Link>
                   </div>
                 ) : (
-                  <span className="text-slate-500 font-semibold">{data.target_id || 'Unknown'}</span>
+                  <span className="text-[var(--text-secondary)] font-semibold">{data.target_id || 'Unknown'}</span>
                 )}
               </InfoRow>
               <InfoRow label="Report Type">
@@ -155,8 +155,8 @@ export default function AdminReportDetail() {
             </div>
 
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Content</p>
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 whitespace-pre-wrap">
+              <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Description / Content</p>
+              <div className="p-4 bg-[var(--bg-hover)] rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] whitespace-pre-wrap">
                 {data.description || data.content || 'No description provided.'}
               </div>
             </div>
@@ -165,11 +165,11 @@ export default function AdminReportDetail() {
 
         <div className="space-y-6">
           <div className="card p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Manage Report</h3>
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4">Manage Report</h3>
             <div className="space-y-4">
               <div>
                 <label className="form-label">Status</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="form-select bg-slate-50">
+                <select value={status} onChange={(e) => setStatus(e.target.value)} className="form-select bg-[var(--bg-hover)]">
                   <option value="pending">Pending</option>
                   <option value="under_review">Under Review</option>
                   <option value="resolved">Resolved</option>
@@ -181,7 +181,7 @@ export default function AdminReportDetail() {
 
               <div>
                 <label className="form-label">Priority</label>
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="form-select bg-slate-50">
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="form-select bg-[var(--bg-hover)]">
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -194,7 +194,7 @@ export default function AdminReportDetail() {
                   type="text"
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  className="form-input font-mono bg-slate-50"
+                  className="form-input font-mono bg-[var(--bg-hover)]"
                   placeholder="Leave empty if not assigned"
                 />
               </div>
@@ -205,7 +205,7 @@ export default function AdminReportDetail() {
                   type="text"
                   value={resolutionAction}
                   onChange={(e) => setResolutionAction(e.target.value)}
-                  className="form-input bg-slate-50"
+                  className="form-input bg-[var(--bg-hover)]"
                   placeholder="e.g. Banned user, Dismissed"
                 />
               </div>
@@ -215,7 +215,7 @@ export default function AdminReportDetail() {
                 <textarea
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
-                  className="form-input bg-slate-50"
+                  className="form-input bg-[var(--bg-hover)]"
                   rows={4}
                   placeholder="Notes visible only to admins..."
                 />

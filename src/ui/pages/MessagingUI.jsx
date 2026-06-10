@@ -432,7 +432,7 @@ export default function MessagingUI({
                  ) : (
                     <div className="absolute inset-0 p-6 flex flex-col bg-[var(--bg-hover)]">
                        {callFrameUrl ? (
-                         <div ref={videoContainerRef} className={`group rounded-3xl overflow-hidden bg-slate-900 shadow-2xl relative border border-[var(--border-color)] flex flex-col transition-all duration-300 ${isCallExpanded ? 'w-full h-full' : 'flex-1'} ${fullScreenContainerClass}`}>
+                         <div ref={videoContainerRef} className={`group rounded-3xl overflow-hidden bg-[var(--bg-page)] shadow-2xl relative border border-[var(--border-color)] flex flex-col transition-all duration-300 ${isCallExpanded ? 'w-full h-full' : 'flex-1'} ${fullScreenContainerClass}`}>
                            <iframe
                               title="Video call"
                               src={callFrameUrl}
@@ -484,7 +484,7 @@ export default function MessagingUI({
                </h3>
                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1">Live</span>
              </div>
-             <div ref={videoContainerRef} className={`group flex-1 relative bg-slate-900 ${fullScreenContainerClass}`}>
+             <div ref={videoContainerRef} className={`group flex-1 relative bg-[var(--bg-page)] ${fullScreenContainerClass}`}>
                <iframe
                  title="Video call"
                  src={callFrameUrl}

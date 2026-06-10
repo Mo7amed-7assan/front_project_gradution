@@ -114,11 +114,11 @@ export default function SubmitReport() {
             <div>
               <label className="form-label">Report Target</label>
               {targetLoading ? (
-                <div className="flex items-center gap-2 text-slate-400 text-sm py-2">
+                <div className="flex items-center gap-2 text-[var(--text-hint)] text-sm py-2">
                   <Spinner /> Loading target details...
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50 border border-slate-200/60 rounded-xl font-bold text-slate-800">
+                <div className="p-3 bg-[var(--bg-hover)] border border-slate-200/60 rounded-xl font-bold text-[var(--text-primary)]">
                   {targetName || (reportedUserId ? 'User' : 'Project')}
                 </div>
               )}
@@ -130,7 +130,7 @@ export default function SubmitReport() {
             <select
               value={reportType}
               onChange={(e) => setReportType(e.target.value)}
-              className="form-select bg-slate-50"
+              className="form-select bg-[var(--bg-hover)]"
               required
             >
               <option value="harassment">Harassment / Abuse</option>
@@ -146,7 +146,7 @@ export default function SubmitReport() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="form-input bg-slate-50"
+              className="form-input bg-[var(--bg-hover)]"
               rows={5}
               placeholder="Provide clear details about the violation. Be as specific as possible..."
               required
@@ -159,15 +159,15 @@ export default function SubmitReport() {
               type="text"
               value={evidenceUrl}
               onChange={(e) => setEvidenceUrl(e.target.value)}
-              className="form-input bg-slate-50"
+              className="form-input bg-[var(--bg-hover)]"
               placeholder="e.g. https://example.com/image1.png, https://example.com/image2.png"
             />
-            <p className="text-xs text-slate-400 mt-1.5 font-medium">
+            <p className="text-xs text-[var(--text-hint)] mt-1.5 font-medium">
               If you have screenshots or links to message logs/evidence, paste their URLs here separated by commas.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-slate-100">
+          <div className="flex gap-3 pt-4 border-t border-[var(--border-color)]">
             <button
               type="button"
               onClick={() => navigate(-1)}

@@ -12,7 +12,7 @@ const STATUS_STYLES = {
   planning:    'bg-yellow-100 text-yellow-700',
   active:      'bg-green-100 text-green-700',
   on_hold:     'bg-blue-100  text-blue-700',
-  completed:   'bg-gray-100  text-gray-600',
+  completed:   'bg-[var(--bg-hover)]  text-[var(--text-secondary)]',
   cancelled:   'bg-red-100 text-red-700',
 }
 

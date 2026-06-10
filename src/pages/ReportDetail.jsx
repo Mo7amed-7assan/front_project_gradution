@@ -143,7 +143,7 @@ export default function ReportDetail() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div className="card p-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-4 capitalize">{data.report_type?.replaceAll('_', ' ')} Report</h2>
+            <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4 capitalize">{data.report_type?.replaceAll('_', ' ')} Report</h2>
 
             {editing ? (
               <form onSubmit={handleUpdate} className="space-y-4">
@@ -152,7 +152,7 @@ export default function ReportDetail() {
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="form-input bg-slate-50"
+                    className="form-input bg-[var(--bg-hover)]"
                     rows={5}
                     required
                   />
@@ -163,7 +163,7 @@ export default function ReportDetail() {
                     type="text"
                     value={evidenceUrl}
                     onChange={(e) => setEvidenceUrl(e.target.value)}
-                    className="form-input bg-slate-50"
+                    className="form-input bg-[var(--bg-hover)]"
                     placeholder="URLs separated by commas"
                   />
                 </div>
@@ -178,8 +178,8 @@ export default function ReportDetail() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Reported Target</p>
-                    <div className="text-sm font-semibold text-slate-800">
+                    <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">Reported Target</p>
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">
                       {data.reported_user?.id ? (
                         <Link to={`/users/${data.reported_user.id}`} className="text-rose-600 hover:underline">
                           User: {targetName}
@@ -194,23 +194,23 @@ export default function ReportDetail() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Submitted At</p>
-                    <div className="text-sm font-semibold text-slate-800">
+                    <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">Submitted At</p>
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">
                       {data.created_at || data.submitted_at ? new Date(data.created_at || data.submitted_at).toLocaleString() : 'Unknown'}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Content</p>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 whitespace-pre-wrap text-sm leading-relaxed">
+                  <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Description / Content</p>
+                  <div className="p-4 bg-[var(--bg-hover)] rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] whitespace-pre-wrap text-sm leading-relaxed">
                     {data.description || 'No description provided.'}
                   </div>
                 </div>
 
                 {data.evidence && (Array.isArray(data.evidence) ? data.evidence.length > 0 : data.evidence.trim().length > 0) && (
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Evidence Provided</p>
+                    <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Evidence Provided</p>
                     <div className="space-y-1">
                       {(Array.isArray(data.evidence) ? data.evidence : data.evidence.split(',')).map((url, idx) => (
                         <a
@@ -239,22 +239,22 @@ export default function ReportDetail() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Action Taken</p>
+                    <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">Action Taken</p>
                     <div className="text-sm font-bold text-emerald-700 capitalize">
                       {data.resolution_action || 'Resolved'}
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Resolved At</p>
-                    <div className="text-sm font-semibold text-slate-800">
+                    <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">Resolved At</p>
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">
                       {data.resolved_at ? new Date(data.resolved_at).toLocaleString() : 'Recently'}
                     </div>
                   </div>
                 </div>
                 {data.resolution_notes && (
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Resolution Notes</p>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200/60 text-xs text-slate-600 font-medium">
+                    <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1.5">Resolution Notes</p>
+                    <div className="p-3 bg-[var(--bg-surface)] rounded-xl border border-slate-200/60 text-xs text-[var(--text-secondary)] font-medium">
                       {data.resolution_notes}
                     </div>
                   </div>
@@ -266,19 +266,19 @@ export default function ReportDetail() {
 
         <div className="space-y-6">
           <div className="card p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Report Status</h3>
-            <div className="space-y-4 text-sm text-slate-600">
-              <div className="flex justify-between py-2 border-b border-slate-100">
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4">Report Status</h3>
+            <div className="space-y-4 text-sm text-[var(--text-secondary)]">
+              <div className="flex justify-between py-2 border-b border-[var(--border-color)]">
                 <span className="font-semibold">Priority</span>
-                <span className="capitalize font-bold text-slate-800">{data.priority || 'Medium'}</span>
+                <span className="capitalize font-bold text-[var(--text-primary)]">{data.priority || 'Medium'}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
+              <div className="flex justify-between py-2 border-b border-[var(--border-color)]">
                 <span className="font-semibold">Status</span>
-                <span className="capitalize font-bold text-slate-800">{data.status || 'Pending'}</span>
+                <span className="capitalize font-bold text-[var(--text-primary)]">{data.status || 'Pending'}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="font-semibold">Assigned Reviewer</span>
-                <span className="font-bold text-slate-800">
+                <span className="font-bold text-[var(--text-primary)]">
                   {data.assigned_to?.full_name || data.assigned_to?.name || 'Moderation Team'}
                 </span>
               </div>

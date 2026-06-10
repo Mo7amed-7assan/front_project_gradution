@@ -55,10 +55,10 @@ export default function MyReports() {
       )}
 
       {items.length === 0 ? (
-        <div className="card text-center py-16 border-2 border-dashed border-slate-200">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 text-2xl">📋</div>
-          <h3 className="font-bold text-slate-800 text-lg mb-1">No reports submitted</h3>
-          <p className="text-slate-500 text-sm">Reports you file about users or projects will appear here.</p>
+        <div className="card text-center py-16 border-2 border-dashed border-[var(--border-color)]">
+          <div className="w-16 h-16 bg-[var(--bg-hover)] rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--border-color)] text-2xl">📋</div>
+          <h3 className="font-bold text-[var(--text-primary)] text-lg mb-1">No reports submitted</h3>
+          <p className="text-[var(--text-secondary)] text-sm">Reports you file about users or projects will appear here.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3">
@@ -70,20 +70,20 @@ export default function MyReports() {
 
             return (
               <div key={it.id} className="card p-5 flex flex-col sm:flex-row sm:items-center gap-4 hover:border-brand-primary/30 transition-colors group">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 text-2xl shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--bg-hover)] flex items-center justify-center text-[var(--text-secondary)] text-2xl shrink-0">
                   {it.report_type === 'harassment' ? '🤬' : it.report_type === 'spam' ? '📨' : '🚩'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-slate-900 group-hover:text-brand-primary transition-colors capitalize">
+                  <p className="font-bold text-[var(--text-primary)] group-hover:text-brand-primary transition-colors capitalize">
                     {it.report_type?.replaceAll('_', ' ')} Report
                   </p>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-slate-500">
-                    <span className="flex items-center gap-1 font-medium text-slate-700">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-[var(--text-secondary)]">
+                    <span className="flex items-center gap-1 font-medium text-[var(--text-primary)]">
                       Target: {targetName}
                     </span>
                     {submittedAt && (
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <svg className="w-3.5 h-3.5 text-[var(--text-hint)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {new Date(submittedAt).toLocaleDateString()}
                       </span>
                     )}

@@ -52,12 +52,12 @@ export default function MyApplicationsUI({
           {[1, 2, 3].map(i => <div key={i} className="h-32 skeleton rounded-2xl" />)}
         </div>
       ) : applications.length === 0 ? (
-        <div className="card p-12 text-center border-dashed border-2 border-slate-200 mt-6">
+        <div className="card p-12 text-center border-dashed border-2 border-[var(--border-color)] mt-6">
           <div className="w-20 h-20 bg-brand-primaryLight rounded-3xl flex items-center justify-center mx-auto mb-5 rotate-3 hover:rotate-0 transition-transform">
              <svg className="w-10 h-10 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           </div>
-          <h3 className="text-xl font-bold text-slate-900 mb-2">No applications yet</h3>
-          <p className="text-slate-500 mb-6 max-w-sm mx-auto">Find a project you love and apply for a role to start collaborating.</p>
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No applications yet</h3>
+          <p className="text-[var(--text-secondary)] mb-6 max-w-sm mx-auto">Find a project you love and apply for a role to start collaborating.</p>
           <Link to="/projects" className="btn-primary shadow-brand-primary/30">
             Explore Projects
           </Link>
@@ -88,7 +88,7 @@ export default function MyApplicationsUI({
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1">
-                        <Link to={`/projects/${a.project?.id}`} className="font-bold text-slate-900 text-lg group-hover:text-brand-primary transition-colors truncate block">
+                        <Link to={`/projects/${a.project?.id}`} className="font-bold text-[var(--text-primary)] text-lg group-hover:text-brand-primary transition-colors truncate block">
                           {projectTitle}
                         </Link>
                         <span className={statusBadge}>
@@ -97,11 +97,11 @@ export default function MyApplicationsUI({
                       </div>
 
                       <div className="flex flex-wrap items-center gap-3 text-sm mb-4 mt-2">
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium">
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-[var(--bg-hover)] rounded-lg text-[var(--text-primary)] font-medium">
                           <svg className="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                          Role: <span className="text-slate-900">{roleName}</span>
+                          Role: <span className="text-[var(--text-primary)]">{roleName}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-slate-400">
+                        <div className="flex items-center gap-1.5 text-[var(--text-hint)]">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           Applied: {a.applied_at ? new Date(a.applied_at).toLocaleDateString() : (a.created_at ? new Date(a.created_at).toLocaleDateString() : '—')}
                         </div>
@@ -109,9 +109,9 @@ export default function MyApplicationsUI({
 
                       {/* Cover message */}
                       {a.cover_message && (
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 relative">
-                          <svg className="w-6 h-6 text-slate-200 absolute -top-2 -left-2 bg-white" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
-                          <p className="text-sm text-slate-700 leading-relaxed italic pl-3 relative z-10 line-clamp-3">
+                        <div className="bg-[var(--bg-hover)] rounded-xl p-4 border border-[var(--border-color)] relative">
+                          <svg className="w-6 h-6 text-slate-200 absolute -top-2 -left-2 bg-[var(--bg-surface)]" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
+                          <p className="text-sm text-[var(--text-primary)] leading-relaxed italic pl-3 relative z-10 line-clamp-3">
                             {a.cover_message}
                           </p>
                         </div>
@@ -120,7 +120,7 @@ export default function MyApplicationsUI({
                   </div>
 
                   {/* Right — actions */}
-                  <div className="flex flex-row md:flex-col items-center justify-end gap-2 shrink-0 border-t md:border-t-0 border-slate-100 pt-4 md:pt-0 md:w-32">
+                  <div className="flex flex-row md:flex-col items-center justify-end gap-2 shrink-0 border-t md:border-t-0 border-[var(--border-color)] pt-4 md:pt-0 md:w-32">
                     {a.project?.id && (
                       <Link
                         to={`/projects/${a.project.id}`}
@@ -147,7 +147,7 @@ export default function MyApplicationsUI({
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-between p-2 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div className="mt-8 flex items-center justify-between p-2 bg-[var(--bg-surface)] rounded-2xl shadow-sm border border-[var(--border-color)]">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
@@ -155,7 +155,7 @@ export default function MyApplicationsUI({
               >
                 ← Prev
               </button>
-              <span className="text-sm font-bold text-slate-500 bg-slate-50 px-4 py-1.5 rounded-xl">
+              <span className="text-sm font-bold text-[var(--text-secondary)] bg-[var(--bg-hover)] px-4 py-1.5 rounded-xl">
                 Page {page} of {totalPages}
               </span>
               <button

@@ -82,15 +82,15 @@ export default function AdminModerationLog() {
                   className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                     actionType === action.value
                       ? 'border-brand-primary bg-brand-primaryLight/10 shadow-sm shadow-brand-primary/10'
-                      : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
+                      : 'border-[var(--border-color)] hover:border-slate-200 bg-slate-50/50'
                   }`}
                 >
                   <span className="text-2xl">{action.icon}</span>
                   <div>
-                    <p className={`text-sm font-bold ${actionType === action.value ? 'text-brand-primary' : 'text-slate-800'}`}>
+                    <p className={`text-sm font-bold ${actionType === action.value ? 'text-brand-primary' : 'text-[var(--text-primary)]'}`}>
                       {action.label}
                     </p>
-                    <p className="text-xs text-slate-500">{action.desc}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{action.desc}</p>
                   </div>
                 </button>
               ))}
@@ -131,11 +131,11 @@ export default function AdminModerationLog() {
                 placeholder="Leave empty for indefinite"
                 min="1"
               />
-              <p className="text-xs text-slate-400 mt-1.5 font-medium">Leave empty for a permanent action.</p>
+              <p className="text-xs text-[var(--text-hint)] mt-1.5 font-medium">Leave empty for a permanent action.</p>
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t border-slate-100">
+          <div className="flex gap-3 pt-4 border-t border-[var(--border-color)]">
             <button type="button" onClick={() => navigate('/admin/moderation')} className="btn-secondary flex-1">
               Cancel
             </button>

@@ -45,16 +45,7 @@ export default function LandingPage() {
           {/* Far Right: Controls */}
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="flex items-center bg-[var(--bg-input)] rounded-full p-1 border border-[var(--border-color)]">
-              {/* Language Toggle */}
-              <button
-                onClick={() => setLocale(locale === 'en' ? 'ar' : 'en')}
-                className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--color-primary)] transition-all flex items-center justify-center w-8 h-8"
-                title="Toggle Language"
-              >
-                <span className="text-xs font-black uppercase">{locale === 'en' ? 'AR' : 'EN'}</span>
-              </button>
-              
-              <div className="w-px h-4 bg-[var(--border-color)] mx-0.5"></div>
+
 
               {/* Theme Toggle */}
               <button
@@ -525,8 +516,9 @@ export default function LandingPage() {
           <div className="mt-12 pt-8 border-t border-[var(--border-color)] flex flex-col md:flex-row items-center justify-between gap-4">
              <p className="text-sm text-[var(--text-secondary)] font-medium">{t('landing.footerCopyright')}</p>
              <div className="flex gap-6 text-sm text-[var(--text-secondary)]">
-                <a href="#" className="hover:text-indigo-500 transition-colors">Privacy Policy</a>
-                <a href="#" className="hover:text-indigo-500 transition-colors">Terms of Service</a>
+                <Link to="/privacy" className="hover:text-indigo-500 transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-indigo-500 transition-colors">Terms of Service</Link>
+                <Link to="/support" className="hover:text-indigo-500 transition-colors">Support</Link>
              </div>
           </div>
         </div>

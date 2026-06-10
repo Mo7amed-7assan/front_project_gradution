@@ -34,8 +34,8 @@ export default function AdminUsers() {
     if (r === 'administrator') return 'bg-red-100 text-red-700'
     if (r === 'moderator') return 'bg-orange-100 text-orange-700'
     if (r === 'regular_user') return 'bg-blue-100 text-blue-700'
-    if (r === 'guest') return 'bg-gray-100 text-gray-700'
-    return 'bg-gray-100 text-gray-700'
+    if (r === 'guest') return 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
+    return 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
   }
 
   const getStatusBadgeColor = (status) => {
@@ -44,8 +44,8 @@ export default function AdminUsers() {
     if (s === 'pending') return 'bg-yellow-100 text-yellow-700'
     if (s === 'suspended') return 'bg-orange-100 text-orange-700'
     if (s === 'banned') return 'bg-red-100 text-red-700'
-    if (s === 'deleted') return 'bg-gray-100 text-gray-700'
-    return 'bg-gray-100 text-gray-700'
+    if (s === 'deleted') return 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
+    return 'bg-[var(--bg-hover)] text-[var(--text-primary)]'
   }
 
   if (loading) return <div className="min-h-[12rem] flex items-center justify-center"><Spinner /></div>

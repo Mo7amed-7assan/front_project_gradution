@@ -18,13 +18,13 @@ export default function DashboardUI({
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-        <h1 className="text-2xl font-bold text-white">All Projects</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">All Projects</h1>
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="btn-secondary text-sm font-semibold flex items-center gap-2"
           >
-            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-[var(--text-secondary)]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
             </svg>
             {showFilters ? 'Hide Filters' : 'Filters'}
@@ -34,14 +34,14 @@ export default function DashboardUI({
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="card p-5 space-y-4 bg-[#1E1E35] border-[#2D2D4E] mb-6">
+        <div className="card p-5 space-y-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <label className="form-label text-xs">Status</label>
               <select
                 value={filters.status}
                 onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-                className="form-select text-sm py-2 bg-[#2A2A4E] text-white border-[#2D2D4E]"
+                className="form-select text-sm py-2"
               >
                 <option value="">All Statuses</option>
                 <option value="planning">Planning</option>
@@ -57,7 +57,7 @@ export default function DashboardUI({
                 value={filters.category}
                 onChange={e => setFilters(f => ({ ...f, category: e.target.value }))}
                 placeholder="e.g. Tech, Finance"
-                className="form-input text-sm py-2 bg-[#2A2A4E] text-white border-[#2D2D4E]"
+                className="form-input text-sm py-2"
               />
             </div>
             <div>
@@ -66,7 +66,7 @@ export default function DashboardUI({
                 value={filters.skill}
                 onChange={e => setFilters(f => ({ ...f, skill: e.target.value }))}
                 placeholder="e.g. React, Node.js"
-                className="form-input text-sm py-2 bg-[#2A2A4E] text-white border-[#2D2D4E]"
+                className="form-input text-sm py-2"
               />
             </div>
             <div>
@@ -75,7 +75,7 @@ export default function DashboardUI({
                 value={filters.search}
                 onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
                 placeholder="Search projects..."
-                className="form-input text-sm py-2 bg-[#2A2A4E] text-white border-[#2D2D4E]"
+                className="form-input text-sm py-2"
               />
             </div>
             <div>
@@ -83,7 +83,7 @@ export default function DashboardUI({
               <select
                 value={filters.accepting_applications}
                 onChange={e => setFilters(f => ({ ...f, accepting_applications: e.target.value }))}
-                className="form-select text-sm py-2 bg-[#2A2A4E] text-white border-[#2D2D4E]"
+                className="form-select text-sm py-2"
               >
                 <option value="">All Settings</option>
                 <option value="true">Accepting Applications</option>
@@ -95,7 +95,7 @@ export default function DashboardUI({
               <select
                 value={filters.sort}
                 onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}
-                className="form-select text-sm py-2 bg-[#2A2A4E] text-white border-[#2D2D4E]"
+                className="form-select text-sm py-2"
               >
                 <option value="created_at">Newest First</option>
                 <option value="view_count">Most Viewed</option>
@@ -115,15 +115,15 @@ export default function DashboardUI({
       )}
 
       {loadingProjects ? (
-         <div className="text-slate-400 text-center py-10">Loading projects...</div>
+         <div className="text-[var(--text-hint)] text-center py-10">Loading projects...</div>
       ) : allProjects.length === 0 ? (
-         <div className="text-slate-400 text-center py-10">No projects found.</div>
+         <div className="text-[var(--text-hint)] text-center py-10">No projects found.</div>
       ) : (
         allProjects.map((post) => {
           const rawAuthor = post.owner?.full_name || post.owner?.name || post.owner?.username || post.author || 'Unknown Author'
           const authorName = typeof rawAuthor === 'string' ? rawAuthor : 'Unknown Author'
           const authorAvatar = (post.owner?.profile_picture || post.owner?.avatar) ? (
-            <img src={post.owner.profile_picture || post.owner.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-[#2D2D4E]" />
+            <img src={post.owner.profile_picture || post.owner.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-[var(--border-color)]" />
           ) : (
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#00D4AA] flex items-center justify-center text-white font-bold text-sm shadow-sm">
               {authorName.charAt(0).toUpperCase()}
@@ -131,19 +131,19 @@ export default function DashboardUI({
           )
 
           return (
-            <div key={post.id} className="card bg-[#1E1E35] border-[#2D2D4E] p-5 transition-all duration-300 hover:border-[#6C63FF]/40 hover:shadow-[0_0_20px_rgba(108,99,255,0.1)]">
+            <div key={post.id} className="card p-5 transition-all duration-300 hover:border-[#6C63FF]/40 hover:shadow-[0_0_20px_rgba(108,99,255,0.1)]">
               {/* Post Header */}
               <div className="flex items-center justify-between mb-4">
                 <Link to={`/users/${post.owner?.id || post.owner_id || post.user_id || ''}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                   {authorAvatar}
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-200">{authorName}</span>
-                      <span className="text-sm text-slate-400">
+                      <span className="font-bold text-[var(--text-primary)]">{authorName}</span>
+                      <span className="text-sm text-[var(--text-hint)]">
                         @{post.owner?.username || authorName.replace(/\s+/g, '').toLowerCase()}
                       </span>
-                      <span className="text-slate-600">•</span>
-                      <span className="text-sm text-slate-400">
+                      <span className="text-[var(--text-secondary)]">•</span>
+                      <span className="text-sm text-[var(--text-hint)]">
                         {post.created_at ? new Date(post.created_at).toLocaleDateString() : 'New'}
                       </span>
                     </div>
@@ -153,8 +153,8 @@ export default function DashboardUI({
 
               {/* Post Content */}
               <Link to={`/projects/${post.id}`} className="block group">
-                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#6C63FF] transition-colors">{post.title || post.name}</h3>
-                <div className="mb-4 text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 group-hover:text-[#6C63FF] transition-colors">{post.title || post.name}</h3>
+                <div className="mb-4 text-sm text-[var(--text-hint)] leading-relaxed whitespace-pre-wrap">
                   {(() => {
                     let desc = post.short_description || post.full_description || post.description || post.tagline || 'No description provided.';
                     if (desc.length > 150) desc = desc.substring(0, 150) + '...';
@@ -170,7 +170,7 @@ export default function DashboardUI({
                   {(post.skills || post.required_skills || post.roles || []).map((s, idx) => {
                     const label = typeof s === 'string' ? s : (s.skill_name || s.role_name || s.name || s.title || String(s));
                     return (
-                      <span key={idx} className="text-[10px] font-bold px-2.5 py-1 bg-[#2D2D4E] text-[#00D4AA] rounded-full border border-[#00D4AA]/20">
+                      <span key={idx} className="text-[10px] font-bold px-2.5 py-1 bg-[var(--bg-hover)] text-[var(--color-accent,#00D4AA)] rounded-full border border-[var(--color-accent,#00D4AA)]/20">
                         {label}
                       </span>
                     )
@@ -179,7 +179,7 @@ export default function DashboardUI({
               </Link>
 
               {/* Footer Interactions */}
-              <div className="flex items-center justify-between pt-4 border-t border-[#2D2D4E]">
+              <div className="flex items-center justify-between pt-4 border-t border-[var(--border-color)]">
                 <Link to={`/projects/${post.id}`} className="btn-secondary text-xs px-4 py-2 shadow-sm">
                   View Details
                 </Link>

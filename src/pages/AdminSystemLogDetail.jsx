@@ -16,8 +16,8 @@ const getLevelBadge = (lvl) => levelMap[`${lvl||'info'}`.toLowerCase()] || { cls
 function InfoRow({ label, children, copyable = false }) {
   return (
     <div>
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-      <div className={`text-sm font-semibold text-slate-800 break-all ${copyable ? 'font-mono bg-slate-50 px-2 py-1 rounded inline-block border border-slate-100' : ''}`}>
+      <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">{label}</p>
+      <div className={`text-sm font-semibold text-[var(--text-primary)] break-all ${copyable ? 'font-mono bg-[var(--bg-hover)] px-2 py-1 rounded inline-block border border-[var(--border-color)]' : ''}`}>
         {children}
       </div>
     </div>
@@ -63,19 +63,19 @@ export default function AdminSystemLogDetail() {
       </div>
 
       <div className="card p-6">
-        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-          <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl shrink-0">
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[var(--border-color)]">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-center text-2xl shrink-0">
             {badge.icon}
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">
                 {item.message || item.event || 'System Event'}
               </h2>
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-1.5">
               <span className={`${badge.cls} text-[10px] font-black`}>{badge.label}</span>
-              <span className="text-xs font-mono text-slate-500 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-mono text-[var(--text-secondary)] bg-[var(--bg-hover)] border border-[var(--border-color)] px-2 py-0.5 rounded-md">
                 {item.context || 'system'}
               </span>
             </div>
@@ -90,8 +90,8 @@ export default function AdminSystemLogDetail() {
             
             {item.description && (
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</p>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-700 whitespace-pre-wrap">
+                <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Description</p>
+                <div className="p-4 bg-[var(--bg-hover)] rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] whitespace-pre-wrap">
                   {item.description}
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function AdminSystemLogDetail() {
             
             {item.user_agent && (
               <InfoRow label="User Agent">
-                <span className="text-xs font-mono text-slate-500">{item.user_agent}</span>
+                <span className="text-xs font-mono text-[var(--text-secondary)]">{item.user_agent}</span>
               </InfoRow>
             )}
           </div>
@@ -121,9 +121,9 @@ export default function AdminSystemLogDetail() {
 
         {item.data && (
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Additional Metadata Payload</p>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 overflow-x-auto">
-              <pre className="text-xs text-slate-600 font-mono">
+            <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Additional Metadata Payload</p>
+            <div className="p-4 bg-[var(--bg-hover)] rounded-xl border border-[var(--border-color)] overflow-x-auto">
+              <pre className="text-xs text-[var(--text-secondary)] font-mono">
                 {typeof item.data === 'string' ? item.data : JSON.stringify(item.data, null, 2)}
               </pre>
             </div>
@@ -132,10 +132,10 @@ export default function AdminSystemLogDetail() {
       </div>
 
       <details className="mt-6">
-        <summary className="cursor-pointer text-xs font-bold text-slate-400 uppercase tracking-wider hover:text-slate-600 transition-colors inline-block ml-1">
+        <summary className="cursor-pointer text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider hover:text-slate-600 transition-colors inline-block ml-1">
           Raw JSON Data
         </summary>
-        <pre className="mt-3 p-4 bg-slate-50 rounded-xl text-xs overflow-auto border border-slate-100 text-slate-600 font-mono">
+        <pre className="mt-3 p-4 bg-[var(--bg-hover)] rounded-xl text-xs overflow-auto border border-[var(--border-color)] text-[var(--text-secondary)] font-mono">
           {JSON.stringify(item, null, 2)}
         </pre>
       </details>

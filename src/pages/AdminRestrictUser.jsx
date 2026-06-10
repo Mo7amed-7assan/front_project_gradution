@@ -89,15 +89,15 @@ export default function AdminRestrictUser() {
                   className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                     restrictionType === rt.value
                       ? 'border-rose-400 bg-rose-50 shadow-sm shadow-rose-400/10'
-                      : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'
+                      : 'border-[var(--border-color)] hover:border-slate-200 bg-slate-50/50'
                   }`}
                 >
                   <span className="text-2xl">{rt.icon}</span>
                   <div>
-                    <p className={`text-sm font-bold ${restrictionType === rt.value ? 'text-rose-600' : 'text-slate-800'}`}>
+                    <p className={`text-sm font-bold ${restrictionType === rt.value ? 'text-rose-600' : 'text-[var(--text-primary)]'}`}>
                       {rt.label}
                     </p>
-                    <p className="text-xs text-slate-500">{rt.desc}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{rt.desc}</p>
                   </div>
                 </button>
               ))}
@@ -126,12 +126,12 @@ export default function AdminRestrictUser() {
               placeholder="Leave empty for permanent restriction"
               min="1"
             />
-            <p className="text-xs text-slate-400 mt-1.5 font-medium">
+            <p className="text-xs text-[var(--text-hint)] mt-1.5 font-medium">
               Restriction will auto-lift after this many hours. Leave empty for permanent.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-slate-100">
+          <div className="flex gap-3 pt-4 border-t border-[var(--border-color)]">
             <button type="button" onClick={() => navigate('/admin/restrictions')} className="btn-secondary flex-1">
               Cancel
             </button>

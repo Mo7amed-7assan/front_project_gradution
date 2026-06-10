@@ -66,7 +66,7 @@ export default function ConnectionsUI({
       <div className="flex items-center space-x-4 min-w-0 flex-1">
         <div className="relative shrink-0">
            {profileUrl ? (
-             <img src={profileUrl} alt={displayName} className="w-14 h-14 rounded-full object-cover shadow-sm bg-slate-100" />
+             <img src={profileUrl} alt={displayName} className="w-14 h-14 rounded-full object-cover shadow-sm bg-[var(--bg-hover)]" />
            ) : (
              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white font-bold text-xl shadow-sm">
                {initial}
@@ -76,10 +76,10 @@ export default function ConnectionsUI({
         </div>
         
         <div className="min-w-0 pr-4">
-          <Link to={`/users/${linkId}`} className="font-bold text-slate-900 hover:text-brand-primary transition-colors text-base truncate block">
+          <Link to={`/users/${linkId}`} className="font-bold text-[var(--text-primary)] hover:text-brand-primary transition-colors text-base truncate block">
             {displayName}
           </Link>
-          <p className="text-xs text-slate-500 truncate mt-0.5">{username ? `@${username}` : displayId || 'Connect to see more'}</p>
+          <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{username ? `@${username}` : displayId || 'Connect to see more'}</p>
           <div className="flex flex-wrap items-center gap-2 mt-2">
              <span className={statusClass(connection.status)}>{connection.status || 'pending'}</span>
              {connection.connection_type && (
@@ -101,7 +101,7 @@ export default function ConnectionsUI({
       <div className="card p-5 group flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-brand-primary">
         <PersonSummary connection={request} person={person} fallbackId={fallbackId} />
         
-        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0 w-full sm:w-auto">
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto border-t sm:border-t-0 border-[var(--border-color)] pt-3 sm:pt-0 w-full sm:w-auto">
           {mode === 'received' ? (
             <>
               <button onClick={() => handleRespond(request.id, 'rejected')} disabled={responding === request.id} className="btn-ghost flex-1 sm:flex-none">
@@ -143,23 +143,23 @@ export default function ConnectionsUI({
       )}
 
       {/* Main Tabs */}
-      <div className="flex gap-2 p-1 bg-white rounded-2xl shadow-sm border border-slate-100 max-w-fit">
+      <div className="flex gap-2 p-1 bg-[var(--bg-surface)] rounded-2xl shadow-sm border border-[var(--border-color)] max-w-fit">
         <button
           onClick={() => setActiveTab('connections')}
           className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
             activeTab === 'connections'
               ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
-              : 'text-slate-500 hover:text-brand-primary hover:bg-brand-primaryLight/50'
+              : 'text-[var(--text-secondary)] hover:text-brand-primary hover:bg-brand-primaryLight/50'
           }`}
         >
-          Connections <span className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'connections' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{connections.length}</span>
+          Connections <span className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'connections' ? 'bg-white/20 text-white' : 'bg-[var(--bg-hover)] text-[var(--text-secondary)]'}`}>{connections.length}</span>
         </button>
         <button
           onClick={() => setActiveTab('requests')}
           className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center ${
             activeTab === 'requests'
               ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/20'
-              : 'text-slate-500 hover:text-brand-primary hover:bg-brand-primaryLight/50'
+              : 'text-[var(--text-secondary)] hover:text-brand-primary hover:bg-brand-primaryLight/50'
           }`}
         >
           Requests 
@@ -169,7 +169,7 @@ export default function ConnectionsUI({
                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
              </span>
           )}
-          <span className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'requests' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{receivedRequests.length + sentRequests.length}</span>
+          <span className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'requests' ? 'bg-white/20 text-white' : 'bg-[var(--bg-hover)] text-[var(--text-secondary)]'}`}>{receivedRequests.length + sentRequests.length}</span>
         </button>
       </div>
 
@@ -178,12 +178,12 @@ export default function ConnectionsUI({
         {activeTab === 'connections' && (
           <div className="space-y-4">
             {connections.length === 0 ? (
-              <div className="card p-12 text-center border-dashed border-2 border-slate-200">
+              <div className="card p-12 text-center border-dashed border-2 border-[var(--border-color)]">
                 <div className="w-20 h-20 bg-brand-primaryLight rounded-3xl flex items-center justify-center mx-auto mb-5 rotate-3 hover:rotate-0 transition-transform">
                   <svg className="w-10 h-10 text-brand-primary" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">No connections yet</h3>
-                <p className="text-slate-500 mb-6 max-w-sm mx-auto">Start building your professional network to collaborate on amazing projects.</p>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No connections yet</h3>
+                <p className="text-[var(--text-secondary)] mb-6 max-w-sm mx-auto">Start building your professional network to collaborate on amazing projects.</p>
                 <Link to="/discover" className="btn-primary shadow-brand-primary/30">Find Co-Founders</Link>
               </div>
             ) : (
@@ -209,11 +209,11 @@ export default function ConnectionsUI({
 
         {activeTab === 'requests' && (
           <div className="space-y-6">
-            <div className="flex gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+            <div className="flex gap-2 p-1 bg-[var(--bg-hover)] rounded-xl w-fit">
               <button
                 onClick={() => setRequestTab('received')}
                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                  requestTab === 'received' ? 'bg-white text-brand-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  requestTab === 'received' ? 'bg-[var(--bg-surface)] text-brand-primary shadow-sm' : 'text-[var(--text-secondary)] hover:text-slate-700'
                 }`}
               >
                 Received ({receivedRequests.length})
@@ -221,7 +221,7 @@ export default function ConnectionsUI({
               <button
                 onClick={() => setRequestTab('sent')}
                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                  requestTab === 'sent' ? 'bg-white text-brand-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  requestTab === 'sent' ? 'bg-[var(--bg-surface)] text-brand-primary shadow-sm' : 'text-[var(--text-secondary)] hover:text-slate-700'
                 }`}
               >
                 Sent ({sentRequests.length})
@@ -231,8 +231,8 @@ export default function ConnectionsUI({
             {requestTab === 'received' && (
               receivedRequests.length === 0 ? (
                 <div className="card p-12 text-center bg-slate-50/50 border-dashed">
-                  <h3 className="text-lg font-bold text-slate-800 mb-1">Inbox Zero</h3>
-                  <p className="text-sm text-slate-500">You have no pending connection requests.</p>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">Inbox Zero</h3>
+                  <p className="text-sm text-[var(--text-secondary)]">You have no pending connection requests.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -246,8 +246,8 @@ export default function ConnectionsUI({
             {requestTab === 'sent' && (
               sentRequests.length === 0 ? (
                 <div className="card p-12 text-center bg-slate-50/50 border-dashed">
-                  <h3 className="text-lg font-bold text-slate-800 mb-1">No sent requests</h3>
-                  <p className="text-sm text-slate-500">You haven't reached out to anyone recently.</p>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">No sent requests</h3>
+                  <p className="text-sm text-[var(--text-secondary)]">You haven't reached out to anyone recently.</p>
                 </div>
               ) : (
                 <div className="space-y-4">

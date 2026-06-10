@@ -30,7 +30,7 @@ function MatchCard({ match, onHover, onSave, onFeedback }) {
       onMouseEnter={() => onHover(match)}
       className={`card p-0 flex flex-col group transition-all duration-300 overflow-hidden ${
         match.is_viewed || match.viewed 
-          ? 'border-slate-100 hover:border-slate-300' 
+          ? 'border-[var(--border-color)] hover:border-slate-300' 
           : 'border-brand-primary/40 shadow-md shadow-brand-primary/10 hover:border-brand-primary hover:shadow-brand-primary/20 ring-1 ring-brand-primary/10'
       }`}
     >
@@ -46,7 +46,7 @@ function MatchCard({ match, onHover, onSave, onFeedback }) {
             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
               isSaved 
                 ? 'bg-brand-primaryLight/30 text-brand-primary hover:bg-brand-primaryLight/50' 
-                : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-brand-primary'
+                : 'bg-[var(--bg-hover)] text-[var(--text-hint)] hover:bg-slate-100 hover:text-brand-primary'
             }`}
             title={isSaved ? "Unsave" : "Save"}
           >
@@ -64,22 +64,22 @@ function MatchCard({ match, onHover, onSave, onFeedback }) {
           <div className="flex-1 min-w-0">
             {targetUser ? (
               <>
-                <h3 className="text-lg font-bold text-slate-900 truncate leading-tight group-hover:text-brand-primary transition-colors">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] truncate leading-tight group-hover:text-brand-primary transition-colors">
                   <Link to={`/users/${targetUser.id}`} className="hover:underline">{targetUser.full_name || targetUser.username}</Link>
                 </h3>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">User Profile</p>
-                <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{targetUser.bio || 'No bio available'}</p>
+                <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1">User Profile</p>
+                <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">{targetUser.bio || 'No bio available'}</p>
               </>
             ) : targetProject ? (
               <>
-                <h3 className="text-lg font-bold text-slate-900 truncate leading-tight group-hover:text-brand-primary transition-colors">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] truncate leading-tight group-hover:text-brand-primary transition-colors">
                   <Link to={`/projects/${targetProject.id}`} className="hover:underline">{targetProject.title || targetProject.name}</Link>
                 </h3>
                 <p className="text-xs font-medium text-brand-secondary uppercase tracking-wider mb-1">Project</p>
-                <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{targetProject.description || targetProject.summary || 'No description available'}</p>
+                <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">{targetProject.description || targetProject.summary || 'No description available'}</p>
               </>
             ) : (
-              <h3 className="text-lg font-bold text-slate-900">Unknown Match</h3>
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Unknown Match</h3>
             )}
           </div>
         </div>
@@ -87,7 +87,7 @@ function MatchCard({ match, onHover, onSave, onFeedback }) {
         {/* Shared Skills */}
         {skills.length > 0 && (
           <div className="mt-auto">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Shared Skills</p>
+            <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2">Shared Skills</p>
             <div className="flex flex-wrap gap-1.5">
               {skills.slice(0, 3).map(skill => (
                 <span key={skill} className="px-2 py-1 bg-brand-primaryLight/20 text-brand-primaryDark text-[10px] font-bold uppercase tracking-wider rounded-md border border-brand-primaryLight/50">
@@ -95,7 +95,7 @@ function MatchCard({ match, onHover, onSave, onFeedback }) {
                 </span>
               ))}
               {skills.length > 3 && (
-                <span className="px-2 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider rounded-md border border-slate-100">
+                <span className="px-2 py-1 bg-[var(--bg-hover)] text-[var(--text-secondary)] text-[10px] font-bold uppercase tracking-wider rounded-md border border-[var(--border-color)]">
                   +{skills.length - 3}
                 </span>
               )}
@@ -105,30 +105,30 @@ function MatchCard({ match, onHover, onSave, onFeedback }) {
       </div>
 
       {/* Feedback Footer */}
-      <div className="bg-slate-50 px-6 py-4 border-t border-slate-100">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Rate this match</p>
+      <div className="bg-[var(--bg-hover)] px-6 py-4 border-t border-[var(--border-color)]">
+        <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-2 text-center">Rate this match</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => handleFeedbackClick('relevant')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'relevant' ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50'}`}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'relevant' ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50'}`}
           >
             👍 <span className="truncate">Relevant</span>
           </button>
           <button
             onClick={() => handleFeedbackClick('not_relevant')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'not_relevant' ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/20' : 'bg-white text-slate-600 border-slate-200 hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50'}`}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'not_relevant' ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/20' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50'}`}
           >
             👎 <span className="truncate">Irrelevant</span>
           </button>
           <button
             onClick={() => handleFeedbackClick('already_connected')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'already_connected' ? 'bg-blue-500 text-white border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50'}`}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'already_connected' ? 'bg-blue-500 text-white border-blue-500 shadow-sm shadow-blue-500/20' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50'}`}
           >
             🤝 <span className="truncate">Connected</span>
           </button>
           <button
             onClick={() => handleFeedbackClick('not_interested')}
-            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'not_interested' ? 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-500/20' : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50'}`}
+            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs font-bold rounded-xl transition-colors border ${activeFeedback === 'not_interested' ? 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-500/20' : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50'}`}
           >
             🚫 <span className="truncate">Ignore</span>
           </button>
@@ -163,7 +163,7 @@ export default function MatchesUI({
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 bg-gradient-to-r from-brand-primaryDark to-brand-primary p-8 rounded-3xl text-white shadow-xl shadow-brand-primary/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-64 h-64 bg-[var(--bg-surface)] opacity-5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-48 h-48 bg-brand-accent opacity-20 rounded-full blur-2xl"></div>
         
         <div className="relative z-10">
@@ -177,12 +177,12 @@ export default function MatchesUI({
       </div>
 
       {matches.length === 0 ? (
-        <div className="card text-center py-20 px-4 border-2 border-dashed border-slate-200 mt-6">
-          <div className="w-24 h-24 bg-white shadow-sm rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
+        <div className="card text-center py-20 px-4 border-2 border-dashed border-[var(--border-color)] mt-6">
+          <div className="w-24 h-24 bg-[var(--bg-surface)] shadow-sm rounded-full flex items-center justify-center mx-auto mb-6 border border-[var(--border-color)]">
              <span className="text-5xl">🎯</span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 mb-2">No matches yet</h3>
-          <p className="text-slate-500 mb-6 max-w-sm mx-auto">Complete your profile with more skills and details to get better matches.</p>
+          <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">No matches yet</h3>
+          <p className="text-[var(--text-secondary)] mb-6 max-w-sm mx-auto">Complete your profile with more skills and details to get better matches.</p>
           <Link to="/profile" className="btn-primary shadow-brand-primary/30 px-8 py-3">
             Update Profile
           </Link>

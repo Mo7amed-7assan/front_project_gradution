@@ -30,10 +30,10 @@ export default function AdminSystemLogsUI({ items, loading, level, setLevel, lev
       </div>
 
       {items.length === 0 ? (
-        <div className="card text-center py-16 border-2 border-dashed border-slate-200">
-          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 text-2xl">🖥️</div>
-          <h3 className="font-bold text-slate-800 text-lg mb-1">No system logs found</h3>
-          <p className="text-slate-500 text-sm">No logs match the selected level filter.</p>
+        <div className="card text-center py-16 border-2 border-dashed border-[var(--border-color)]">
+          <div className="w-16 h-16 bg-[var(--bg-hover)] rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--border-color)] text-2xl">🖥️</div>
+          <h3 className="font-bold text-[var(--text-primary)] text-lg mb-1">No system logs found</h3>
+          <p className="text-[var(--text-secondary)] text-sm">No logs match the selected level filter.</p>
         </div>
       ) : (
         <div className="card p-0 divide-y divide-slate-100 overflow-hidden">
@@ -46,18 +46,18 @@ export default function AdminSystemLogsUI({ items, loading, level, setLevel, lev
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-0.5">
                       <span className={`${badge.cls} text-[10px] font-black`}>{badge.label}</span>
-                      <span className="text-xs font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                      <span className="text-xs font-mono text-[var(--text-secondary)] bg-[var(--bg-hover)] px-1.5 py-0.5 rounded">
                         {log.context || 'system'}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-slate-800 group-hover:text-brand-primary transition-colors truncate">
+                    <p className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-brand-primary transition-colors truncate">
                       {log.message || log.event || 'No message'}
                     </p>
                     {log.description && (
-                      <p className="text-xs text-slate-500 truncate mt-0.5">{log.description}</p>
+                      <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{log.description}</p>
                     )}
                   </div>
-                  <div className="text-right text-xs text-slate-400 font-medium shrink-0 pt-1">
+                  <div className="text-right text-xs text-[var(--text-hint)] font-medium shrink-0 pt-1">
                     {log.created_at ? new Date(log.created_at).toLocaleString() : 'Unknown'}
                   </div>
                 </div>

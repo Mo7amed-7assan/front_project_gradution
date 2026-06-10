@@ -50,6 +50,9 @@ const icons = {
   Report: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
   ),
+  Lightning: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  ),
 }
 
 const ADMIN_NAV_ITEMS = [
@@ -102,7 +105,7 @@ function TopNav({ user, logout, unreadCount }) {
                 className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl text-[11px] font-semibold transition-all ${
                   isActive
                     ? 'text-[#6C63FF] bg-[#6C63FF]/10'
-                    : 'text-slate-400 hover:text-white hover:bg-[#2A2A4E]'
+                    : 'text-[var(--text-hint)] hover:text-white hover:bg-[#2A2A4E]'
                 }`}
               >
                 {item.icon}
@@ -131,7 +134,7 @@ function TopNav({ user, logout, unreadCount }) {
             {isAdminOpen && (
               <div className="absolute right-0 top-full mt-2 w-48 bg-[#1E1E35] border border-[#2D2D4E] rounded-xl shadow-xl overflow-hidden py-1">
                 {ADMIN_NAV_ITEMS.map(item => (
-                  <Link key={item.to} to={item.to} onClick={() => setIsAdminOpen(false)} className="block px-4 py-2 text-sm text-slate-300 hover:bg-[#2A2A4E] hover:text-white">
+                  <Link key={item.to} to={item.to} onClick={() => setIsAdminOpen(false)} className="block px-4 py-2 text-sm text-[var(--text-hint)] hover:bg-[#2A2A4E] hover:text-white">
                     {item.label}
                   </Link>
                 ))}
@@ -143,17 +146,14 @@ function TopNav({ user, logout, unreadCount }) {
         <div className="w-px h-6 bg-[#2D2D4E] mx-1"></div>
 
         {/* Icons */}
-        <button onClick={toggleLocale} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-white transition-colors px-2 py-1.5 hover:bg-[#2A2A4E] rounded-lg">
-          {icons.Globe} {locale === 'en' ? 'AR' : 'EN'}
-        </button>
-        <button onClick={toggleTheme} className="text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
+        <button onClick={toggleTheme} className="text-[var(--text-hint)] hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
           {isDark ? icons.Sun : icons.Moon}
         </button>
-        <Link to="/notifications" className="relative text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
+        <Link to="/notifications" className="relative text-[var(--text-hint)] hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
           {icons.Bell}
           {unreadCount > 0 && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-[#EF4444] rounded-full border-2 border-[#1E1E35]"></span>}
         </Link>
-        <Link to="/messages" className="text-slate-400 hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
+        <Link to="/messages" className="text-[var(--text-hint)] hover:text-white transition-colors p-1.5 hover:bg-[#2A2A4E] rounded-full">
           {icons.Chat}
         </Link>
 
@@ -167,12 +167,12 @@ function TopNav({ user, logout, unreadCount }) {
                 {avatar}
               </div>
             )}
-            <span className="text-slate-400">{icons.ChevronDown}</span>
+            <span className="text-[var(--text-hint)]">{icons.ChevronDown}</span>
           </button>
 
           {isProfileOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-[#1E1E35] border border-[#2D2D4E] rounded-xl shadow-xl overflow-hidden py-1">
-              <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-slate-300 hover:bg-[#2A2A4E] hover:text-white">{t('nav.myProfile')}</Link>
+              <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="block px-4 py-2 text-sm text-[var(--text-hint)] hover:bg-[#2A2A4E] hover:text-white">{t('nav.myProfile')}</Link>
               <div className="h-px bg-[#2D2D4E] my-1"></div>
               <button onClick={logout} className="w-full text-left px-4 py-2 text-sm text-[#EF4444] hover:bg-[#2A2A4E] flex items-center gap-2">
                 {icons.Logout} {t('nav.signOut')}
@@ -224,24 +224,24 @@ function LeftSidebar({ user, projectCount, connectionCount, skillsData }) {
           )}
         </Link>
 
-        <h2 className="text-lg font-bold text-white leading-tight">{displayName}</h2>
-        <p className="text-sm text-slate-400 mb-3">{username}</p>
+        <h2 className="text-lg font-bold text-[var(--text-primary)] leading-tight">{displayName}</h2>
+        <p className="text-sm text-[var(--text-hint)] mb-3">{username}</p>
         <div className="badge badge-primary mb-4 capitalize">{userRole}</div>
-        <p className="text-xs text-slate-300 mb-2 px-2 italic leading-relaxed">{user?.bio || user?.about || t('sidebar.noBio')}</p>
+        <p className="text-xs text-[var(--text-hint)] mb-2 px-2 italic leading-relaxed">{user?.bio || user?.about || t('sidebar.noBio')}</p>
 
         {/* SECTION 2: Stats & Skills */}
         <div className="w-full border-t border-[#2D2D4E] pt-5 mt-4">
           <div className="flex justify-between items-center text-sm mb-3">
-            <span className="text-slate-400 font-medium">{t('sidebar.connections')}</span>
-            <span className="font-bold text-white">{connectionCount}</span>
+            <span className="text-[var(--text-hint)] font-medium">{t('sidebar.connections')}</span>
+            <span className="font-bold text-[var(--text-primary)]">{connectionCount}</span>
           </div>
           <div className="flex justify-between items-center text-sm mb-5">
-            <span className="text-slate-400 font-medium">{t('sidebar.projects')}</span>
-            <span className="font-bold text-white">{projectCount}</span>
+            <span className="text-[var(--text-hint)] font-medium">{t('sidebar.projects')}</span>
+            <span className="font-bold text-[var(--text-primary)]">{projectCount}</span>
           </div>
 
           <div className="text-center">
-            <span className="block text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest">{t('sidebar.mySkills')}</span>
+            <span className="block text-[10px] font-bold text-[var(--text-hint)] mb-3 uppercase tracking-widest">{t('sidebar.mySkills')}</span>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {displayedSkills.length > 0 ? (
                 <>
@@ -254,17 +254,25 @@ function LeftSidebar({ user, projectCount, connectionCount, skillsData }) {
                     )
                   })}
                   {remainingSkills > 0 && (
-                    <span className="text-[10px] font-bold px-2.5 py-1 bg-[#2D2D4E] text-slate-400 rounded-full border border-[#2D2D4E]">
+                    <span className="text-[10px] font-bold px-2.5 py-1 bg-[#2D2D4E] text-[var(--text-hint)] rounded-full border border-[#2D2D4E]">
                       {t('sidebar.moreSkills', remainingSkills)}
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-xs text-slate-500">{t('sidebar.noSkills')}</span>
+                <span className="text-xs text-[var(--text-secondary)]">{t('sidebar.noSkills')}</span>
               )}
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Footer Links */}
+      <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[11px] font-medium text-[var(--text-hint)] w-full px-4 text-center">
+        <Link to="/terms" className="hover:text-[var(--text-primary)] transition-colors">Terms</Link>
+        <Link to="/privacy" className="hover:text-[var(--text-primary)] transition-colors">Privacy</Link>
+        <Link to="/support" className="hover:text-[var(--text-primary)] transition-colors">Support</Link>
+        <span className="w-full mt-1 opacity-70">&copy; {new Date().getFullYear()} Co-Found</span>
       </div>
     </aside>
   )
@@ -307,7 +315,7 @@ function RightSidebar() {
   if (loading) {
     return (
       <aside className="hidden lg:flex flex-col gap-6 sticky top-20 self-start pb-6">
-        <div className="text-center text-slate-400 py-10">{t('widgets.loadingSuggestions')}</div>
+        <div className="text-center text-[var(--text-hint)] py-10">{t('widgets.loadingSuggestions')}</div>
       </aside>
     )
   }
@@ -316,9 +324,9 @@ function RightSidebar() {
     <aside className="hidden lg:flex flex-col gap-6 sticky top-20 self-start pb-6">
       {/* Suggested Projects */}
       <div className="card p-5">
-        <h3 className="text-base font-bold text-white mb-4">{t('widgets.suggestedProjects')}</h3>
+        <h3 className="text-base font-bold text-[var(--text-primary)] mb-4">{t('widgets.suggestedProjects')}</h3>
         {suggestedProjects.length === 0 ? (
-          <p className="text-xs text-slate-400">{t('widgets.noProjectSuggestions')}</p>
+          <p className="text-xs text-[var(--text-hint)]">{t('widgets.noProjectSuggestions')}</p>
         ) : (
           <ul className="space-y-4">
             {suggestedProjects.map((match, idx) => {
@@ -328,15 +336,15 @@ function RightSidebar() {
               
               return (
                 <Link to={`/projects/${proj.id}`} key={match.id} className="flex items-center gap-3 group cursor-pointer hover:bg-slate-800/50 p-2 -mx-2 rounded-lg transition-colors">
-                  <span className="text-sm font-bold text-slate-500 w-4">{idx + 1}.</span>
-                  <div className="w-8 h-8 rounded-full bg-[#2D2D4E] flex items-center justify-center text-xs font-bold text-white shrink-0 group-hover:ring-2 group-hover:ring-[#00D4AA]/50 transition-all overflow-hidden">
+                  <span className="text-sm font-bold text-[var(--text-secondary)] w-4">{idx + 1}.</span>
+                  <div className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)] shrink-0 group-hover:ring-2 group-hover:ring-[#00D4AA]/50 transition-all overflow-hidden">
                     {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : initial}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-white truncate group-hover:text-[#00D4AA] transition-colors">
+                    <p className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-[#00D4AA] transition-colors">
                       {proj.title || proj.name}
                     </p>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-[var(--text-hint)]">
                       {t('widgets.matchPercent', Math.round((match.match_score || match.score || 0) * 100))}
                     </p>
                   </div>
@@ -349,9 +357,9 @@ function RightSidebar() {
 
       {/* Suggested Users */}
       <div className="card p-5">
-        <h3 className="text-base font-bold text-white mb-4">{t('widgets.suggestedConnections')}</h3>
+        <h3 className="text-base font-bold text-[var(--text-primary)] mb-4">{t('widgets.suggestedConnections')}</h3>
         {suggestedUsers.length === 0 ? (
-          <p className="text-xs text-slate-400">{t('widgets.noUserSuggestions')}</p>
+          <p className="text-xs text-[var(--text-hint)]">{t('widgets.noUserSuggestions')}</p>
         ) : (
           <ul className="space-y-4">
             {suggestedUsers.map((match) => {
@@ -363,19 +371,19 @@ function RightSidebar() {
               return (
                 <Link to={`/users/${u.id}`} key={match.id} className="flex items-center justify-between gap-2 group hover:bg-slate-800/50 p-2 -mx-2 rounded-lg transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-[#2D2D4E] flex items-center justify-center text-xs font-bold text-white shrink-0 group-hover:ring-2 group-hover:ring-[#6C63FF]/50 transition-all overflow-hidden">
+                    <div className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center text-xs font-bold text-[var(--text-primary)] shrink-0 group-hover:ring-2 group-hover:ring-[#6C63FF]/50 transition-all overflow-hidden">
                       {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : initial}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-white truncate group-hover:text-[#6C63FF] transition-colors">
+                      <p className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-[#6C63FF] transition-colors">
                         {name}
                       </p>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] text-[var(--text-hint)]">
                         {t('widgets.matchPercent', Math.round((match.match_score || match.score || 0) * 100))}
                       </p>
                     </div>
                   </div>
-                  <button className="text-[10px] font-bold px-2 py-1 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white hover:border-slate-400 transition-colors shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Connect logic here */ }}>
+                  <button className="text-[10px] font-bold px-2 py-1 rounded-full border border-slate-600 text-[var(--text-hint)] hover:bg-slate-700 hover:text-white hover:border-slate-400 transition-colors shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Connect logic here */ }}>
                     {t('widgets.connect')}
                   </button>
                 </Link>

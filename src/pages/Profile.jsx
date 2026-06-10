@@ -49,6 +49,7 @@ export default function Profile() {
   const [profilePictureUploading, setProfilePictureUploading] = useState(false)
   const [profilePictureError, setProfilePictureError] = useState(null)
   const [profilePicturePreview, setProfilePicturePreview] = useState(null)
+  const [profilePictureFile, setProfilePictureFile] = useState(null)
 
   const [passwordForm, setPasswordForm] = useState({
     current_password: '',
@@ -148,22 +149,7 @@ export default function Profile() {
 
     setProfilePictureError(null)
     setProfilePicturePreview(URL.createObjectURL(file))
-    setProfilePictureUploading(true)
-    setProfileSuccess(null)
-
-    try {
-      const formData = new FormData()
-      formData.append('profile_picture', file)
-      await updateMyProfile(formData)
-      setProfileSuccess('Profile picture updated successfully.')
-      fetchProfile()
-      fetchMe()
-    } catch (err) {
-      setProfilePictureError(err?.response?.data?.message || err.message)
-    } finally {
-      setProfilePictureUploading(false)
-      e.target.value = ''
-    }
+    setProfilePictureFile(file)
   }
 
   const handleSaveProfile = async (e) => {
@@ -172,10 +158,22 @@ export default function Profile() {
     setProfileSuccess(null)
     setProfileSavingError(null)
     try {
-      await updateMyProfile(profileForm)
+      const formData = new FormData()
+      Object.keys(profileForm).forEach(key => {
+        if (profileForm[key] !== null && profileForm[key] !== undefined) {
+          formData.append(key, profileForm[key])
+        }
+      })
+      if (profilePictureFile) {
+        formData.append('profile_picture', profilePictureFile)
+      }
+      formData.append('_method', 'PUT')
+
+      await updateMyProfile(formData)
       setProfileSuccess('Profile updated successfully.')
       fetchProfile()
       fetchMe()
+      setProfilePictureFile(null)
     } catch (err) {
       setProfileSavingError(err?.response?.data?.message || err.message)
     } finally {
