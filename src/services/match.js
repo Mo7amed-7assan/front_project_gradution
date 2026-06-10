@@ -8,7 +8,8 @@ const getData = (res) => {
 
 export async function getMatches(params = {}) {
     const res = await api.get('/matches', { params })
-    return getData(res)
+    // Return the full response so callers can navigate the structure
+    return res
 }
 
 export async function saveMatch(id, saved = true) {

@@ -11,13 +11,14 @@ const FEEDBACK_TYPES = [
 ]
 
 const extractMatchList = (value) => {
-  if (Array.isArray(value)) return value
-  if (Array.isArray(value?.data?.data?.data)) return value.data.data.data
+  // API returns { data: { data: [...], meta: {...}, links: {...} } }
+  // value here is the full axios response object
   if (Array.isArray(value?.data?.data)) return value.data.data
+  if (Array.isArray(value?.data?.data?.data)) return value.data.data.data
   if (Array.isArray(value?.data?.matches)) return value.data.matches
   if (Array.isArray(value?.data)) return value.data
   if (Array.isArray(value?.matches)) return value.matches
-  if (Array.isArray(value?.items)) return value.items
+  if (Array.isArray(value)) return value
   return []
 }
 
@@ -38,7 +39,16 @@ function SuggestedMatchCard({ match, kind, onViewed, onSave, onFeedback }) {
   const [submitting, setSubmitting] = useState(false)
   const feedbackSent = hasFeedback(match)
   const score = getMatchScore(match)
-  const skills = match.match_reasons?.shared_skills || match.shared_skills || match.skills || []
+  const skills = (
+    // collaborator match_reasons keys: skill_overlap (array of skill objects)
+    // project match_reasons keys: skill_coverage (array of skill objects)
+    match.match_reasons?.skill_overlap ||
+    match.match_reasons?.skill_coverage ||
+    match.match_reasons?.shared_skills ||
+    match.shared_skills ||
+    match.skills ||
+    []
+  )
   const isSaved = match.is_saved || match.saved
 
   const submitFeedback = async () => {
