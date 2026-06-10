@@ -103,7 +103,7 @@ function AICheckRow({ label, passed, confidence }) {
 
   return (
     <div className="py-3 border-b border-[var(--border-color)]/50 last:border-0 hover:bg-[var(--bg-hover)]/20 px-2 rounded-xl transition-colors duration-150">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold border ${
             passedStatus ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -331,7 +331,7 @@ export default function AdminUserDetail() {
     <div className="max-w-2xl mx-auto space-y-6">
       {zoomImage && <ZoomModal src={zoomImage} onClose={() => setZoomImage(null)} />}
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <Link to="/admin/users" className="text-sm text-[#6C63FF] font-bold flex items-center gap-1 mb-2 hover:underline">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -383,7 +383,7 @@ export default function AdminUserDetail() {
 
         <div className="p-6 space-y-6">
           {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InfoRow label="Username">@{item.username || 'N/A'}</InfoRow>
             <InfoRow label="Location">{item.location || '—'}</InfoRow>
             <InfoRow label="Registered">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Unknown'}</InfoRow>
@@ -396,7 +396,7 @@ export default function AdminUserDetail() {
           {editMode && (
             <div className="pt-6 border-t border-[var(--border-color)] space-y-4">
               <p className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-wider">Edit User</p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Role</label>
                   <select value={formRole} onChange={(e) => setFormRole(e.target.value)} className="form-select">
@@ -432,8 +432,8 @@ export default function AdminUserDetail() {
       {verificationData ? (
         <div className="space-y-6">
           {/* Card 1: Identity Profile Cross-Check */}
-          <div className="card p-6">
-            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-5 mb-6">
+          <div className="card p-4 md:p-6 w-full">
+            <div className="flex items-center justify-between flex-wrap gap-2 border-b border-[var(--border-color)] pb-5 mb-6">
               <div>
                 <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   🪪 Identity Profile Cross-Check
@@ -497,7 +497,7 @@ export default function AdminUserDetail() {
           </div>
 
           {/* Card 2: Credential Document Review (Pictures) */}
-          <div className="card p-6">
+          <div className="card p-4 md:p-6 w-full">
             <div className="mb-6">
               <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                 📄 Credential Document Review
@@ -527,7 +527,7 @@ export default function AdminUserDetail() {
 
           {/* Card 3: Automated Agent Audit (AI verification checks) */}
           {automatedChecks ? (
-            <div className="card p-6">
+            <div className="card p-4 md:p-6 w-full">
               <div className="mb-6">
                 <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   🤖 Automatic Agent Audit

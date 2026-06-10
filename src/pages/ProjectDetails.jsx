@@ -51,6 +51,7 @@ export default function ProjectDetails() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
+  const isGuest = user?.role === 'guest'
 
   const [project, setProject] = useState(null)
   const [team, setTeam] = useState([])
@@ -534,7 +535,7 @@ export default function ProjectDetails() {
   if (!project) return <div className="p-8">Project not found.</div>
 
   return (
-    <div className="max-w-6xl mx-auto card p-6 md:p-8 rounded-2xl">
+    <div className="max-w-6xl w-full mx-auto card p-4 md:p-8 rounded-2xl">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-[var(--text-primary)]">{project.title || project.name}</h1>
@@ -547,7 +548,7 @@ export default function ProjectDetails() {
               <button onClick={handleDelete} className="btn-danger px-4 py-2">Delete Project</button>
             </>
           )}
-          {!isOwner() && !currentMember && !hasApplied() && isAcceptingApplications && (
+          {!isGuest && !isOwner() && !currentMember && !hasApplied() && isAcceptingApplications && (
             <button onClick={openApply} disabled={applying} className="btn-primary px-4 py-2">Apply</button>
           )}
           {(isOwner() || currentMember) && (
@@ -559,7 +560,7 @@ export default function ProjectDetails() {
           {!isOwner() && currentApplicationStatus && currentApplicationStatus !== 'accepted' && (
             <span className="px-4 py-2 rounded-xl bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-color)] capitalize">Application {currentApplicationStatus}</span>
           )}
-          {!isOwner() && (
+          {!isOwner() && !isGuest && user && (
             <Link
               to={`/reports/submit?projectId=${id}`}
               className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl text-sm font-bold border border-rose-500/20 transition-colors flex items-center gap-1.5"
@@ -846,7 +847,7 @@ export default function ProjectDetails() {
                   {selectedSkills.length > 0 && (
                     <div className="mt-2 space-y-1">
                       {selectedSkills.map((skill) => (
-                        <div key={skill.skill_name} className="flex items-center justify-between bg-blue-50 p-2 rounded text-sm">
+                        <div key={skill.skill_name} className="flex items-center justify-between flex-wrap gap-2 bg-blue-50 p-2 rounded text-sm">
                           <span>{skill.skill_name} <span className="text-[var(--text-secondary)]">({skill.proficiency_claimed}/5)</span></span>
                           <button 
                             type="button"
@@ -874,7 +875,7 @@ export default function ProjectDetails() {
       {milestoneModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-[var(--bg-surface)] rounded shadow max-w-xl w-full p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <h3 className="text-lg font-semibold">{editingMilestone ? 'Edit Milestone' : 'Create Milestone'}</h3>
               <button onClick={closeMilestoneModal} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
@@ -903,7 +904,7 @@ export default function ProjectDetails() {
       {teamEditModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-[var(--bg-surface)] rounded shadow max-w-lg w-full p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <h3 className="text-lg font-semibold">Edit Member</h3>
               <button onClick={closeTeamEditModal} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
@@ -942,7 +943,7 @@ export default function ProjectDetails() {
       {applicationDetailModalOpen && selectedApplication && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-[var(--bg-surface)] rounded shadow max-w-2xl w-full p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <h3 className="text-lg font-semibold">Application Details</h3>
               <button onClick={closeApplicationDetailModal} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>
@@ -994,7 +995,7 @@ export default function ProjectDetails() {
       {rateModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-[var(--bg-surface)] rounded shadow max-w-lg w-full p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <h3 className="text-lg font-semibold">Rate {resolveUserName(rateMember)}</h3>
               <button onClick={() => setRateModalOpen(false)} className="text-[var(--text-secondary)] hover:text-gray-700">Close</button>
             </div>

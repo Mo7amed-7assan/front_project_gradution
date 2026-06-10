@@ -23,7 +23,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] font-sans transition-colors duration-300 scroll-smooth">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 bg-[var(--bg-surface)]/80 backdrop-blur-md border-b border-[var(--border-color)] transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between flex-wrap gap-2">
           
           <div className="flex items-center gap-8">
             {/* Far Left: Official Logo */}
@@ -163,7 +163,7 @@ export default function LandingPage() {
                              <div className="h-3 w-16 bg-[var(--text-hint)] rounded opacity-40"></div>
                           </div>
                           <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--border-color)] shadow-sm relative">
-                             <div className="flex items-center justify-between mb-4">
+                             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
                                <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shrink-0"></div>
                                   <div className="flex flex-col gap-2">
@@ -315,7 +315,7 @@ export default function LandingPage() {
                              <div className="h-1.5 w-8 bg-white/70 rounded"></div>
                           </div>
                        </div>
-                       <div className="grid grid-cols-2 gap-3">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {[1, 2, 3, 4].map(i => (
                              <div key={i} className={`bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] p-3 flex flex-col gap-3 ${i > 2 ? 'opacity-50' : ''}`}>
                                 <div className="flex items-center gap-2">
@@ -347,7 +347,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
             {/* The Challenge */}
-            <div className="bg-rose-500/5 border border-rose-500/20 p-8 sm:p-10 rounded-3xl relative">
+            <div className="bg-rose-500/5 border border-rose-500/20 p-4 sm:p-10 w-full rounded-3xl relative">
               <div className="absolute top-0 right-8 transform -translate-y-1/2 w-12 h-12 bg-rose-100 rounded-2xl flex items-center justify-center shadow-lg">
                 <svg className="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
               </div>
@@ -358,7 +358,7 @@ export default function LandingPage() {
             </div>
 
             {/* The Solution */}
-            <div className="bg-indigo-500/5 border border-indigo-500/20 p-8 sm:p-10 rounded-3xl relative">
+            <div className="bg-indigo-500/5 border border-indigo-500/20 p-4 sm:p-10 w-full rounded-3xl relative">
               <div className="absolute top-0 right-8 transform -translate-y-1/2 w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center shadow-lg">
                 <svg className="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>

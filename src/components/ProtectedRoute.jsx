@@ -36,9 +36,11 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/verify-email" replace />
   }
 
-  if (authStage === 'guest') {
-    return <Navigate to="/verify-identity" replace />
+  // Guest users can access /home only — all other protected routes redirect to /home
+  if (authStage === 'guest' && pathname !== '/home' && pathname !== '/') {
+    return <Navigate to="/home" replace />
   }
+  // Guest on /home → allowed through
 
   // authStage === 'verified' — full access granted
   return children
@@ -72,7 +74,7 @@ export function StageRoute({ forStage, children }) {
   // Already past this stage → redirect to the correct destination
   if (authStage !== forStage) {
     if (authStage === 'unverified') return <Navigate to="/verify-email" replace />
-    if (authStage === 'guest') return <Navigate to="/verify-identity" replace />
+    if (authStage === 'guest') return <Navigate to="/home" replace />
     return <Navigate to="/home" replace /> // verified users go home
   }
 

@@ -759,8 +759,19 @@ export default function Messaging() {
     setWideFrame((prev) => !prev)
   }
 
+  const handleClearSelection = () => {
+    setSelectedPersonId('')
+    setSelectedProjectId('')
+    setSelectedConversationId('')
+    if (searchParams.toString()) {
+      // Clear URL params via window.history to avoid unnecessary re-renders
+      window.history.pushState({}, '', '/messages')
+    }
+  }
+
   return (
     <MessagingUI
+      onClearSelection={handleClearSelection}
       loading={loading}
       connectedPeople={connectedPeople}
       projects={projects}

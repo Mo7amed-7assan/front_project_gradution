@@ -64,7 +64,9 @@ export default function MessagingUI({
   onEndCall,
   onCancelCall,
   setSelectedConversationId,
+  onClearSelection,
 }) {
+  const isSelected = Boolean(selectedPerson || selectedProject || activeCall || callFrameUrl)
   const [activeRightTab, setActiveRightTab] = useState('messages')
   const [sidebarTab, setSidebarTab] = useState('connections')
   const [isFullScreen, setIsFullScreen] = useState(false)
@@ -180,10 +182,10 @@ export default function MessagingUI({
   )
 
   return (
-    <div className="flex bg-[var(--bg-surface)] overflow-hidden h-[calc(100vh-4rem)]">
+    <div className="flex bg-[var(--bg-surface)] overflow-hidden h-[calc(100vh-4rem)] relative">
       
       {/* Sidebar */}
-      <div className="w-80 flex-shrink-0 border-r border-[var(--border-color)] flex flex-col bg-[var(--bg-page)] relative z-10">
+      <div className={`w-full md:w-80 flex-shrink-0 border-r border-[var(--border-color)] flex flex-col bg-[var(--bg-page)] relative z-10 ${isSelected ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-5 border-b border-[var(--border-color)] bg-[var(--bg-surface)] shadow-sm shrink-0">
           <div className="flex gap-2 bg-[var(--bg-hover)] p-1.5 rounded-xl border border-[var(--border-color)]/60">
              <button 
@@ -330,17 +332,21 @@ export default function MessagingUI({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col bg-[var(--bg-surface)] overflow-hidden relative">
+      <div className={`flex-1 flex flex-col bg-[var(--bg-surface)] overflow-hidden relative ${isSelected ? 'flex' : 'hidden md:flex'}`}>
          {sidebarTab === 'connections' && (selectedPerson || selectedProject) ? (
            <>
               {/* Header */}
-              <div className="sticky top-0 z-20 h-[76px] border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-md">
-                 <button
-                   type="button"
-                   onClick={handleHeaderClick}
-                   className="flex items-center gap-4 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500/30 rounded-2xl px-2 py-1"
-                 >
-                    <PersonAvatar name={selectedProject ? getProjectName(selectedProject) : selectedPerson.name} avatar={selectedPerson?.avatar} />
+              <div className="sticky top-0 z-20 h-[76px] border-b border-[var(--border-color)] flex items-center justify-between px-3 md:px-6 shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-md">
+                 <div className="flex items-center gap-1 min-w-0">
+                   <button type="button" onClick={onClearSelection} className="md:hidden p-2 shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                   </button>
+                   <button
+                     type="button"
+                     onClick={handleHeaderClick}
+                     className="flex items-center gap-4 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500/30 rounded-2xl px-2 py-1 min-w-0"
+                   >
+                      <PersonAvatar name={selectedProject ? getProjectName(selectedProject) : selectedPerson.name} avatar={selectedPerson?.avatar} />
                     <div>
                        <h3 className="font-bold text-[var(--text-primary)] text-lg leading-none mb-1.5 hover:text-indigo-600 transition-colors">
                          {selectedProject ? getProjectName(selectedProject) : selectedPerson.name}
@@ -355,7 +361,8 @@ export default function MessagingUI({
                        </p>
                     </div>
                  </button>
-                 <div className="flex items-center gap-3 relative">
+                 </div>
+                 <div className="flex items-center gap-3 relative shrink-0">
                     <button
                       type="button"
                       onClick={toggleCallOptions}
@@ -477,12 +484,17 @@ export default function MessagingUI({
            </>
          ) : sidebarTab === 'calls' && callFrameUrl ? (
            // Call-only view — joined from calls tab without selecting a person
-           <div className="flex-1 flex flex-col overflow-hidden relative bg-[var(--bg-hover)]">
-             <div className="h-[76px] border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-md z-20">
-               <h3 className="font-bold text-[var(--text-primary)] text-lg">
-                 {activeCall ? getCallLabel(activeCall) : 'Active Call'}
-               </h3>
-               <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1">Live</span>
+           <div className={`flex-1 flex flex-col overflow-hidden relative bg-[var(--bg-hover)] ${isSelected ? 'flex' : 'hidden md:flex'}`}>
+             <div className="h-[76px] border-b border-[var(--border-color)] flex items-center justify-between px-3 md:px-6 shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-md z-20">
+               <div className="flex items-center gap-2 min-w-0">
+                 <button type="button" onClick={onClearSelection} className="md:hidden p-2 shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                 </button>
+                 <h3 className="font-bold text-[var(--text-primary)] text-lg truncate">
+                   {activeCall ? getCallLabel(activeCall) : 'Active Call'}
+                 </h3>
+               </div>
+               <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1 shrink-0">Live</span>
              </div>
              <div ref={videoContainerRef} className={`group flex-1 relative bg-[var(--bg-page)] ${fullScreenContainerClass}`}>
                <iframe

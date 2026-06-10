@@ -127,7 +127,7 @@ export default function Support() {
             </div>
 
             {/* Direct contact links */}
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
               <a
                 href="mailto:support@cofound.dpdns.org"
                 className="flex items-center gap-3 bg-[#1A1A3E] border border-[#2D2D4E] rounded-xl p-4 hover:border-[#6C63FF]/50 transition-colors group"

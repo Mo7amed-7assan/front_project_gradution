@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const LAST_UPDATED = 'June 2025'
+const LAST_UPDATED = 'June 2026'
 
 const Section = ({ title, children }) => (
   <section className="mb-10">

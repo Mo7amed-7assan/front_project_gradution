@@ -63,7 +63,7 @@ export default function AdminSettingDetail() {
 
   return (
     <div className="max-w-4xl mx-auto card p-6 md:p-8 rounded-2xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
         <h1 className="text-2xl font-bold font-mono text-[var(--text-primary)]">{key}</h1>
         <button
           onClick={() => setEditMode(!editMode)}
@@ -81,7 +81,7 @@ export default function AdminSettingDetail() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="form-label">Type</label>
             <div className="mt-1 p-3 bg-[var(--bg-hover)]/30 rounded-xl text-sm text-[var(--text-primary)] border border-[var(--border-color)]">

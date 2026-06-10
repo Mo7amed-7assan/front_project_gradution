@@ -80,7 +80,7 @@ export default function Register(){
       </div>
 
       {/* Right Side: Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 relative overflow-y-auto">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12 w-full relative overflow-y-auto">
         <div className="w-full max-w-md my-auto">
           <Link to="/" className="flex items-center gap-3 mb-10 w-fit">
             <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 shadow-sm border border-[var(--border-color)]">

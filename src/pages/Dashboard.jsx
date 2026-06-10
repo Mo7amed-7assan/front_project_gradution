@@ -16,6 +16,7 @@ function extractList(res) {
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const isGuest = user?.role === 'guest'
   const displayName = user?.full_name || user?.name || user?.username || 'there'
 
   const [stats, setStats] = useState({ projects: 0, applications: 0, unread: 0 })
@@ -55,6 +56,14 @@ export default function Dashboard() {
   }, [filters, user])
 
   const load = async () => {
+    if (isGuest) {
+      setStats({ projects: 0, applications: 0, unread: 0 })
+      setRecentProjects([])
+      setMyApplications([])
+      setLoadingStats(false)
+      return
+    }
+
     setLoadingStats(true)
     try {
       const [mineProjRes, appRes, notifRes] = await Promise.allSettled([
@@ -139,6 +148,7 @@ export default function Dashboard() {
       setFilters={setFilters}
       showFilters={showFilters}
       setShowFilters={setShowFilters}
+      isGuest={isGuest}
     />
   )
 }

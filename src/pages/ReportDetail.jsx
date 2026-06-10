@@ -102,7 +102,7 @@ export default function ReportDetail() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <Link to="/reports" className="text-sm text-brand-primary font-bold flex items-center gap-1 mb-2 hover:underline">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -142,7 +142,7 @@ export default function ReportDetail() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-          <div className="card p-6">
+          <div className="card p-4 md:p-6 w-full">
             <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4 capitalize">{data.report_type?.replaceAll('_', ' ')} Report</h2>
 
             {editing ? (
@@ -176,7 +176,7 @@ export default function ReportDetail() {
               </form>
             ) : (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">Reported Target</p>
                     <div className="text-sm font-semibold text-[var(--text-primary)]">
@@ -237,7 +237,7 @@ export default function ReportDetail() {
                 ✅ Report Resolution Decision
               </h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs font-bold text-[var(--text-hint)] uppercase tracking-wider mb-1">Action Taken</p>
                     <div className="text-sm font-bold text-emerald-700 capitalize">
@@ -265,7 +265,7 @@ export default function ReportDetail() {
         </div>
 
         <div className="space-y-6">
-          <div className="card p-6">
+          <div className="card p-4 md:p-6 w-full">
             <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4">Report Status</h3>
             <div className="space-y-4 text-sm text-[var(--text-secondary)]">
               <div className="flex justify-between py-2 border-b border-[var(--border-color)]">

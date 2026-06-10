@@ -14,6 +14,7 @@ import {
   deletePortfolioItem
 } from '../services/profile'
 import ProfileUI from '../ui/pages/ProfileUI'
+import { normalizeProfileMedia } from '../utils/media'
 
 const extractArray = (response) => {
   if (Array.isArray(response)) return response
@@ -90,7 +91,7 @@ export default function Profile() {
     setProfileError(null)
     try {
       const res = await getMyProfile()
-      const data = res?.data || res
+      const data = normalizeProfileMedia(res?.data || res)
       setProfile(data)
       setProfileForm({
         full_name: data?.full_name || '',
@@ -148,6 +149,13 @@ export default function Profile() {
     if (!file) return
 
     setProfilePictureError(null)
+    if (!file.type.startsWith('image/')) {
+      setProfilePicturePreview(null)
+      setProfilePictureFile(null)
+      setProfilePictureError('Please choose a valid image file.')
+      e.target.value = ''
+      return
+    }
     setProfilePicturePreview(URL.createObjectURL(file))
     setProfilePictureFile(file)
   }
@@ -158,6 +166,7 @@ export default function Profile() {
     setProfileSuccess(null)
     setProfileSavingError(null)
     try {
+      setProfilePictureUploading(Boolean(profilePictureFile))
       const formData = new FormData()
       Object.keys(profileForm).forEach(key => {
         if (profileForm[key] !== null && profileForm[key] !== undefined) {
@@ -167,17 +176,18 @@ export default function Profile() {
       if (profilePictureFile) {
         formData.append('profile_picture', profilePictureFile)
       }
-      formData.append('_method', 'PUT')
 
       await updateMyProfile(formData)
       setProfileSuccess('Profile updated successfully.')
       fetchProfile()
       fetchMe()
       setProfilePictureFile(null)
+      setProfilePicturePreview(null)
     } catch (err) {
       setProfileSavingError(err?.response?.data?.message || err.message)
     } finally {
       setProfileSaving(false)
+      setProfilePictureUploading(false)
     }
   }
 

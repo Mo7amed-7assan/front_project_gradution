@@ -37,6 +37,16 @@ export default function EditProfileUI({
       <div className="card p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
+            <label className="form-label">Full Name</label>
+            <input
+              value={form.full_name}
+              onChange={handleChange('full_name')}
+              className="form-input"
+              placeholder="Your full name"
+            />
+          </div>
+
+          <div>
             <label className="form-label">Bio</label>
             <textarea
               value={form.bio}
@@ -76,6 +86,27 @@ export default function EditProfileUI({
                   placeholder="https://yourwebsite.com"
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="form-label">LinkedIn URL</label>
+              <input
+                value={form.linkedin_url}
+                onChange={handleChange('linkedin_url')}
+                className="form-input"
+                placeholder="https://linkedin.com/in/..."
+              />
+            </div>
+            <div>
+              <label className="form-label">GitHub URL</label>
+              <input
+                value={form.github_url}
+                onChange={handleChange('github_url')}
+                className="form-input"
+                placeholder="https://github.com/..."
+              />
             </div>
           </div>
 

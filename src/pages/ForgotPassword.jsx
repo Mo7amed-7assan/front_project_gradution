@@ -48,7 +48,7 @@ export default function ForgotPassword() {
       {/* Background Abstract */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1000px] h-[600px] bg-gradient-to-br from-indigo-500/10 to-violet-500/10 blur-3xl rounded-full opacity-70 pointer-events-none"></div>
 
-      <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border-color)] p-8 sm:p-10 rounded-3xl shadow-2xl relative z-10">
+      <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 sm:p-10 w-full rounded-3xl shadow-2xl relative z-10">
         <div className="flex flex-col items-center text-center mb-8">
            <Link to="/" className="flex items-center gap-2 mb-6">
              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-[var(--border-color)] shrink-0">

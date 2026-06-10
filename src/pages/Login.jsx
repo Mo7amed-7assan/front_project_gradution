@@ -78,7 +78,7 @@ export default function Login() {
       </div>
 
       {/* Right Side: Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12 w-full relative">
         <div className="w-full max-w-md">
           <Link to="/" className="flex items-center gap-3 mb-10 w-fit">
             <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 shadow-sm border border-[var(--border-color)]">
@@ -136,7 +136,7 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-[var(--border-color)] text-indigo-600 focus:ring-indigo-500 bg-[var(--bg-input)] cursor-pointer" />
                 <span className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">Remember me</span>
