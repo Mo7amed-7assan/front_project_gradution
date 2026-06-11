@@ -19,6 +19,21 @@ import { normalizeProfileMedia } from '../utils/media'
 const AuthContext = createContext(null)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+const MEDIA_FIELDS = [
+  'avatar', 'avatar_url',
+  'profile_picture', 'profile_picture_url',
+  'cover_photo', 'cover_photo_url',
+  'photo', 'photo_url',
+]
+
+/** Pick only the media fields from an object (used to preserve them during merge). */
+const extractMediaFields = (obj) => {
+  if (!obj) return {}
+  return Object.fromEntries(
+    MEDIA_FIELDS.filter(k => obj[k] != null).map(k => [k, obj[k]])
+  )
+}
+
 const normalizeUser = (value) => {
   const user = value?.user || value
   if (!user) return null
@@ -62,18 +77,38 @@ export function AuthProvider({ children }) {
     }
     const isGuestSession = Cookies.get('cf_guest') === '1'
     try {
-      // Try /auth/me first (returns role + email_verified_at fields); fall back to /profile
-      let res
+      // Always fetch /profile (has profile_picture etc.) plus /auth/me for role fields.
+      // /auth/me may not include the profile picture, so we merge both responses.
+      let authData = null
+      let profileData = null
+
       try {
-        res = await api.get('/auth/me')
+        const res = await api.get('/auth/me')
+        authData =
+          res?.data?.data?.user ||
+          res?.data?.data ||
+          res?.data?.user ||
+          res?.data
       } catch {
-        res = await api.get('/profile')
+        // /auth/me unavailable — profile fetch below will cover everything
       }
-      let u =
-        res?.data?.data?.user ||
-        res?.data?.data ||
-        res?.data?.user ||
-        res?.data
+
+      try {
+        const res = await api.get('/profile')
+        profileData =
+          res?.data?.data?.user ||
+          res?.data?.data ||
+          res?.data?.user ||
+          res?.data
+      } catch {
+        // ignore — authData may still be enough
+      }
+
+      // Merge: profile fields first (has picture), then auth fields on top (has role/verified)
+      let u = profileData || authData
+      if (profileData && authData) {
+        u = { ...profileData, ...authData, ...extractMediaFields(profileData) }
+      }
 
       // If the backend doesn't return role:'guest' but we know it's a guest session,
       // re-inject the guest markers so getAuthStage returns 'guest' correctly.
